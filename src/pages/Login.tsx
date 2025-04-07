@@ -6,10 +6,11 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
+import { useAuth } from '@/lib/auth';
 
 const Login = () => {
   const navigate = useNavigate();
-  const [isLoading, setIsLoading] = React.useState(false);
+  const { signIn, loading } = useAuth();
   const [formData, setFormData] = React.useState({
     email: '',
     password: '',
@@ -26,14 +27,12 @@ const Login = () => {
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setIsLoading(true);
-    
-    // Simulating API call delay
-    setTimeout(() => {
-      setIsLoading(false);
-      toast.success("Login successful! Redirecting to dashboard...");
+    try {
+      await signIn(formData.email, formData.password);
       navigate('/dashboard');
-    }, 1500);
+    } catch (error) {
+      console.error('Login error:', error);
+    }
   };
 
   return (
@@ -91,9 +90,9 @@ const Login = () => {
         <Button 
           type="submit" 
           className="w-full bg-lending-primary hover:bg-lending-primary/90"
-          disabled={isLoading}
+          disabled={loading}
         >
-          {isLoading ? 'Signing in...' : 'Sign in'}
+          {loading ? 'Signing in...' : 'Sign in'}
         </Button>
         
         {/* OR divider */}

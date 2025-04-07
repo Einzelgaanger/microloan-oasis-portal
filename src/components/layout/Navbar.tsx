@@ -1,13 +1,19 @@
-
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { Menu, X, ChevronDown, Home, FileText, HelpCircle, Phone, User } from 'lucide-react';
+import { Menu, X, ChevronDown, Home, FileText, HelpCircle, Phone, User, CreditCard, LogOut, Settings, PieChart } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useAuth } from '@/lib/auth';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { supabase } from '@/integrations/supabase/client';
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const [userMenuOpen, setUserMenuOpen] = useState(false);
   const location = useLocation();
+  const { user, signOut } = useAuth();
+  const [userName, setUserName] = useState('');
+  const [avatarUrl, setAvatarUrl] = useState('');
   
   const isActive = (path: string) => {
     return location.pathname === path;
@@ -17,12 +23,61 @@ const Navbar = () => {
     setIsOpen(!isOpen);
   };
 
-  const navLinks = [
+  const toggleUserMenu = () => {
+    setUserMenuOpen(!userMenuOpen);
+  };
+
+  useEffect(() => {
+    const fetchUserProfile = async () => {
+      if (user) {
+        try {
+          const { data: profileData } = await supabase
+            .from('profiles')
+            .select('first_name, last_name, avatar_url')
+            .eq('id', user.id)
+            .single();
+            
+          if (profileData) {
+            setUserName(`${profileData.first_name} ${profileData.last_name}`);
+            if (profileData.avatar_url) {
+              setAvatarUrl(profileData.avatar_url);
+            }
+          }
+        } catch (error) {
+          console.error('Error fetching user profile:', error);
+        }
+      }
+    };
+    
+    fetchUserProfile();
+  }, [user]);
+
+  const getInitials = () => {
+    if (!userName) return 'U';
+    return userName.split(' ').map(n => n[0]).join('').toUpperCase();
+  };
+
+  const handleSignOut = async () => {
+    try {
+      await signOut();
+      setUserMenuOpen(false);
+    } catch (error) {
+      console.error('Sign out error:', error);
+    }
+  };
+
+  const publicNavLinks = [
     { name: 'Home', path: '/', icon: <Home className="w-4 h-4 mr-1" /> },
-    { name: 'Apply', path: '/apply', icon: <FileText className="w-4 h-4 mr-1" /> },
     { name: 'About Us', path: '/about', icon: <HelpCircle className="w-4 h-4 mr-1" /> },
     { name: 'Contact', path: '/contact', icon: <Phone className="w-4 h-4 mr-1" /> },
   ];
+
+  const authenticatedNavLinks = [
+    { name: 'Dashboard', path: '/dashboard', icon: <PieChart className="w-4 h-4 mr-1" /> },
+    { name: 'Apply for Loan', path: '/apply', icon: <FileText className="w-4 h-4 mr-1" /> },
+  ];
+
+  const navLinks = user ? authenticatedNavLinks : publicNavLinks;
 
   return (
     <header className="sticky top-0 z-50 w-full bg-white shadow-sm border-b border-gray-200">
@@ -60,16 +115,82 @@ const Navbar = () => {
             ))}
             
             <div className="ml-4 flex items-center">
-              <Link to="/login">
-                <Button variant="outline" size="sm" className="mr-2">
-                  Login
-                </Button>
-              </Link>
-              <Link to="/register">
-                <Button size="sm" className="bg-lending-primary hover:bg-lending-primary/90">
-                  Register
-                </Button>
-              </Link>
+              {user ? (
+                <div className="relative">
+                  <button
+                    onClick={toggleUserMenu}
+                    className="flex items-center space-x-2 focus:outline-none"
+                  >
+                    <Avatar className="h-8 w-8">
+                      {avatarUrl ? (
+                        <AvatarImage src={avatarUrl} alt={userName} />
+                      ) : (
+                        <AvatarFallback className="bg-lending-primary text-white">
+                          {getInitials()}
+                        </AvatarFallback>
+                      )}
+                    </Avatar>
+                    <span className="hidden lg:block text-sm font-medium text-gray-700">
+                      {userName.split(' ')[0]}
+                    </span>
+                    <ChevronDown className="h-4 w-4 text-gray-500" />
+                  </button>
+                  
+                  {/* User Dropdown Menu */}
+                  {userMenuOpen && (
+                    <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50 border border-gray-200">
+                      <div className="px-4 py-2 border-b border-gray-100">
+                        <p className="text-sm font-medium">{userName}</p>
+                        <p className="text-xs text-gray-500">{user.email}</p>
+                      </div>
+                      <Link
+                        to="/profile"
+                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center"
+                        onClick={() => setUserMenuOpen(false)}
+                      >
+                        <User className="h-4 w-4 mr-2" />
+                        My Profile
+                      </Link>
+                      <Link
+                        to="/dashboard"
+                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center"
+                        onClick={() => setUserMenuOpen(false)}
+                      >
+                        <CreditCard className="h-4 w-4 mr-2" />
+                        My Loans
+                      </Link>
+                      <Link
+                        to="/admin"
+                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center"
+                        onClick={() => setUserMenuOpen(false)}
+                      >
+                        <Settings className="h-4 w-4 mr-2" />
+                        Admin Panel
+                      </Link>
+                      <button
+                        className="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100 flex items-center"
+                        onClick={handleSignOut}
+                      >
+                        <LogOut className="h-4 w-4 mr-2" />
+                        Sign out
+                      </button>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <>
+                  <Link to="/login">
+                    <Button variant="outline" size="sm" className="mr-2">
+                      Login
+                    </Button>
+                  </Link>
+                  <Link to="/register">
+                    <Button size="sm" className="bg-lending-primary hover:bg-lending-primary/90">
+                      Register
+                    </Button>
+                  </Link>
+                </>
+              )}
             </div>
           </nav>
           
@@ -108,18 +229,75 @@ const Navbar = () => {
               {link.name}
             </Link>
           ))}
-          <div className="flex flex-col pt-2 space-y-2">
-            <Link to="/login" onClick={toggleMenu}>
-              <Button variant="outline" className="w-full">
-                Login
-              </Button>
-            </Link>
-            <Link to="/register" onClick={toggleMenu}>
-              <Button className="w-full bg-lending-primary hover:bg-lending-primary/90">
-                Register
-              </Button>
-            </Link>
-          </div>
+          
+          {user ? (
+            <>
+              <div className="border-t border-gray-200 my-2 pt-2">
+                <div className="flex items-center px-3 py-2">
+                  <Avatar className="h-8 w-8 mr-2">
+                    {avatarUrl ? (
+                      <AvatarImage src={avatarUrl} alt={userName} />
+                    ) : (
+                      <AvatarFallback className="bg-lending-primary text-white">
+                        {getInitials()}
+                      </AvatarFallback>
+                    )}
+                  </Avatar>
+                  <div>
+                    <p className="text-sm font-medium">{userName}</p>
+                    <p className="text-xs text-gray-500">{user.email}</p>
+                  </div>
+                </div>
+                <Link
+                  to="/profile"
+                  className="flex items-center px-3 py-2 text-base font-medium rounded-md text-gray-600 hover:bg-gray-100"
+                  onClick={toggleMenu}
+                >
+                  <User className="h-4 w-4 mr-2" />
+                  My Profile
+                </Link>
+                <Link
+                  to="/dashboard"
+                  className="flex items-center px-3 py-2 text-base font-medium rounded-md text-gray-600 hover:bg-gray-100"
+                  onClick={toggleMenu}
+                >
+                  <CreditCard className="h-4 w-4 mr-2" />
+                  My Loans
+                </Link>
+                <Link
+                  to="/admin"
+                  className="flex items-center px-3 py-2 text-base font-medium rounded-md text-gray-600 hover:bg-gray-100"
+                  onClick={toggleMenu}
+                >
+                  <Settings className="h-4 w-4 mr-2" />
+                  Admin Panel
+                </Link>
+                <button
+                  className="flex items-center w-full text-left px-3 py-2 text-base font-medium rounded-md text-red-600 hover:bg-gray-100"
+                  onClick={() => {
+                    handleSignOut();
+                    toggleMenu();
+                  }}
+                >
+                  <LogOut className="h-4 w-4 mr-2" />
+                  Sign out
+                </button>
+              </div>
+            </>
+          ) : (
+            <div className="flex flex-col pt-2 space-y-2">
+              <Link to="/login" onClick={toggleMenu}>
+                <Button variant="outline" className="w-full">
+                  Login
+                </Button>
+              </Link>
+              <Link to="/register" onClick={toggleMenu}>
+                <Button className="w-full bg-lending-primary hover:bg-lending-primary/90">
+                  Register
+                </Button>
+              </Link>
+            </div>
+          )}
         </div>
       </div>
     </header>

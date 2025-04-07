@@ -6,16 +6,22 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
+import { useAuth } from '@/lib/auth';
+import { PhoneInput } from '@/components/ui/phone-input';
 
 const Register = () => {
   const navigate = useNavigate();
-  const [isLoading, setIsLoading] = React.useState(false);
+  const { signUp, loading } = useAuth();
   const [formData, setFormData] = React.useState({
     firstName: '',
     lastName: '',
     email: '',
     password: '',
     confirmPassword: '',
+    phoneNumber: '',
+    address: '',
+    city: '',
+    zipCode: '',
     agreeTerms: false
   });
 
@@ -24,6 +30,13 @@ const Register = () => {
     setFormData(prev => ({
       ...prev,
       [name]: type === 'checkbox' ? checked : value,
+    }));
+  };
+
+  const handlePhoneChange = (value: string) => {
+    setFormData(prev => ({
+      ...prev,
+      phoneNumber: value
     }));
   };
 
@@ -40,14 +53,21 @@ const Register = () => {
       return;
     }
     
-    setIsLoading(true);
-    
-    // Simulating API call delay
-    setTimeout(() => {
-      setIsLoading(false);
-      toast.success("Registration successful! Please check your email to verify your account.");
+    try {
+      const userData = {
+        first_name: formData.firstName,
+        last_name: formData.lastName,
+        phone_number: formData.phoneNumber,
+        address: formData.address,
+        city: formData.city,
+        zip_code: formData.zipCode
+      };
+
+      await signUp(formData.email, formData.password, userData);
       navigate('/login');
-    }, 1500);
+    } catch (error) {
+      console.error('Registration error:', error);
+    }
   };
 
   return (
@@ -95,6 +115,54 @@ const Register = () => {
             onChange={handleChange}
           />
         </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="phoneNumber">Phone Number</Label>
+          <PhoneInput
+            id="phoneNumber"
+            value={formData.phoneNumber}
+            onChange={handlePhoneChange}
+            placeholder="+1 (555) 000-0000"
+          />
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="address">Address</Label>
+          <Input
+            id="address"
+            name="address"
+            placeholder="123 Main St"
+            required
+            value={formData.address}
+            onChange={handleChange}
+          />
+        </div>
+
+        <div className="grid grid-cols-2 gap-4">
+          <div className="space-y-2">
+            <Label htmlFor="city">City</Label>
+            <Input
+              id="city"
+              name="city"
+              placeholder="New York"
+              required
+              value={formData.city}
+              onChange={handleChange}
+            />
+          </div>
+          
+          <div className="space-y-2">
+            <Label htmlFor="zipCode">Zip Code</Label>
+            <Input
+              id="zipCode"
+              name="zipCode"
+              placeholder="10001"
+              required
+              value={formData.zipCode}
+              onChange={handleChange}
+            />
+          </div>
+        </div>
         
         <div className="space-y-2">
           <Label htmlFor="password">Password</Label>
@@ -139,9 +207,9 @@ const Register = () => {
         <Button 
           type="submit" 
           className="w-full bg-lending-primary hover:bg-lending-primary/90"
-          disabled={isLoading}
+          disabled={loading}
         >
-          {isLoading ? 'Creating account...' : 'Create account'}
+          {loading ? 'Creating account...' : 'Create account'}
         </Button>
       </form>
     </AuthLayout>
