@@ -5,6 +5,7 @@ import App from './App.tsx'
 import './index.css'
 import { AuthProvider } from './lib/auth'
 
+// Initialize React in strict mode
 createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
     <AuthProvider>

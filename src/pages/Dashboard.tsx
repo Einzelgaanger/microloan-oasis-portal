@@ -1,19 +1,19 @@
-
 import React, { useEffect, useState } from 'react';
 import MainLayout from '@/components/layout/MainLayout';
 import { useAuth } from '@/lib/auth';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Link } from 'react-router-dom';
-import { supabase } from '@/integrations/supabase/client';
 import { AlertTriangle, CheckCircle, Clock, FileText, CreditCard, CalendarRange, ChevronRight } from 'lucide-react';
 import { ProtectedRoute } from '@/lib/auth';
+import { dataService } from '@/services/dataService';
+import { Loan, Profile } from '@/services/mockDataService';
 
 const Dashboard = () => {
   const { user } = useAuth();
-  const [loans, setLoans] = useState<any[]>([]);
+  const [loans, setLoans] = useState<Loan[]>([]);
   const [loading, setLoading] = useState(true);
-  const [profile, setProfile] = useState<any>(null);
+  const [profile, setProfile] = useState<Profile | null>(null);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -21,23 +21,11 @@ const Dashboard = () => {
       
       try {
         // Fetch user profile
-        const { data: profileData, error: profileError } = await supabase
-          .from('profiles')
-          .select('*')
-          .eq('id', user.id)
-          .single();
-          
-        if (profileError) throw profileError;
+        const profileData = await dataService.profiles.getProfile(user.id);
         setProfile(profileData);
         
         // Fetch user loans
-        const { data: loansData, error: loansError } = await supabase
-          .from('loans')
-          .select('*')
-          .eq('user_id', user.id)
-          .order('created_at', { ascending: false });
-          
-        if (loansError) throw loansError;
+        const loansData = await dataService.loans.getUserLoans(user.id);
         setLoans(loansData || []);
       } catch (error) {
         console.error('Error fetching user data:', error);

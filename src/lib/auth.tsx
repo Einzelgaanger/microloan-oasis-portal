@@ -1,13 +1,16 @@
 
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { supabase } from '@/integrations/supabase/client';
-import { Session, User } from '@supabase/supabase-js';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
+import { authService, dataService } from '@/services/dataService';
+
+interface AuthUser {
+  id: string;
+  email: string;
+}
 
 interface AuthContextProps {
-  session: Session | null;
-  user: User | null;
+  user: AuthUser | null;
   loading: boolean;
   signIn: (email: string, password: string) => Promise<void>;
   signUp: (email: string, password: string, userData: any) => Promise<void>;
@@ -17,36 +20,29 @@ interface AuthContextProps {
 const AuthContext = createContext<AuthContextProps | undefined>(undefined);
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
-  const [session, setSession] = useState<Session | null>(null);
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<AuthUser | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // First set up the auth state listener
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, currentSession) => {
-      setSession(currentSession);
-      setUser(currentSession?.user ?? null);
-      setLoading(false);
-    });
+    const checkAuth = async () => {
+      try {
+        const { user } = await authService.getSession();
+        setUser(user);
+      } catch (error) {
+        console.error('Auth check error:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-    // Then check for existing session
-    supabase.auth.getSession().then(({ data: { session: currentSession } }) => {
-      setSession(currentSession);
-      setUser(currentSession?.user ?? null);
-      setLoading(false);
-    });
-
-    // Cleanup subscription
-    return () => subscription.unsubscribe();
+    checkAuth();
   }, []);
 
   const signIn = async (email: string, password: string) => {
     try {
       setLoading(true);
-      const { error } = await supabase.auth.signInWithPassword({ email, password });
-      if (error) {
-        throw error;
-      }
+      const user = await authService.signIn(email, password);
+      setUser(user);
       toast.success('Signed in successfully');
     } catch (error: any) {
       toast.error(error.message || 'Error signing in');
@@ -59,17 +55,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const signUp = async (email: string, password: string, userData: any) => {
     try {
       setLoading(true);
-      const { error } = await supabase.auth.signUp({
-        email,
-        password,
-        options: {
-          data: userData,
-        },
-      });
-      if (error) {
-        throw error;
-      }
-      toast.success('Account created successfully. Please verify your email.');
+      const user = await authService.signUp(email, password, userData);
+      setUser(user);
+      toast.success('Account created successfully');
     } catch (error: any) {
       toast.error(error.message || 'Error creating account');
       throw error;
@@ -81,7 +69,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const signOut = async () => {
     try {
       setLoading(true);
-      await supabase.auth.signOut();
+      await authService.signOut();
+      setUser(null);
       toast.success('Signed out successfully');
     } catch (error: any) {
       toast.error(error.message || 'Error signing out');
@@ -91,7 +80,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ session, user, loading, signIn, signUp, signOut }}>
+    <AuthContext.Provider value={{ user, loading, signIn, signUp, signOut }}>
       {children}
     </AuthContext.Provider>
   );
@@ -138,18 +127,8 @@ export const AdminRoute = ({ children }: { children: React.ReactNode }) => {
       if (!user) return;
       
       try {
-        const { data, error } = await supabase
-          .from('user_roles')
-          .select('role')
-          .eq('user_id', user.id)
-          .eq('role', 'admin')
-          .single();
-
-        if (error) {
-          throw error;
-        }
-
-        setIsAdmin(!!data);
+        const isUserAdmin = await dataService.roles.isAdmin(user.id);
+        setIsAdmin(isUserAdmin);
       } catch (error) {
         setIsAdmin(false);
         console.error('Error checking admin status:', error);

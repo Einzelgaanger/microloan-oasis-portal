@@ -5,7 +5,7 @@ import { Menu, X, ChevronDown, Home, FileText, HelpCircle, Phone, User, CreditCa
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/lib/auth';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { supabase } from '@/integrations/supabase/client';
+import { dataService } from '@/services/dataService';
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -31,16 +31,11 @@ const Navbar = () => {
     const fetchUserProfile = async () => {
       if (user) {
         try {
-          const { data: profileData } = await supabase
-            .from('profiles')
-            .select('first_name, last_name, avatar_url')
-            .eq('id', user.id)
-            .single();
-            
-          if (profileData) {
-            setUserName(`${profileData.first_name} ${profileData.last_name}`);
-            if (profileData.avatar_url) {
-              setAvatarUrl(profileData.avatar_url);
+          const profile = await dataService.profiles.getProfile(user.id);
+          if (profile) {
+            setUserName(`${profile.first_name} ${profile.last_name}`);
+            if (profile.avatar_url) {
+              setAvatarUrl(profile.avatar_url);
             }
           }
         } catch (error) {

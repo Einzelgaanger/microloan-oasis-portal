@@ -1,206 +1,134 @@
-
 import React, { useState, useEffect } from 'react';
 import MainLayout from '@/components/layout/MainLayout';
-import { useAuth, ProtectedRoute } from '@/lib/auth';
-import { supabase } from '@/integrations/supabase/client';
-import { toast } from 'sonner';
+import { useAuth } from '@/lib/auth';
 import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { FileUpload } from '@/components/ui/file-upload';
-import { Loader2, Lock, Mail, Phone, User, CreditCard } from 'lucide-react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { PhoneInput } from '@/components/ui/phone-input';
-
-type Profile = {
-  id: string;
-  first_name: string;
-  last_name: string;
-  phone_number: string;
-  address: string;
-  city: string;
-  zip_code: string;
-  avatar_url?: string;
-};
+import { Camera, Check, CreditCard, FileText, Upload, X } from 'lucide-react';
+import { toast } from 'sonner';
+import { ProtectedRoute } from '@/lib/auth';
+import { dataService } from '@/services/dataService';
+import { Profile } from '@/services/mockDataService';
 
 const UserProfile = () => {
-  const { user, signOut } = useAuth();
-  const [profile, setProfile] = useState<Profile | null>(null);
+  const { user } = useAuth();
   const [loading, setLoading] = useState(true);
-  const [updating, setUpdating] = useState(false);
-  const [changePassword, setChangePassword] = useState({
-    currentPassword: '',
-    newPassword: '',
-    confirmPassword: ''
+  const [saving, setSaving] = useState(false);
+  const [profile, setProfile] = useState<Profile | null>(null);
+  
+  const [formState, setFormState] = useState({
+    avatar_url: '',
+    first_name: '',
+    last_name: '',
+    phone_number: '',
+    address: '',
+    city: '',
+    zip_code: ''
   });
 
   useEffect(() => {
-    if (user) {
-      fetchProfile();
-    }
+    const fetchProfile = async () => {
+      if (!user) return;
+      
+      try {
+        const profileData = await dataService.profiles.getProfile(user.id);
+        
+        if (profileData) {
+          setProfile(profileData);
+          setFormState({
+            avatar_url: profileData.avatar_url || '',
+            first_name: profileData.first_name || '',
+            last_name: profileData.last_name || '',
+            phone_number: profileData.phone_number || '',
+            address: profileData.address || '',
+            city: profileData.city || '',
+            zip_code: profileData.zip_code || ''
+          });
+        }
+      } catch (error) {
+        console.error('Error fetching profile:', error);
+        toast.error('Failed to load profile data');
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    fetchProfile();
   }, [user]);
 
-  const fetchProfile = async () => {
-    try {
-      setLoading(true);
-      
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', user?.id)
-        .single();
-        
-      if (error) throw error;
-      setProfile(data);
-    } catch (error: any) {
-      toast.error(`Error loading profile: ${error.message}`);
-      console.error('Error fetching profile:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleProfileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setProfile(prev => prev ? { ...prev, [name]: value } : null);
+    setFormState(prev => ({ ...prev, [name]: value }));
   };
-
+  
   const handlePhoneChange = (value: string) => {
-    setProfile(prev => prev ? { ...prev, phone_number: value } : null);
+    setFormState(prev => ({ ...prev, phone_number: value }));
   };
-
-  const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setChangePassword(prev => ({ ...prev, [name]: value }));
-  };
-
-  const handleAvatarChange = async (file: File | null) => {
-    if (!file || !user) return;
+  
+  const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!e.target.files || !e.target.files[0]) return;
     
     try {
-      setUpdating(true);
+      // For the mock implementation, we'll just use a fake URL
+      // In a real app, this would upload to storage
+      const fakeUrl = URL.createObjectURL(e.target.files[0]);
       
-      // Upload the avatar to storage
-      const fileExt = file.name.split('.').pop();
-      const fileName = `${user.id}-avatar.${fileExt}`;
-      const filePath = `avatars/${fileName}`;
+      setFormState(prev => ({ ...prev, avatar_url: fakeUrl }));
       
-      const { error: uploadError } = await supabase.storage
-        .from('avatars')
-        .upload(filePath, file, { upsert: true });
+      if (user) {
+        await dataService.profiles.updateProfile(user.id, {
+          avatar_url: fakeUrl
+        });
         
-      if (uploadError) throw uploadError;
-      
-      // Get the public URL
-      const { data: publicUrlData } = supabase.storage
-        .from('avatars')
-        .getPublicUrl(filePath);
-        
-      // Update the profile with the avatar URL
-      const { error: updateError } = await supabase
-        .from('profiles')
-        .update({ avatar_url: publicUrlData.publicUrl })
-        .eq('id', user.id);
-        
-      if (updateError) throw updateError;
-      
-      // Update local state
-      setProfile(prev => prev ? { ...prev, avatar_url: publicUrlData.publicUrl } : null);
-      
-      toast.success('Profile picture updated successfully');
-    } catch (error: any) {
-      toast.error(`Error updating profile picture: ${error.message}`);
-      console.error('Error updating avatar:', error);
-    } finally {
-      setUpdating(false);
+        toast.success('Profile picture updated');
+      }
+    } catch (error) {
+      console.error('Error uploading avatar:', error);
+      toast.error('Failed to update profile picture');
     }
   };
-
-  const updateProfile = async () => {
-    if (!profile || !user) return;
-    
-    try {
-      setUpdating(true);
-      
-      const { error } = await supabase
-        .from('profiles')
-        .update({
-          first_name: profile.first_name,
-          last_name: profile.last_name,
-          phone_number: profile.phone_number,
-          address: profile.address,
-          city: profile.city,
-          zip_code: profile.zip_code
-        })
-        .eq('id', user.id);
-        
-      if (error) throw error;
-      
-      toast.success('Profile updated successfully');
-    } catch (error: any) {
-      toast.error(`Error updating profile: ${error.message}`);
-      console.error('Update error:', error);
-    } finally {
-      setUpdating(false);
-    }
-  };
-
-  const updatePassword = async () => {
+  
+  const handleSaveProfile = async () => {
     if (!user) return;
     
     try {
-      setUpdating(true);
+      setSaving(true);
       
-      // Validate password match
-      if (changePassword.newPassword !== changePassword.confirmPassword) {
-        throw new Error('New passwords do not match');
-      }
-      
-      // Update password
-      const { error } = await supabase.auth.updateUser({
-        password: changePassword.newPassword
+      await dataService.profiles.updateProfile(user.id, {
+        first_name: formState.first_name,
+        last_name: formState.last_name,
+        phone_number: formState.phone_number,
+        address: formState.address,
+        city: formState.city,
+        zip_code: formState.zip_code
       });
       
-      if (error) throw error;
+      toast.success('Profile updated successfully');
       
-      // Clear the form
-      setChangePassword({
-        currentPassword: '',
-        newPassword: '',
-        confirmPassword: ''
-      });
-      
-      toast.success('Password updated successfully');
-    } catch (error: any) {
-      toast.error(`Error updating password: ${error.message}`);
-      console.error('Password update error:', error);
-    } finally {
-      setUpdating(false);
-    }
-  };
-
-  const handleLogout = async () => {
-    try {
-      await signOut();
+      // Update local profile state
+      setProfile(prev => prev ? { ...prev, ...formState } : null);
     } catch (error) {
-      console.error('Logout error:', error);
+      console.error('Error updating profile:', error);
+      toast.error('Failed to update profile');
+    } finally {
+      setSaving(false);
     }
   };
 
   const getInitials = () => {
-    if (!profile) return 'U';
-    return `${profile.first_name.charAt(0)}${profile.last_name.charAt(0)}`;
+    if (!formState.first_name || !formState.last_name) return 'U';
+    return `${formState.first_name[0]}${formState.last_name[0]}`.toUpperCase();
   };
 
   if (loading) {
     return (
       <MainLayout>
-        <div className="container mx-auto px-4 py-8">
-          <div className="flex items-center justify-center h-64">
-            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-lending-primary"></div>
-          </div>
+        <div className="min-h-screen flex items-center justify-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-lending-primary"></div>
         </div>
       </MainLayout>
     );
@@ -210,263 +138,180 @@ const UserProfile = () => {
     <ProtectedRoute>
       <MainLayout>
         <div className="container mx-auto px-4 py-8">
-          <div className="flex flex-col md:flex-row items-start gap-6">
-            {/* Profile Sidebar */}
-            <div className="w-full md:w-1/3 lg:w-1/4">
-              <Card className="mb-6">
-                <CardContent className="p-6 flex flex-col items-center">
-                  <div className="mb-4 relative">
-                    <Avatar className="w-24 h-24 border-4 border-white shadow-lg">
-                      {profile?.avatar_url ? (
-                        <AvatarImage src={profile.avatar_url} alt={`${profile.first_name} ${profile.last_name}`} />
-                      ) : (
-                        <AvatarFallback className="text-xl bg-lending-primary text-white">
-                          {getInitials()}
-                        </AvatarFallback>
-                      )}
-                    </Avatar>
-                  </div>
-                  <h2 className="text-xl font-bold mb-1">{profile?.first_name} {profile?.last_name}</h2>
-                  <p className="text-gray-500 mb-4">{user?.email}</p>
-                  <FileUpload 
-                    accept="image/*"
-                    maxSize={2 * 1024 * 1024} // 2MB
-                    onFileSelected={handleAvatarChange}
-                    currentFile={null}
-                    helperText="Upload a new profile picture (Max 2MB)"
-                    className="w-full"
-                  />
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader className="pb-2">
-                  <CardTitle className="text-lg">Account Information</CardTitle>
-                </CardHeader>
-                <CardContent className="p-6 space-y-4">
-                  <div className="flex items-center">
-                    <Mail className="h-5 w-5 text-gray-500 mr-2" />
-                    <div>
-                      <p className="text-sm text-gray-500">Email</p>
-                      <p className="font-medium">{user?.email}</p>
-                    </div>
-                  </div>
-                  
-                  <div className="flex items-center">
-                    <Phone className="h-5 w-5 text-gray-500 mr-2" />
-                    <div>
-                      <p className="text-sm text-gray-500">Phone</p>
-                      <p className="font-medium">{profile?.phone_number || 'Not provided'}</p>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center">
-                    <User className="h-5 w-5 text-gray-500 mr-2" />
-                    <div>
-                      <p className="text-sm text-gray-500">Member Since</p>
-                      <p className="font-medium">{new Date().toLocaleDateString()}</p>
-                    </div>
-                  </div>
-                </CardContent>
-                <CardFooter>
-                  <Button 
-                    variant="outline" 
-                    className="w-full text-red-600 hover:text-red-700 hover:bg-red-50"
-                    onClick={handleLogout}
-                  >
-                    Sign Out
-                  </Button>
-                </CardFooter>
-              </Card>
-            </div>
-            
-            {/* Main Content */}
-            <div className="w-full md:w-2/3 lg:w-3/4">
-              <Tabs defaultValue="profile" className="w-full">
-                <TabsList className="mb-6">
-                  <TabsTrigger value="profile">Profile</TabsTrigger>
-                  <TabsTrigger value="security">Security</TabsTrigger>
-                  <TabsTrigger value="payment">Payment Methods</TabsTrigger>
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-2xl font-bold">My Profile</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <Tabs defaultValue="profile" className="space-y-4">
+                <TabsList>
+                  <TabsTrigger value="profile">
+                    <FileText className="mr-2 h-4 w-4" />
+                    Profile Information
+                  </TabsTrigger>
+                  <TabsTrigger value="security">
+                    <CreditCard className="mr-2 h-4 w-4" />
+                    Security
+                  </TabsTrigger>
                 </TabsList>
-                
-                <TabsContent value="profile">
-                  <Card>
-                    <CardHeader>
-                      <CardTitle>Personal Information</CardTitle>
-                      <CardDescription>
-                        Update your personal details
-                      </CardDescription>
-                    </CardHeader>
-                    <CardContent className="space-y-6">
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div className="space-y-2">
-                          <Label htmlFor="first_name">First Name</Label>
-                          <Input 
-                            id="first_name"
-                            name="first_name"
-                            value={profile?.first_name || ''}
-                            onChange={handleProfileChange}
-                          />
-                        </div>
-                        
-                        <div className="space-y-2">
-                          <Label htmlFor="last_name">Last Name</Label>
-                          <Input 
-                            id="last_name"
-                            name="last_name"
-                            value={profile?.last_name || ''}
-                            onChange={handleProfileChange}
-                          />
+                <TabsContent value="profile" className="space-y-4">
+                  <div className="grid gap-4">
+                    {/* Avatar Section */}
+                    <div>
+                      <div className="flex items-center space-x-4">
+                        <Avatar className="h-16 w-16">
+                          {formState.avatar_url ? (
+                            <AvatarImage src={formState.avatar_url} alt="Avatar" />
+                          ) : (
+                            <AvatarFallback className="bg-lending-primary text-white">
+                              {getInitials()}
+                            </AvatarFallback>
+                          )}
+                        </Avatar>
+                        <div className="space-y-1">
+                          <p className="text-sm font-medium leading-none">
+                            {formState.first_name} {formState.last_name}
+                          </p>
+                          <p className="text-sm text-gray-500">
+                            {user?.email}
+                          </p>
+                          <div className="flex items-center space-x-2">
+                            <Input
+                              type="file"
+                              id="avatar-upload"
+                              className="hidden"
+                              onChange={handleAvatarUpload}
+                            />
+                            <Label
+                              htmlFor="avatar-upload"
+                              className="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-secondary hover:bg-secondary bg-muted text-muted-foreground hover:text-muted-foreground h-9 px-4 py-2"
+                            >
+                              <Upload className="mr-2 h-4 w-4" />
+                              Upload Avatar
+                            </Label>
+                            {formState.avatar_url && (
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => setFormState(prev => ({ ...prev, avatar_url: '' }))}
+                              >
+                                <X className="mr-2 h-4 w-4" />
+                                Remove
+                              </Button>
+                            )}
+                          </div>
                         </div>
                       </div>
-                      
-                      <div className="space-y-2">
-                        <Label htmlFor="phone_number">Phone Number</Label>
-                        <PhoneInput
-                          id="phone_number"
-                          value={profile?.phone_number || ''}
-                          onChange={handlePhoneChange}
-                          placeholder="+1 (555) 000-0000"
+                    </div>
+
+                    {/* Personal Information */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <Label htmlFor="firstName">First Name</Label>
+                        <Input
+                          type="text"
+                          id="firstName"
+                          name="first_name"
+                          value={formState.first_name}
+                          onChange={handleInputChange}
                         />
                       </div>
-                      
-                      <div className="space-y-2">
+                      <div>
+                        <Label htmlFor="lastName">Last Name</Label>
+                        <Input
+                          type="text"
+                          id="lastName"
+                          name="last_name"
+                          value={formState.last_name}
+                          onChange={handleInputChange}
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="phoneNumber">Phone Number</Label>
+                        <PhoneInput
+                          id="phoneNumber"
+                          value={formState.phone_number}
+                          onChange={handlePhoneChange}
+                          placeholder="+1 555 123 4567"
+                        />
+                      </div>
+                      <div>
                         <Label htmlFor="address">Address</Label>
-                        <Input 
+                        <Input
+                          type="text"
                           id="address"
                           name="address"
-                          value={profile?.address || ''}
-                          onChange={handleProfileChange}
+                          value={formState.address}
+                          onChange={handleInputChange}
                         />
                       </div>
-                      
-                      <div className="grid grid-cols-2 gap-6">
-                        <div className="space-y-2">
-                          <Label htmlFor="city">City</Label>
-                          <Input 
-                            id="city"
-                            name="city"
-                            value={profile?.city || ''}
-                            onChange={handleProfileChange}
-                          />
-                        </div>
-                        
-                        <div className="space-y-2">
-                          <Label htmlFor="zip_code">Zip Code</Label>
-                          <Input 
-                            id="zip_code"
-                            name="zip_code"
-                            value={profile?.zip_code || ''}
-                            onChange={handleProfileChange}
-                          />
-                        </div>
+                      <div>
+                        <Label htmlFor="city">City</Label>
+                        <Input
+                          type="text"
+                          id="city"
+                          name="city"
+                          value={formState.city}
+                          onChange={handleInputChange}
+                        />
                       </div>
-                    </CardContent>
-                    <CardFooter>
-                      <Button 
-                        onClick={updateProfile}
-                        disabled={updating}
-                        className="bg-lending-primary hover:bg-lending-primary/90"
-                      >
-                        {updating && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                        Save Changes
-                      </Button>
-                    </CardFooter>
-                  </Card>
+                      <div>
+                        <Label htmlFor="zipCode">ZIP Code</Label>
+                        <Input
+                          type="text"
+                          id="zipCode"
+                          name="zip_code"
+                          value={formState.zip_code}
+                          onChange={handleInputChange}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                  <Button
+                    className="bg-lending-primary hover:bg-lending-primary/90"
+                    onClick={handleSaveProfile}
+                    disabled={saving}
+                  >
+                    {saving ? (
+                      <>
+                        Saving...
+                      </>
+                    ) : (
+                      <>
+                        Save Profile
+                        <Check className="ml-2 h-4 w-4" />
+                      </>
+                    )}
+                  </Button>
                 </TabsContent>
-                
                 <TabsContent value="security">
-                  <Card>
-                    <CardHeader>
-                      <CardTitle>Security Settings</CardTitle>
-                      <CardDescription>
-                        Update your password and security preferences
-                      </CardDescription>
-                    </CardHeader>
-                    <CardContent className="space-y-6">
-                      <div className="space-y-2">
-                        <Label htmlFor="currentPassword">Current Password</Label>
-                        <div className="relative">
-                          <Input 
-                            id="currentPassword"
-                            name="currentPassword"
-                            type="password"
-                            value={changePassword.currentPassword}
-                            onChange={handlePasswordChange}
-                            className="pr-10"
-                          />
-                          <Lock className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-                        </div>
-                      </div>
-                      
-                      <div className="space-y-2">
-                        <Label htmlFor="newPassword">New Password</Label>
-                        <div className="relative">
-                          <Input 
-                            id="newPassword"
-                            name="newPassword"
-                            type="password"
-                            value={changePassword.newPassword}
-                            onChange={handlePasswordChange}
-                            className="pr-10"
-                          />
-                          <Lock className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-                        </div>
-                      </div>
-                      
-                      <div className="space-y-2">
-                        <Label htmlFor="confirmPassword">Confirm New Password</Label>
-                        <div className="relative">
-                          <Input 
-                            id="confirmPassword"
-                            name="confirmPassword"
-                            type="password"
-                            value={changePassword.confirmPassword}
-                            onChange={handlePasswordChange}
-                            className="pr-10"
-                          />
-                          <Lock className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-                        </div>
-                      </div>
-                    </CardContent>
-                    <CardFooter>
-                      <Button 
-                        onClick={updatePassword}
-                        disabled={updating || !changePassword.currentPassword || !changePassword.newPassword || !changePassword.confirmPassword}
-                        className="bg-lending-primary hover:bg-lending-primary/90"
-                      >
-                        {updating && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                        Update Password
-                      </Button>
-                    </CardFooter>
-                  </Card>
-                </TabsContent>
-                
-                <TabsContent value="payment">
-                  <Card>
-                    <CardHeader>
-                      <CardTitle>Payment Methods</CardTitle>
-                      <CardDescription>
-                        Manage your payment methods for loan repayments
-                      </CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="flex items-center justify-center h-48 border-2 border-dashed rounded-lg">
-                        <div className="text-center">
-                          <CreditCard className="h-10 w-10 text-gray-400 mx-auto mb-2" />
-                          <h3 className="text-lg font-medium mb-1">No payment methods yet</h3>
-                          <p className="text-gray-500">Add a payment method to easily repay your loans</p>
-                          <Button className="mt-4 bg-lending-primary hover:bg-lending-primary/90">
-                            Add Payment Method
-                          </Button>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
+                  <div className="grid gap-4">
+                    <div>
+                      <Label htmlFor="password">Change Password</Label>
+                      <Input
+                        type="password"
+                        id="password"
+                        placeholder="Enter new password"
+                        disabled
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="confirmPassword">
+                        Confirm New Password
+                      </Label>
+                      <Input
+                        type="password"
+                        id="confirmPassword"
+                        placeholder="Confirm new password"
+                        disabled
+                      />
+                    </div>
+                    <Button disabled>Update Password</Button>
+                  </div>
                 </TabsContent>
               </Tabs>
-            </div>
-          </div>
+            </CardContent>
+          </Card>
         </div>
       </MainLayout>
     </ProtectedRoute>
