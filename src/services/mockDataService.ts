@@ -1,3 +1,4 @@
+
 // Mock data and service functions for development use
 
 export interface Profile {
@@ -119,6 +120,18 @@ export interface Loan {
   
   created_at: string;
   updated_at: string;
+}
+
+// Add Payment interface
+export interface Payment {
+  id: string;
+  user_id: string;
+  loan_id: string;
+  amount: number;
+  payment_date: string;
+  status: "pending" | "completed" | "failed";
+  transaction_id: string;
+  payment_method: string;
 }
 
 // Mock profiles
@@ -333,7 +346,7 @@ export const profileService = {
     return new Promise((resolve) => {
       setTimeout(() => {
         const profiles = getDataFromStorage<Profile>(STORAGE_KEYS.PROFILES);
-        const profile = profiles.find(p => p.id === userId);
+        const profile = profiles.find(p => p.user_id === userId || p.id === userId);
         resolve(profile || null);
       }, 300);
     });
@@ -343,12 +356,24 @@ export const profileService = {
     return new Promise((resolve) => {
       setTimeout(() => {
         const profiles = getDataFromStorage<Profile>(STORAGE_KEYS.PROFILES);
-        const index = profiles.findIndex(p => p.id === userId);
+        const index = profiles.findIndex(p => p.user_id === userId || p.id === userId);
         
         if (index >= 0) {
-          profiles[index] = { ...profiles[index], ...data };
+          profiles[index] = { ...profiles[index], ...data, updated_at: new Date().toISOString() };
         } else {
-          profiles.push({ id: userId, first_name: '', last_name: '', ...data });
+          profiles.push({ 
+            id: userId, 
+            user_id: userId, 
+            first_name: '', 
+            last_name: '', 
+            phone_number: '', 
+            address: '', 
+            city: '', 
+            zip_code: '', 
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString(),
+            ...data 
+          });
         }
         
         saveDataToStorage(STORAGE_KEYS.PROFILES, profiles);

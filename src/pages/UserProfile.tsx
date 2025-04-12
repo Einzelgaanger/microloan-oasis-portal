@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import MainLayout from '@/components/layout/MainLayout';
 import { useAuth } from '@/lib/auth';
@@ -62,7 +61,7 @@ const UserProfile = () => {
     occupation: '',
     employer_name: '',
     employer_contact: '',
-    monthly_income: '',
+    monthly_income: 0,
     secondary_income: '',
     pay_frequency: '',
     work_location: '',
@@ -199,11 +198,16 @@ const UserProfile = () => {
     try {
       setSaving(true);
       
+      // Convert monthly income to number if it's a string
+      const monthlyIncome = typeof employmentInfo.monthly_income === 'string' 
+        ? parseInt(employmentInfo.monthly_income, 10) || 0
+        : employmentInfo.monthly_income;
+      
       // Combine all profile data
-      const profileData = {
+      const profileData: Partial<Profile> = {
         ...personalInfo,
         ...contactInfo,
-        ...employmentInfo,
+        ...{...employmentInfo, monthly_income: monthlyIncome},
         ...bankingInfo,
         ...creditInfo,
         ...kinInfo,
@@ -221,7 +225,7 @@ const UserProfile = () => {
       toast.success('Profile updated successfully');
       
       // Update local profile state
-      setProfile(prev => prev ? { ...prev, ...profileData } : null);
+      setProfile(prev => prev ? {...prev, ...profileData} : null);
     } catch (error) {
       console.error('Error updating profile:', error);
       toast.error('Failed to update profile');
@@ -833,12 +837,9 @@ const UserProfile = () => {
               </CardContent>
             </Card>
           </FadeIn>
-          {/* Add a Kenya-themed floating character */}
-          <FloatingCharacter
-            character="🇰🇪"
-            position="bottom-left"
-            className="hidden md:block"
-          />
+          <div className="fixed bottom-4 left-4 text-4xl hidden md:block animate-bounce">
+            🇰🇪
+          </div>
         </div>
       </MainLayout>
     </ProtectedRoute>

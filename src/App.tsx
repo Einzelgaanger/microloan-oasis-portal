@@ -13,7 +13,6 @@ import LoanApplication from "./pages/LoanApplication";
 import AdminDashboard from "./pages/AdminDashboard";
 import UserProfile from "./pages/UserProfile";
 import { AnimatedGradientBackground } from "@/components/ui/animations";
-import { FloatingCharacter } from "@/components/ui/animations";
 import AdminLogin from "./pages/AdminLogin";
 
 const queryClient = new QueryClient();
@@ -24,13 +23,6 @@ const App = () => (
     <QueryClientProvider client={queryClient}>
       {/* Add animated background */}
       <AnimatedGradientBackground className="opacity-10" />
-      
-      {/* Add floating cartoon character */}
-      <FloatingCharacter 
-        character="🧙‍♂️" 
-        position="bottom-right" 
-        className="hidden md:block" 
-      />
       
       <Toaster />
       <Sonner richColors />
