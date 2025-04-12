@@ -13,13 +13,26 @@ import Dashboard from "./pages/Dashboard";
 import LoanApplication from "./pages/LoanApplication";
 import AdminDashboard from "./pages/AdminDashboard";
 import UserProfile from "./pages/UserProfile";
+import { AnimatedGradientBackground } from "@/components/ui/animations";
+import { FloatingCharacter } from "@/components/ui/animations";
 
 const queryClient = new QueryClient();
 
+// Add vibrant theme colors
 const App = () => (
   <React.StrictMode>
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
+        {/* Add animated background */}
+        <AnimatedGradientBackground className="opacity-10" />
+        
+        {/* Add floating cartoon character */}
+        <FloatingCharacter 
+          character="🧙‍♂️" 
+          position="bottom-right" 
+          className="hidden md:block" 
+        />
+        
         <Toaster />
         <Sonner richColors />
         <BrowserRouter>
