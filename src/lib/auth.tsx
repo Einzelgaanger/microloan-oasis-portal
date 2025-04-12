@@ -26,8 +26,15 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   useEffect(() => {
     const checkAuth = async () => {
       try {
-        const { user } = await authService.getSession();
-        setUser(user);
+        const { user: authUser } = await authService.getSession();
+        if (authUser) {
+          setUser({
+            id: authUser.id,
+            email: authUser.email || 'user@example.com' // Ensure email is never undefined
+          });
+        } else {
+          setUser(null);
+        }
       } catch (error) {
         console.error('Auth check error:', error);
       } finally {
@@ -41,9 +48,14 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const signIn = async (email: string, password: string) => {
     try {
       setLoading(true);
-      const user = await authService.signIn(email, password);
-      setUser(user);
-      toast.success('Signed in successfully');
+      const authUser = await authService.signIn(email, password);
+      if (authUser) {
+        setUser({
+          id: authUser.id,
+          email: authUser.email || email // Use provided email if not returned
+        });
+        toast.success('Signed in successfully');
+      }
     } catch (error: any) {
       toast.error(error.message || 'Error signing in');
       throw error;
@@ -55,9 +67,14 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const signUp = async (email: string, password: string, userData: any) => {
     try {
       setLoading(true);
-      const user = await authService.signUp(email, password, userData);
-      setUser(user);
-      toast.success('Account created successfully');
+      const authUser = await authService.signUp(email, password, userData);
+      if (authUser) {
+        setUser({
+          id: authUser.id,
+          email: authUser.email || email // Use provided email if not returned
+        });
+        toast.success('Account created successfully');
+      }
     } catch (error: any) {
       toast.error(error.message || 'Error creating account');
       throw error;

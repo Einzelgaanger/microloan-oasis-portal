@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import MainLayout from '@/components/layout/MainLayout';
 import { useAuth } from '@/lib/auth';
@@ -6,7 +7,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { AlertTriangle, CheckCircle, Clock, Download, Eye, FileText, Search, ThumbsDown, ThumbsUp } from 'lucide-react';
+import { AlertTriangle, CheckCircle, Clock, Download, Eye, FileText, Search, ThumbsDown, ThumbsUp, X } from 'lucide-react';
 import { toast } from 'sonner';
 import { dataService } from '@/services/dataService';
 import { Loan } from '@/services/mockDataService';
@@ -73,14 +74,13 @@ const AdminDashboard = () => {
           approved_at: new Date().toISOString()
         });
         
-        // Update local state
-        const updatedLoans = loans.map(loan => 
+        // Update local state - ensure we maintain the correct typing
+        setLoans(prevLoans => prevLoans.map(loan => 
           loan.id === loanId 
             ? { ...loan, status: 'approved', approved_at: new Date().toISOString() }
             : loan
-        );
+        ));
         
-        setLoans(updatedLoans);
         setFilteredLoans(prevFiltered => prevFiltered.map(loan => 
           loan.id === loanId 
             ? { ...loan, status: 'approved', approved_at: new Date().toISOString() }
@@ -116,8 +116,8 @@ const AdminDashboard = () => {
         rejected_reason: rejectionReason
       });
       
-      // Update local state
-      const updatedLoans = loans.map(loan => 
+      // Update local state with proper typing
+      setLoans(prevLoans => prevLoans.map(loan => 
         loan.id === loanId 
           ? { 
               ...loan, 
@@ -126,9 +126,8 @@ const AdminDashboard = () => {
               rejected_reason: rejectionReason
             }
           : loan
-      );
+      ));
       
-      setLoans(updatedLoans);
       setFilteredLoans(prevFiltered => prevFiltered.map(loan => 
         loan.id === loanId 
           ? { 
@@ -332,7 +331,7 @@ const AdminDashboard = () => {
           {/* Loan Details Modal */}
           {viewingDetails && selectedLoan && (
             <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-              <Card className="max-w-2xl w-full mx-4">
+              <Card className="max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
                 <CardHeader className="flex items-center justify-between">
                   <CardTitle>Loan Details #{selectedLoan.id.slice(-5)}</CardTitle>
                   <Button variant="ghost" size="sm" onClick={() => setViewingDetails(false)}>
@@ -366,40 +365,48 @@ const AdminDashboard = () => {
                   </div>
                   <div>
                     <p className="text-sm font-medium text-gray-500">Employer Name</p>
-                    <p className="text-lg">{selectedLoan.employer_name}</p>
+                    <p className="text-lg">{selectedLoan.employer_name || 'Not provided'}</p>
                   </div>
                   <div>
                     <p className="text-sm font-medium text-gray-500">Monthly Income</p>
                     <p className="text-lg">{formatCurrency(selectedLoan.monthly_income)}</p>
                   </div>
-                  <div>
-                    <p className="text-sm font-medium text-gray-500">ID Document</p>
-                    <a href={selectedLoan.id_document_url} target="_blank" rel="noopener noreferrer" className="text-lending-primary hover:underline">
-                      View Document
-                    </a>
+                  
+                  {/* Additional Documents */}
+                  <div className="col-span-2">
+                    <p className="text-sm font-medium text-gray-500 mb-2">KYC Documents</p>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="border p-3 rounded-md">
+                        <p className="font-medium mb-1">ID Document</p>
+                        <a href={selectedLoan.id_document_url} target="_blank" rel="noopener noreferrer" className="text-lending-primary hover:underline flex items-center">
+                          <FileText className="h-4 w-4 mr-1" /> View Document
+                        </a>
+                      </div>
+                      <div className="border p-3 rounded-md">
+                        <p className="font-medium mb-1">Proof of Income</p>
+                        <a href={selectedLoan.proof_of_income_url} target="_blank" rel="noopener noreferrer" className="text-lending-primary hover:underline flex items-center">
+                          <FileText className="h-4 w-4 mr-1" /> View Document
+                        </a>
+                      </div>
+                      <div className="border p-3 rounded-md">
+                        <p className="font-medium mb-1">Selfie Verification</p>
+                        <a href={selectedLoan.selfie_url} target="_blank" rel="noopener noreferrer" className="text-lending-primary hover:underline flex items-center">
+                          <FileText className="h-4 w-4 mr-1" /> View Selfie
+                        </a>
+                      </div>
+                      <div className="border p-3 rounded-md">
+                        <p className="font-medium mb-1">Other Documents</p>
+                        <a href={selectedLoan.other_documents_url} target="_blank" rel="noopener noreferrer" className="text-lending-primary hover:underline flex items-center">
+                          <FileText className="h-4 w-4 mr-1" /> View Documents
+                        </a>
+                      </div>
+                    </div>
                   </div>
-                  <div>
-                    <p className="text-sm font-medium text-gray-500">Proof of Income</p>
-                    <a href={selectedLoan.proof_of_income_url} target="_blank" rel="noopener noreferrer" className="text-lending-primary hover:underline">
-                      View Document
-                    </a>
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium text-gray-500">Selfie</p>
-                    <a href={selectedLoan.selfie_url} target="_blank" rel="noopener noreferrer" className="text-lending-primary hover:underline">
-                      View Selfie
-                    </a>
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium text-gray-500">Other Documents</p>
-                    <a href={selectedLoan.other_documents_url} target="_blank" rel="noopener noreferrer" className="text-lending-primary hover:underline">
-                      View Documents
-                    </a>
-                  </div>
+                  
                   {selectedLoan.status === 'rejected' && (
-                    <div className="col-span-2">
-                      <p className="text-sm font-medium text-gray-500">Rejection Reason</p>
-                      <p className="text-lg">{selectedLoan.rejected_reason}</p>
+                    <div className="col-span-2 bg-red-50 p-3 rounded-md border border-red-200">
+                      <p className="text-sm font-medium text-gray-700">Rejection Reason</p>
+                      <p className="text-red-600">{selectedLoan.rejected_reason}</p>
                     </div>
                   )}
                 </CardContent>
@@ -454,6 +461,28 @@ const AdminDashboard = () => {
       </MainLayout>
     </AdminRoute>
   );
+};
+
+// Add these functions back to fix errors
+const getLoanStatusStyle = (status: string) => {
+  switch (status) {
+    case 'approved':
+      return { icon: <CheckCircle className="text-green-500 h-5 w-5" />, color: 'bg-green-100 text-green-800' };
+    case 'pending':
+      return { icon: <Clock className="text-amber-500 h-5 w-5" />, color: 'bg-amber-100 text-amber-800' };
+    case 'rejected':
+      return { icon: <AlertTriangle className="text-red-500 h-5 w-5" />, color: 'bg-red-100 text-red-800' };
+    default:
+      return { icon: <FileText className="text-blue-500 h-5 w-5" />, color: 'bg-blue-100 text-blue-800' };
+  }
+};
+
+const formatCurrency = (amount: number) => {
+  return new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency: 'USD',
+    minimumFractionDigits: 2
+  }).format(amount);
 };
 
 export default AdminDashboard;

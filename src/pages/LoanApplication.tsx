@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import MainLayout from '@/components/layout/MainLayout';
 import { useAuth } from '@/lib/auth';
@@ -11,68 +12,94 @@ import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import { ProtectedRoute } from '@/lib/auth';
 import { dataService } from '@/services/dataService';
+import { FileUpload } from '@/components/ui/file-upload';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
 
 const LoanApplication = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
 
-  const [loanData, setLoanData] = useState({
-    amount: 5000,
-    purpose: '',
-    duration: 12,
-    interestRate: 5,
-    employmentStatus: '',
-    employerName: '',
-    monthlyIncome: 0,
-  });
-
+  // Form initial values
+  const [loanAmount, setLoanAmount] = useState(5000);
+  const [idDocument, setIdDocument] = useState<File | null>(null);
+  const [proofOfIncome, setProofOfIncome] = useState<File | null>(null);
+  const [selfiePhoto, setSelfiePhoto] = useState<File | null>(null);
+  const [otherDocuments, setOtherDocuments] = useState<File | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target;
-    setLoanData(prev => ({ ...prev, [name]: value }));
-  };
+  // Define form schema
+  const formSchema = z.object({
+    purpose: z.string().min(5, "Purpose is required and must be at least 5 characters"),
+    duration: z.number().min(6, "Duration must be at least 6 months").max(60, "Duration cannot exceed 60 months"),
+    interestRate: z.number().min(1, "Interest rate must be at least 1%").max(30, "Interest rate cannot exceed 30%"),
+    employmentStatus: z.string().min(2, "Employment status is required"),
+    employerName: z.string().optional(),
+    monthlyIncome: z.number().min(500, "Monthly income must be at least $500"),
+    phoneNumber: z.string().min(10, "Phone number is required"),
+    address: z.string().min(5, "Address is required")
+  });
 
-  const handleSliderChange = (value: number[]) => {
-    setLoanData(prev => ({ ...prev, amount: value[0] }));
-  };
+  // Initialize form
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      purpose: '',
+      duration: 12,
+      interestRate: 5,
+      employmentStatus: '',
+      employerName: '',
+      monthlyIncome: 0,
+      phoneNumber: '',
+      address: ''
+    },
+  });
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    
+  // Handle form submission
+  const onSubmit = async (values: z.infer<typeof formSchema>) => {
     if (!user) {
       toast.error('You must be logged in to apply for a loan');
       return;
     }
-    
-    // Calculate monthly payment
-    const r = loanData.interestRate / 100 / 12; // Monthly interest rate
-    const n = loanData.duration; // Number of months
-    const monthlyPayment = (loanData.amount * r * Math.pow(1 + r, n)) / (Math.pow(1 + r, n) - 1);
+
+    if (!idDocument || !proofOfIncome || !selfiePhoto) {
+      toast.error('Please upload all required documents');
+      return;
+    }
     
     setSubmitting(true);
     
     try {
-      // For demonstration, create an empty URL for the document fields
-      const documentPlaceholder = '/documents/placeholder.pdf';
+      // Mock file uploads with placeholder URLs
+      const idDocUrl = `/documents/${idDocument.name}`;
+      const incomeDocUrl = `/documents/${proofOfIncome.name}`;
+      const selfieUrl = `/documents/${selfiePhoto.name}`;
+      const otherDocsUrl = otherDocuments ? `/documents/${otherDocuments.name}` : null;
       
+      // Calculate monthly payment
+      const r = values.interestRate / 100 / 12; // Monthly interest rate
+      const n = values.duration; // Number of months
+      const monthlyPayment = (loanAmount * r * Math.pow(1 + r, n)) / (Math.pow(1 + r, n) - 1);
+      
+      // Create loan application
       await dataService.loans.createLoan({
         user_id: user.id,
-        amount: loanData.amount,
-        purpose: loanData.purpose,
-        duration: loanData.duration,
-        interest_rate: loanData.interestRate,
+        amount: loanAmount,
+        purpose: values.purpose,
+        duration: values.duration,
+        interest_rate: values.interestRate,
         monthly_payment: parseFloat(monthlyPayment.toFixed(2)),
-        employment_status: loanData.employmentStatus,
-        employer_name: loanData.employerName,
-        monthly_income: loanData.monthlyIncome,
-        id_document_url: documentPlaceholder,
-        proof_of_income_url: documentPlaceholder,
-        selfie_url: documentPlaceholder,
-        other_documents_url: documentPlaceholder,
+        employment_status: values.employmentStatus,
+        employer_name: values.employerName || '',
+        monthly_income: values.monthlyIncome,
+        id_document_url: idDocUrl,
+        proof_of_income_url: incomeDocUrl,
+        selfie_url: selfieUrl,
+        other_documents_url: otherDocsUrl || '',
         status: 'pending',
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
         is_repaid: false
       });
       
@@ -94,108 +121,262 @@ const LoanApplication = () => {
             <CardHeader>
               <CardTitle className="text-2xl">Loan Application</CardTitle>
               <CardDescription>
-                Fill out the form below to apply for a loan.
+                Fill out this form completely to apply for a loan. All documents will be verified.
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <form onSubmit={handleSubmit} className="space-y-4">
-                <div>
-                  <Label htmlFor="amount">Loan Amount</Label>
-                  <Slider
-                    defaultValue={[loanData.amount]}
-                    max={10000}
-                    step={100}
-                    onValueChange={(value) => handleSliderChange(value.map(Number))}
-                  />
-                  <Input
-                    type="number"
-                    id="amount"
-                    name="amount"
-                    value={loanData.amount}
-                    onChange={handleInputChange}
-                    className="mt-2"
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="purpose">Purpose of Loan</Label>
-                  <Textarea
-                    id="purpose"
+              <Form {...form}>
+                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+                  {/* Loan Amount Slider */}
+                  <div className="space-y-2">
+                    <Label htmlFor="amount">Loan Amount: ${loanAmount}</Label>
+                    <Slider
+                      value={[loanAmount]}
+                      max={10000}
+                      step={100}
+                      onValueChange={(value) => setLoanAmount(value[0])}
+                      className="my-4"
+                    />
+                    <div className="flex justify-between text-xs text-gray-500">
+                      <span>$1,000</span>
+                      <span>$5,000</span>
+                      <span>$10,000</span>
+                    </div>
+                  </div>
+
+                  {/* Purpose of Loan */}
+                  <FormField
+                    control={form.control}
                     name="purpose"
-                    value={loanData.purpose}
-                    onChange={handleInputChange}
-                    placeholder="Briefly describe the purpose of the loan"
-                    required
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Purpose of Loan</FormLabel>
+                        <FormControl>
+                          <Textarea
+                            placeholder="Briefly describe how you plan to use this loan"
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormDescription>
+                          Be specific about your intended use of the funds
+                        </FormDescription>
+                        <FormMessage />
+                      </FormItem>
+                    )}
                   />
-                </div>
-                <div>
-                  <Label htmlFor="duration">Loan Duration (months)</Label>
-                  <Input
-                    type="number"
-                    id="duration"
-                    name="duration"
-                    value={loanData.duration}
-                    onChange={handleInputChange}
-                    min="6"
-                    max="60"
-                    required
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="interestRate">Interest Rate (%)</Label>
-                  <Input
-                    type="number"
-                    id="interestRate"
-                    name="interestRate"
-                    value={loanData.interestRate}
-                    onChange={handleInputChange}
-                    step="0.1"
-                    required
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="employmentStatus">Employment Status</Label>
-                  <Input
-                    type="text"
-                    id="employmentStatus"
-                    name="employmentStatus"
-                    value={loanData.employmentStatus}
-                    onChange={handleInputChange}
-                    required
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="employerName">Employer Name</Label>
-                  <Input
-                    type="text"
-                    id="employerName"
-                    name="employerName"
-                    value={loanData.employerName}
-                    onChange={handleInputChange}
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="monthlyIncome">Monthly Income</Label>
-                  <Input
-                    type="number"
-                    id="monthlyIncome"
-                    name="monthlyIncome"
-                    value={loanData.monthlyIncome}
-                    onChange={handleInputChange}
-                    required
-                  />
-                </div>
-                <Button
-                  type="submit"
-                  className="bg-lending-primary hover:bg-lending-primary/90"
-                  disabled={submitting}
-                >
-                  {submitting ? 'Submitting...' : 'Submit Application'}
-                </Button>
-              </form>
+
+                  {/* Loan Terms */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <FormField
+                      control={form.control}
+                      name="duration"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Loan Duration (months)</FormLabel>
+                          <FormControl>
+                            <Input
+                              type="number"
+                              {...field}
+                              onChange={e => field.onChange(parseInt(e.target.value))}
+                              min="6"
+                              max="60"
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="interestRate"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Interest Rate (%)</FormLabel>
+                          <FormControl>
+                            <Input 
+                              type="number" 
+                              step="0.1"
+                              {...field}
+                              onChange={e => field.onChange(parseFloat(e.target.value))}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+
+                  {/* Employment Information */}
+                  <div className="space-y-4">
+                    <h3 className="text-lg font-medium">Employment Information</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <FormField
+                        control={form.control}
+                        name="employmentStatus"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Employment Status</FormLabel>
+                            <Select onValueChange={field.onChange} defaultValue={field.value}>
+                              <FormControl>
+                                <SelectTrigger>
+                                  <SelectValue placeholder="Select status" />
+                                </SelectTrigger>
+                              </FormControl>
+                              <SelectContent>
+                                <SelectItem value="Full-time">Full-time</SelectItem>
+                                <SelectItem value="Part-time">Part-time</SelectItem>
+                                <SelectItem value="Self-employed">Self-employed</SelectItem>
+                                <SelectItem value="Unemployed">Unemployed</SelectItem>
+                                <SelectItem value="Student">Student</SelectItem>
+                                <SelectItem value="Retired">Retired</SelectItem>
+                              </SelectContent>
+                            </Select>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      
+                      <FormField
+                        control={form.control}
+                        name="employerName"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Employer Name</FormLabel>
+                            <FormControl>
+                              <Input {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+                    
+                    <FormField
+                      control={form.control}
+                      name="monthlyIncome"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Monthly Income</FormLabel>
+                          <FormControl>
+                            <Input 
+                              type="number" 
+                              {...field}
+                              onChange={e => field.onChange(parseFloat(e.target.value))}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+
+                  {/* Contact Information */}
+                  <div className="space-y-4">
+                    <h3 className="text-lg font-medium">Contact Information</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <FormField
+                        control={form.control}
+                        name="phoneNumber"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Phone Number</FormLabel>
+                            <FormControl>
+                              <Input {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      
+                      <FormField
+                        control={form.control}
+                        name="address"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Address</FormLabel>
+                            <FormControl>
+                              <Input {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+                  </div>
+
+                  {/* Required Document Uploads */}
+                  <div className="space-y-4">
+                    <h3 className="text-lg font-medium">Required Documents</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <div>
+                        <Label htmlFor="idDocument" className="mb-2 block">
+                          ID Document <span className="text-red-500">*</span>
+                        </Label>
+                        <FileUpload
+                          accept=".jpg,.jpeg,.png,.pdf"
+                          maxSize={5 * 1024 * 1024} // 5MB
+                          onFileSelected={setIdDocument}
+                          currentFile={idDocument}
+                          helperText="Upload a clear photo of your government-issued ID (max 5MB)"
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="proofOfIncome" className="mb-2 block">
+                          Proof of Income <span className="text-red-500">*</span>
+                        </Label>
+                        <FileUpload
+                          accept=".jpg,.jpeg,.png,.pdf"
+                          maxSize={5 * 1024 * 1024}
+                          onFileSelected={setProofOfIncome}
+                          currentFile={proofOfIncome}
+                          helperText="Upload pay stubs, bank statements, or tax returns"
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="selfiePhoto" className="mb-2 block">
+                          Selfie Photo <span className="text-red-500">*</span>
+                        </Label>
+                        <FileUpload
+                          accept=".jpg,.jpeg,.png"
+                          maxSize={5 * 1024 * 1024}
+                          onFileSelected={setSelfiePhoto}
+                          currentFile={selfiePhoto}
+                          helperText="Upload a clear selfie holding your ID card"
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="otherDocuments" className="mb-2 block">
+                          Other Supporting Documents
+                        </Label>
+                        <FileUpload
+                          accept=".jpg,.jpeg,.png,.pdf"
+                          maxSize={10 * 1024 * 1024} // 10MB
+                          onFileSelected={setOtherDocuments}
+                          currentFile={otherDocuments}
+                          helperText="Optional: additional documents to support your application"
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="flex flex-col space-y-2">
+                    <Button
+                      type="submit"
+                      className="bg-lending-primary hover:bg-lending-primary/90"
+                      disabled={submitting}
+                    >
+                      {submitting ? 'Submitting...' : 'Submit Application'}
+                    </Button>
+                    <p className="text-xs text-gray-500">
+                      By submitting this application, you agree to our terms and conditions and consent to a credit check.
+                    </p>
+                  </div>
+                </form>
+              </Form>
             </CardContent>
             <CardFooter>
               <p className="text-sm text-gray-500">
-                Please ensure all information is accurate before submitting.
+                Please ensure all information is accurate before submitting. Providing false information may result in your application being rejected.
               </p>
             </CardFooter>
           </Card>
