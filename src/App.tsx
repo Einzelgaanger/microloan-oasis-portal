@@ -14,18 +14,28 @@ import AdminDashboard from "./pages/AdminDashboard";
 import UserProfile from "./pages/UserProfile";
 import { AnimatedGradientBackground } from "@/components/ui/animations";
 import AdminLogin from "./pages/AdminLogin";
+import { DynamicBackground } from "@/components/ui/floating-animations";
 
-const queryClient = new QueryClient();
+// Create a new query client with optimized settings
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      refetchOnWindowFocus: false,
+      retry: 1,
+      staleTime: 5 * 60 * 1000, // 5 minutes
+    },
+  },
+});
 
 // Add vibrant theme colors
 const App = () => (
   <React.StrictMode>
     <QueryClientProvider client={queryClient}>
       {/* Add animated background */}
-      <AnimatedGradientBackground className="opacity-10" />
+      <DynamicBackground className="opacity-10" />
       
       <Toaster />
-      <Sonner richColors />
+      <Sonner richColors closeButton position="top-right" />
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<Index />} />

@@ -14,18 +14,22 @@
     --popover: 0 0% 100%;
     --popover-foreground: 222 47% 11%;
 
-    --primary: 221 83% 23%;
+    /* Vibrant primary colors - Kenyan blue */
+    --primary: 210 100% 30%;
     --primary-foreground: 210 40% 98%;
 
-    --secondary: 186 43% 33%;
+    /* Kenyan green */
+    --secondary: 142 71% 45%;
     --secondary-foreground: 210 40% 98%;
 
+    /* Kenyan gold/yellow */
     --accent: 43 74% 51%;
     --accent-foreground: 222 47% 11%;
 
     --muted: 210 40% 96.1%;
     --muted-foreground: 215.4 16.3% 46.9%;
 
+    /* Kenyan red */
     --destructive: 0 84% 60%;
     --destructive-foreground: 210 40% 98%;
 
@@ -35,6 +39,11 @@
 
     --radius: 0.5rem;
 
+    /* Lending-specific colors for legacy support */
+    --lending-primary: 210 100% 30%;
+    --lending-secondary: 142 71% 45%;
+    --lending-accent: 43 74% 51%;
+    
     --sidebar-background: 0 0% 98%;
     --sidebar-foreground: 240 5.3% 26.1%;
     --sidebar-primary: 240 5.9% 10%;
@@ -50,6 +59,11 @@
     --vibrant-yellow: 48 100% 50%;
     --vibrant-red: 0 100% 50%;
     --vibrant-purple: 270 100% 60%;
+    
+    /* Kenya specific colors */
+    --kenya-green: 120 55% 35%;
+    --kenya-red: 0 100% 45%;
+    --kenya-black: 0 0% 10%;
   }
 
   .dark {
@@ -92,6 +106,16 @@
     @apply bg-background text-foreground;
     font-feature-settings: "rlig" 1, "calt" 1;
   }
+  
+  /* Enhance text */
+  h1, h2, h3, h4 {
+    @apply font-bold tracking-tight;
+  }
+  
+  /* Add smooth scrolling */
+  html {
+    @apply scroll-smooth;
+  }
 }
 
 @layer components {
@@ -125,7 +149,49 @@
                       radial-gradient(at 65% 85%, hsla(var(--accent) / 0.15) 0px, transparent 50%);
   }
   
-  /* New vibrant UI components */
+  /* Kenya-themed UI components */
+  .kenya-card {
+    @apply bg-white rounded-lg shadow-lg p-6 transition-all duration-300 border-l-4 hover:shadow-xl;
+  }
+  
+  .kenya-card-green {
+    @apply kenya-card border-green-600;
+  }
+  
+  .kenya-card-red {
+    @apply kenya-card border-red-600;
+  }
+  
+  .kenya-card-black {
+    @apply kenya-card border-black;
+  }
+  
+  /* Loan status badges */
+  .loan-status-badge {
+    @apply inline-flex items-center justify-center px-2.5 py-0.5 rounded-full text-xs font-medium;
+  }
+  
+  .loan-status-pending {
+    @apply loan-status-badge bg-yellow-100 text-yellow-800;
+  }
+  
+  .loan-status-approved {
+    @apply loan-status-badge bg-green-100 text-green-800;
+  }
+  
+  .loan-status-rejected {
+    @apply loan-status-badge bg-red-100 text-red-800;
+  }
+  
+  .loan-status-disbursed {
+    @apply loan-status-badge bg-blue-100 text-blue-800;
+  }
+  
+  .loan-status-repaid {
+    @apply loan-status-badge bg-purple-100 text-purple-800;
+  }
+  
+  /* Enhanced vibrant UI components */
   .vibrant-card {
     @apply bg-white rounded-lg shadow-lg p-6 transition-all duration-300 border-l-4 hover:shadow-xl;
   }
@@ -164,6 +230,11 @@
   
   .gradient-yellow-red {
     @apply from-yellow-400 to-red-500;
+  }
+  
+  /* Kenya flag colors */
+  .kenya-flag-text {
+    @apply bg-clip-text text-transparent bg-gradient-to-r from-green-600 via-red-600 to-black;
   }
   
   /* Enhanced animations */
@@ -241,6 +312,15 @@
   .badge-purple {
     @apply badge bg-purple-100 text-purple-800;
   }
+  
+  /* Kenya-themed page backgrounds */
+  .kenya-bg-pattern {
+    @apply bg-white;
+    background-image: 
+      radial-gradient(at 10% 20%, hsla(var(--kenya-green) / 0.1) 0px, transparent 50%),
+      radial-gradient(at 90% 80%, hsla(var(--kenya-red) / 0.1) 0px, transparent 50%),
+      radial-gradient(at 50% 50%, hsla(var(--kenya-black) / 0.05) 0px, transparent 50%);
+  }
 }
 
 /* Mobile optimization */
@@ -261,4 +341,34 @@
     width: 100% !important;
     max-width: 100% !important;
   }
+  
+  /* Improved mobile navigation styles */
+  .mobile-nav {
+    @apply fixed top-0 left-0 right-0 bg-white shadow-lg z-50 py-2 px-4;
+  }
+  
+  .mobile-nav-menu {
+    @apply absolute top-full left-0 right-0 bg-white shadow-lg z-40 py-4;
+  }
+}
+
+/* Feature icons */
+.feature-icon {
+  @apply w-12 h-12 rounded-full flex items-center justify-center text-white mb-4;
+}
+
+.feature-icon-green {
+  @apply bg-green-600;
+}
+
+.feature-icon-red {
+  @apply bg-red-600;
+}
+
+.feature-icon-blue {
+  @apply bg-blue-600;
+}
+
+.feature-icon-yellow {
+  @apply bg-yellow-500;
 }

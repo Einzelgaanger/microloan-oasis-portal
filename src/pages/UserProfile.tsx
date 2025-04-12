@@ -61,7 +61,7 @@ const UserProfile = () => {
     occupation: '',
     employer_name: '',
     employer_contact: '',
-    monthly_income: 0,
+    monthly_income: '',
     secondary_income: '',
     pay_frequency: '',
     work_location: '',
@@ -200,7 +200,7 @@ const UserProfile = () => {
       
       // Convert monthly income to number if it's a string
       const monthlyIncome = typeof employmentInfo.monthly_income === 'string' 
-        ? parseInt(employmentInfo.monthly_income, 10) || 0
+        ? parseFloat(employmentInfo.monthly_income) || 0
         : employmentInfo.monthly_income;
       
       // Combine all profile data
@@ -214,7 +214,7 @@ const UserProfile = () => {
         ...digitalInfo,
         ...legalInfo,
         // Handle file uploads separately or convert to URLs
-        id_document_url: personalInfo.id_document ? `/mock-url/${personalInfo.id_document.name}` : profile?.id_document_url || '',
+        id_document_url: personalInfo.id_document ? `/mock-documents/id-doc-${Date.now()}.jpg` : profile?.id_document_url || '',
         selfie_photo_url: personalInfo.selfie_photo ? `/mock-url/${personalInfo.selfie_photo.name}` : profile?.selfie_photo_url || '',
         payslip_document_url: employmentInfo.payslip_document ? `/mock-url/${employmentInfo.payslip_document.name}` : profile?.payslip_document_url || '',
         statements_document_url: bankingInfo.statements_document ? `/mock-url/${bankingInfo.statements_document.name}` : profile?.statements_document_url || '',
@@ -513,7 +513,7 @@ const UserProfile = () => {
                         <PhoneInput
                           id="alternativePhone"
                           value={contactInfo.alternative_phone}
-                          onChange={(value) => handleInputChange(setContactInfo, 'alternative_phone', value)}
+                          onChange={(value) => handleInputChange(setContactInfo, 'alternative_phone', e.target.value)}
                           placeholder="+254 7XX XXX XXX"
                         />
                       </div>
