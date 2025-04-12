@@ -1,15 +1,83 @@
-
 // Mock data and service functions for development use
 
 export interface Profile {
   id: string;
+  user_id: string;
+  avatar_url?: string;
   first_name: string;
   last_name: string;
-  phone_number?: string;
-  address?: string;
-  city?: string;
-  zip_code?: string;
-  avatar_url?: string;
+  phone_number: string;
+  address: string;
+  city: string;
+  zip_code: string;
+  
+  // Additional Kenyan-specific fields
+  id_number?: string;
+  date_of_birth?: string;
+  gender?: string;
+  marital_status?: string;
+  nationality?: string;
+  id_document_url?: string;
+  selfie_photo_url?: string;
+  
+  // Contact & Residential Information
+  county?: string;
+  sub_county?: string;
+  village?: string;
+  landmark?: string;
+  permanent_address?: string;
+  alternative_phone?: string;
+  email?: string;
+  years_at_address?: string;
+  
+  // Employment & Income Details
+  employment_status?: string;
+  occupation?: string;
+  employer_name?: string;
+  employer_contact?: string;
+  monthly_income?: number;
+  secondary_income?: string;
+  pay_frequency?: string;
+  work_location?: string;
+  payslip_document_url?: string;
+  
+  // Banking & Mobile Money Details
+  bank_name?: string;
+  bank_branch?: string;
+  account_number?: string;
+  mpesa_number?: string;
+  statements_document_url?: string;
+  preferred_disbursement?: string;
+  
+  // Credit History & Loan Behavior
+  previous_loans?: string;
+  outstanding_loans?: string;
+  credit_score_consent?: boolean;
+  purpose_of_loan?: string;
+  requested_amount?: string;
+  repayment_period?: string;
+  repayment_channel?: string;
+  
+  // Next of Kin / Guarantor Details
+  kin_name?: string;
+  kin_relationship?: string;
+  kin_phone?: string;
+  kin_id_number?: string;
+  kin_address?: string;
+  guarantor_consent?: boolean;
+  
+  // Digital Footprint
+  smartphone_ownership?: string;
+  social_media_handles?: string;
+  app_permissions_consent?: boolean;
+  
+  // Legal & Compliance
+  kyc_consent?: boolean;
+  terms_agreement?: boolean;
+  data_usage_consent?: boolean;
+  
+  created_at: string;
+  updated_at: string;
 }
 
 export interface UserRole {
@@ -27,63 +95,77 @@ export interface Loan {
   interest_rate: number;
   monthly_payment: number;
   employment_status: string;
-  employer_name?: string;
+  employer_name: string;
   monthly_income: number;
-  id_document_url?: string;
-  proof_of_income_url?: string;
-  selfie_url?: string;
+  
+  // KYC Documents
+  id_document_url: string;
+  proof_of_income_url: string;
+  selfie_url: string;
   other_documents_url?: string;
-  status: 'pending' | 'approved' | 'rejected';
+  
+  // Additional loan fields
+  county?: string;
+  mpesa_number?: string;
+  next_of_kin_name?: string;
+  next_of_kin_phone?: string;
+  next_of_kin_relation?: string;
+  
+  status: "pending" | "approved" | "rejected";
   approved_at?: string;
   rejected_at?: string;
   rejected_reason?: string;
+  is_repaid: boolean;
+  
   created_at: string;
   updated_at: string;
-  is_repaid: boolean;
-}
-
-export interface Payment {
-  id: string;
-  user_id: string;
-  loan_id: string;
-  amount: number;
-  payment_date: string;
-  status: 'pending' | 'completed' | 'failed';
-  transaction_id?: string;
-  payment_method: string;
 }
 
 // Mock profiles
 const mockProfiles: Profile[] = [
   {
-    id: "1",
+    id: "profile1",
+    user_id: "user1",
     first_name: "John",
-    last_name: "Doe",
-    phone_number: "+1234567890",
-    address: "123 Main St",
-    city: "New York",
-    zip_code: "10001",
-    avatar_url: "https://randomuser.me/api/portraits/men/1.jpg"
+    last_name: "Kamau",
+    phone_number: "+254722000001",
+    address: "Moi Avenue",
+    city: "Nairobi",
+    zip_code: "00100",
+    id_number: "12345678",
+    nationality: "Kenyan",
+    county: "Nairobi",
+    sub_county: "Westlands",
+    village: "Parklands",
+    employment_status: "employed",
+    employer_name: "Safaricom PLC",
+    monthly_income: 70000,
+    bank_name: "Equity Bank",
+    mpesa_number: "+254722000001",
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString()
   },
   {
-    id: "2",
-    first_name: "Jane",
-    last_name: "Smith",
-    phone_number: "+0987654321",
-    address: "456 Park Ave",
-    city: "Los Angeles",
-    zip_code: "90001",
-    avatar_url: "https://randomuser.me/api/portraits/women/1.jpg"
-  },
-  {
-    id: "admin",
-    first_name: "Admin",
-    last_name: "User",
-    phone_number: "+1122334455",
-    address: "789 Admin St",
-    city: "Chicago",
-    zip_code: "60001",
-    avatar_url: "https://randomuser.me/api/portraits/men/10.jpg"
+    id: "profile2",
+    user_id: "user2",
+    first_name: "Mary",
+    last_name: "Wanjiku",
+    phone_number: "+254722000002",
+    address: "Ngong Road",
+    city: "Nairobi",
+    zip_code: "00200",
+    id_number: "23456789",
+    nationality: "Kenyan",
+    county: "Nairobi",
+    sub_county: "Kibra",
+    village: "Kibera",
+    employment_status: "self-employed",
+    employer_name: "Own Business",
+    monthly_income: 45000,
+    bank_name: "KCB",
+    mpesa_number: "+254722000002",
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString()
   }
 ];
 
@@ -109,63 +191,73 @@ const mockUserRoles: UserRole[] = [
 // Mock loans
 const mockLoans: Loan[] = [
   {
-    id: "1",
-    user_id: "1",
-    amount: 5000,
-    purpose: "Home Improvement",
-    duration: 12,
-    interest_rate: 5,
-    monthly_payment: 428.04,
-    employment_status: "Employed",
-    employer_name: "Tech Corp",
-    monthly_income: 5000,
-    id_document_url: "/documents/id1.pdf",
-    proof_of_income_url: "/documents/income1.pdf",
-    selfie_url: "/documents/selfie1.jpg",
+    id: "loan1",
+    user_id: "user1",
+    amount: 20000,
+    purpose: "Business expansion",
+    duration: 3,
+    interest_rate: 15,
+    monthly_payment: 7189,
+    employment_status: "employed",
+    employer_name: "Safaricom PLC",
+    monthly_income: 70000,
+    id_document_url: "/mock-documents/id-doc1.jpg",
+    proof_of_income_url: "/mock-documents/income-proof1.pdf",
+    selfie_url: "/mock-documents/selfie1.jpg",
+    mpesa_number: "+254722000001",
+    county: "Nairobi",
+    next_of_kin_name: "Jane Kamau",
+    next_of_kin_phone: "+254722000003",
+    next_of_kin_relation: "Spouse",
     status: "approved",
-    approved_at: "2025-01-15T10:00:00Z",
-    created_at: "2025-01-10T08:30:00Z",
-    updated_at: "2025-01-15T10:00:00Z",
-    is_repaid: false
+    approved_at: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(),
+    is_repaid: false,
+    created_at: new Date(Date.now() - 14 * 24 * 60 * 60 * 1000).toISOString(),
+    updated_at: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString()
   },
   {
-    id: "2",
-    user_id: "1",
-    amount: 2000,
-    purpose: "Education",
-    duration: 6,
-    interest_rate: 4,
-    monthly_payment: 339.93,
-    employment_status: "Employed",
-    employer_name: "Tech Corp",
-    monthly_income: 5000,
-    id_document_url: "/documents/id1.pdf",
-    proof_of_income_url: "/documents/income1.pdf",
-    selfie_url: "/documents/selfie1.jpg",
-    status: "pending",
-    created_at: "2025-03-05T14:20:00Z",
-    updated_at: "2025-03-05T14:20:00Z",
-    is_repaid: false
-  },
-  {
-    id: "3",
-    user_id: "2",
-    amount: 10000,
-    purpose: "Business",
-    duration: 24,
-    interest_rate: 6,
-    monthly_payment: 443.20,
-    employment_status: "Self-employed",
-    monthly_income: 8000,
-    id_document_url: "/documents/id2.pdf",
-    proof_of_income_url: "/documents/income2.pdf",
-    selfie_url: "/documents/selfie2.jpg",
+    id: "loan2",
+    user_id: "user1",
+    amount: 5000,
+    purpose: "Medical emergency",
+    duration: 1,
+    interest_rate: 10,
+    monthly_payment: 5083,
+    employment_status: "employed",
+    employer_name: "Safaricom PLC",
+    monthly_income: 70000,
+    id_document_url: "/mock-documents/id-doc1.jpg",
+    proof_of_income_url: "/mock-documents/income-proof1.pdf",
+    selfie_url: "/mock-documents/selfie1.jpg",
+    mpesa_number: "+254722000001",
+    county: "Nairobi",
     status: "rejected",
-    rejected_at: "2025-02-20T16:45:00Z",
-    rejected_reason: "Insufficient income documentation",
-    created_at: "2025-02-15T11:10:00Z",
-    updated_at: "2025-02-20T16:45:00Z",
-    is_repaid: false
+    rejected_at: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString(),
+    rejected_reason: "Incomplete documentation",
+    is_repaid: false,
+    created_at: new Date(Date.now() - 35 * 24 * 60 * 60 * 1000).toISOString(),
+    updated_at: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString()
+  },
+  {
+    id: "loan3",
+    user_id: "user2",
+    amount: 15000,
+    purpose: "School fees",
+    duration: 3,
+    interest_rate: 12,
+    monthly_payment: 5270,
+    employment_status: "self-employed",
+    employer_name: "Own Business",
+    monthly_income: 45000,
+    id_document_url: "/mock-documents/id-doc2.jpg",
+    proof_of_income_url: "/mock-documents/income-proof2.pdf",
+    selfie_url: "/mock-documents/selfie2.jpg",
+    mpesa_number: "+254722000002",
+    county: "Nairobi",
+    status: "pending",
+    is_repaid: false,
+    created_at: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
+    updated_at: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString()
   }
 ];
 
@@ -379,83 +471,40 @@ export const paymentService = {
 
 // Mock authentication service
 export const mockAuthService = {
-  currentUser: null as { id: string; email: string } | null,
-  
-  signIn: (email: string, password: string): Promise<{ id: string; email: string }> => {
-    return new Promise((resolve, reject) => {
-      setTimeout(() => {
-        // For demo, allow any email/password combination
-        // In a real app, this would validate credentials
-        let userId = "1"; // Default to first mock user
-        
-        // Check if it's the admin email
-        if (email.toLowerCase().includes('admin')) {
-          userId = "admin";
-        } else if (email.toLowerCase().includes('jane') || email.toLowerCase().includes('smith')) {
-          userId = "2";
-        }
-        
-        const user = { id: userId, email };
-        localStorage.setItem(STORAGE_KEYS.CURRENT_USER, JSON.stringify(user));
-        mockAuthService.currentUser = user;
-        resolve(user);
-      }, 500);
-    });
+  signIn: async (email: string, password: string) => {
+    console.log('Mock Auth: signIn', email, password);
+    
+    // For development, allow any credentials
+    return {
+      id: 'user1',
+      email: email || 'john.kamau@example.com'
+    };
   },
   
-  signUp: (email: string, password: string, userData: any): Promise<{ id: string; email: string }> => {
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        // For demo, simulate successful signup
-        const userId = `user_${Date.now()}`;
-        const user = { id: userId, email };
-        
-        // Create a profile for the new user
-        const profiles = getDataFromStorage<Profile>(STORAGE_KEYS.PROFILES);
-        const newProfile: Profile = {
-          id: userId,
-          first_name: userData.first_name || '',
-          last_name: userData.last_name || '',
-        };
-        profiles.push(newProfile);
-        saveDataToStorage(STORAGE_KEYS.PROFILES, profiles);
-        
-        // Assign user role
-        const roles = getDataFromStorage<UserRole>(STORAGE_KEYS.USER_ROLES);
-        const newRole: UserRole = {
-          id: `role_${Date.now()}`,
-          user_id: userId,
-          role: 'user'
-        };
-        roles.push(newRole);
-        saveDataToStorage(STORAGE_KEYS.USER_ROLES, roles);
-        
-        // Set as current user
-        localStorage.setItem(STORAGE_KEYS.CURRENT_USER, JSON.stringify(user));
-        mockAuthService.currentUser = user;
-        resolve(user);
-      }, 500);
-    });
+  signUp: async (email: string, password: string, userData: any) => {
+    console.log('Mock Auth: signUp', email, password, userData);
+    
+    // Create a new mock user
+    return {
+      id: 'new-user-' + Date.now(),
+      email: email || 'new.user@example.com'
+    };
   },
   
-  signOut: (): Promise<void> => {
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        localStorage.removeItem(STORAGE_KEYS.CURRENT_USER);
-        mockAuthService.currentUser = null;
-        resolve();
-      }, 300);
-    });
+  signOut: async () => {
+    console.log('Mock Auth: signOut');
+    return true;
   },
   
-  getSession: (): Promise<{ user: { id: string; email: string } | null }> => {
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        const userJson = localStorage.getItem(STORAGE_KEYS.CURRENT_USER);
-        const user = userJson ? JSON.parse(userJson) : null;
-        mockAuthService.currentUser = user;
-        resolve({ user });
-      }, 300);
-    });
+  getSession: async () => {
+    console.log('Mock Auth: getSession');
+    
+    // For development, always return a session
+    return { 
+      user: {
+        id: 'user1',
+        email: 'john.kamau@example.com'
+      }
+    };
   }
 };
