@@ -60,6 +60,11 @@ export const useProfileData = () => {
     if (!user) return false;
     
     try {
+      // Ensure monthly_income is a number if provided
+      if (profileData.monthly_income && typeof profileData.monthly_income === 'string') {
+        profileData.monthly_income = parseFloat(profileData.monthly_income);
+      }
+      
       const updatedProfile = await dataService.profiles.updateProfile(user.id, profileData);
       setProfile(prev => ({...prev, ...updatedProfile} as Profile));
       

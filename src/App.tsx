@@ -12,7 +12,6 @@ import Dashboard from "./pages/Dashboard";
 import LoanApplication from "./pages/LoanApplication";
 import AdminDashboard from "./pages/AdminDashboard";
 import UserProfile from "./pages/UserProfile";
-import { AnimatedGradientBackground } from "@/components/ui/animations";
 import AdminLogin from "./pages/AdminLogin";
 import { DynamicBackground } from "@/components/ui/floating-animations";
 
@@ -29,28 +28,26 @@ const queryClient = new QueryClient({
 
 // Add vibrant theme colors
 const App = () => (
-  <React.StrictMode>
-    <QueryClientProvider client={queryClient}>
-      {/* Add animated background */}
-      <DynamicBackground className="opacity-10" />
-      
-      <Toaster />
-      <Sonner richColors closeButton position="top-right" />
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Index />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />
-          <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/apply" element={<LoanApplication />} />
-          <Route path="/admin" element={<AdminLogin />} />
-          <Route path="/admin/dashboard" element={<AdminDashboard />} />
-          <Route path="/profile" element={<UserProfile />} />
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </BrowserRouter>
-    </QueryClientProvider>
-  </React.StrictMode>
+  <QueryClientProvider client={queryClient}>
+    {/* Add animated background */}
+    <DynamicBackground className="opacity-10" />
+    
+    <Toaster />
+    <Sonner richColors closeButton position="top-right" />
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<Index />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
+        <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/apply" element={<LoanApplication />} />
+        <Route path="/admin" element={<AdminLogin />} />
+        <Route path="/admin/dashboard" element={<AdminDashboard />} />
+        <Route path="/profile" element={<UserProfile />} />
+        <Route path="*" element={<NotFound />} />
+      </Routes>
+    </BrowserRouter>
+  </QueryClientProvider>
 );
 
 export default App;
