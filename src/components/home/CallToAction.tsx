@@ -10,7 +10,7 @@ interface CallToActionProps {
 
 const CallToAction = ({ onApplyClick }: CallToActionProps) => {
   return (
-    <section className="py-16 bg-gradient-to-br from-lending-primary to-lending-primary/80 text-white">
+    <section className="py-16 bg-gradient-to-br from-black to-gray-800 text-white">
       <div className="container mx-auto px-4 md:px-6">
         <div className="max-w-4xl mx-auto text-center">
           <h2 className="text-3xl md:text-4xl font-bold mb-6 animate-fade-in">
@@ -23,7 +23,7 @@ const CallToAction = ({ onApplyClick }: CallToActionProps) => {
             <Button 
               size="lg" 
               variant="secondary" 
-              className="bg-white text-lending-primary hover:bg-gray-100 btn-pulse"
+              className="bg-white text-black hover:bg-gray-100 btn-pulse"
               onClick={onApplyClick}
             >
               Apply Now

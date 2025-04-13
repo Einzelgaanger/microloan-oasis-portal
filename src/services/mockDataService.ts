@@ -40,6 +40,7 @@ export interface Profile {
   selfie_url?: string;
   payslip_url?: string;
   statement_url?: string;
+  avatar_url?: string;
   created_at?: string;
   updated_at?: string;
 }
@@ -107,10 +108,6 @@ const mockProfiles: Profile[] = [
     email: "john.kamau@example.com",
     phone_number: "+254722000001",
     address: "Moi Avenue",
-    city: "Nairobi",
-    zip_code: "00100",
-    id_number: "12345678",
-    nationality: "Kenyan",
     county: "Nairobi",
     sub_county: "Westlands",
     village: "Parklands",
@@ -119,6 +116,12 @@ const mockProfiles: Profile[] = [
     monthly_income: 70000,
     bank_name: "Equity Bank",
     mpesa_number: "+254722000001",
+    id_number: "12345678",
+    nationality: "Kenyan",
+    kin_name: "Jane Kamau",
+    kin_relationship: "Spouse",
+    kin_phone: "+254722000003",
+    avatar_url: "https://randomuser.me/api/portraits/men/32.jpg",
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString()
   },
@@ -130,10 +133,6 @@ const mockProfiles: Profile[] = [
     email: "mary.wanjiku@example.com",
     phone_number: "+254722000002",
     address: "Ngong Road",
-    city: "Nairobi",
-    zip_code: "00200",
-    id_number: "23456789",
-    nationality: "Kenyan",
     county: "Nairobi",
     sub_county: "Kibra",
     village: "Kibera",
@@ -142,6 +141,12 @@ const mockProfiles: Profile[] = [
     monthly_income: 45000,
     bank_name: "KCB",
     mpesa_number: "+254722000002",
+    id_number: "23456789",
+    nationality: "Kenyan",
+    kin_name: "John Wanjiku",
+    kin_relationship: "Brother",
+    kin_phone: "+254722000004",
+    avatar_url: "https://randomuser.me/api/portraits/women/32.jpg",
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString()
   }
@@ -333,8 +338,14 @@ export const profileService = {
             last_name: '', 
             phone_number: '', 
             address: '', 
-            city: '', 
-            zip_code: '', 
+            county: '',
+            employment_status: '',
+            monthly_income: 0,
+            mpesa_number: '',
+            id_number: '',
+            kin_name: '',
+            kin_relationship: '',
+            kin_phone: '',
             created_at: new Date().toISOString(),
             updated_at: new Date().toISOString(),
             ...data 

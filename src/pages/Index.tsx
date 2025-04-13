@@ -15,8 +15,10 @@ const Index = () => {
 
   const handleApplyNow = () => {
     if (user) {
+      // If logged in, check if they have completed their profile first
       navigate('/apply');
     } else {
+      // If not logged in, redirect to login
       navigate('/login');
     }
   };

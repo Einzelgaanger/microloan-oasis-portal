@@ -13,7 +13,7 @@ interface HeroProps {
 
 const Hero = ({ onApplyClick }: HeroProps) => {
   return (
-    <section className="hero-pattern relative py-16 md:py-24 overflow-hidden">
+    <section className="relative py-16 md:py-24 overflow-hidden bg-gradient-to-b from-white to-gray-100">
       {/* Add floating elements for visual interest */}
       <div className="hidden md:block">
         <KenyaFloatingElements count={4} />
@@ -29,13 +29,13 @@ const Hero = ({ onApplyClick }: HeroProps) => {
           >
             <div className="flex items-center mb-4">
               <WavingFlag size={36} />
-              <h2 className="text-lg font-medium ml-2 text-lending-primary">Kenya's Trusted Microlender</h2>
+              <h2 className="text-lg font-medium ml-2 text-black">Kenya's Trusted Microlender</h2>
             </div>
             
-            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight text-lending-primary mb-6">
+            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight text-black mb-6">
               Quick, Secure, and<br/>Accessible Micro Loans
             </h1>
-            <p className="text-xl text-gray-600 mb-8">
+            <p className="text-xl text-gray-700 mb-8">
               Get the financial support you need with our hassle-free lending solutions designed for Kenyan businesses and individuals.
             </p>
             
@@ -53,8 +53,8 @@ const Hero = ({ onApplyClick }: HeroProps) => {
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ duration: 0.5, delay: (index + 1) * 0.1 }}
                 >
-                  <CheckCircle className="h-5 w-5 text-green-500 mr-2 flex-shrink-0" />
-                  <span className="text-gray-700">{feature}</span>
+                  <CheckCircle className="h-5 w-5 text-green-600 mr-2 flex-shrink-0" />
+                  <span className="text-gray-800">{feature}</span>
                 </motion.div>
               ))}
             </div>
@@ -62,14 +62,14 @@ const Hero = ({ onApplyClick }: HeroProps) => {
             <div className="flex flex-col sm:flex-row gap-4">
               <Button 
                 size="lg" 
-                className="bg-green-600 hover:bg-green-700 btn-pulse"
+                className="bg-black hover:bg-black/90 text-white btn-pulse"
                 onClick={onApplyClick}
               >
                 Apply for a Loan
                 <ArrowRight className="ml-2 h-5 w-5" />
               </Button>
               <Link to="/register">
-                <Button variant="outline" size="lg" className="border-lending-primary text-lending-primary hover:bg-lending-primary/10">
+                <Button variant="outline" size="lg" className="border-black text-black hover:bg-black/10">
                   Register Now
                 </Button>
               </Link>

@@ -22,6 +22,7 @@ const AuthContext = createContext<AuthContextProps | undefined>(undefined);
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState<AuthUser | null>(null);
   const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -59,8 +60,12 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         const isAdmin = await dataService.roles.isAdmin(authUser.id);
         toast.success('Signed in successfully');
         
-        // Return the isAdmin status so the login page can redirect accordingly
-        return isAdmin;
+        // Handle navigation based on admin status
+        if (isAdmin) {
+          navigate('/admin/dashboard');
+        } else {
+          navigate('/dashboard');
+        }
       }
     } catch (error: any) {
       toast.error(error.message || 'Error signing in');
@@ -68,8 +73,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     } finally {
       setLoading(false);
     }
-    
-    return false;
   };
 
   const signUp = async (email: string, password: string, userData: any) => {
@@ -82,6 +85,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           email: authUser.email || email // Use provided email if not returned
         });
         toast.success('Account created successfully');
+        navigate('/profile');
       }
     } catch (error: any) {
       toast.error(error.message || 'Error creating account');
@@ -97,6 +101,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       await authService.signOut();
       setUser(null);
       toast.success('Signed out successfully');
+      navigate('/');
     } catch (error: any) {
       toast.error(error.message || 'Error signing out');
     } finally {
@@ -133,7 +138,7 @@ export const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-lending-primary"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-black"></div>
       </div>
     );
   }
@@ -176,7 +181,7 @@ export const AdminRoute = ({ children }: { children: React.ReactNode }) => {
   if (loading || checkingAdmin) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-lending-primary"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-black"></div>
       </div>
     );
   }
