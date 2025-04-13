@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import MainLayout from '@/components/layout/MainLayout';
 import { useAuth } from '@/lib/auth';
@@ -851,4 +852,116 @@ const UserProfile = () => {
                           )}
                         </div>
                         
-                        <div className="
+                        <div className="pt-4 flex justify-between">
+                          <Button 
+                            type="button" 
+                            variant="outline"
+                            onClick={() => setActiveTab('employment')}
+                          >
+                            Previous
+                          </Button>
+                          <Button 
+                            type="submit" 
+                            className="bg-lending-primary hover:bg-lending-primary/90"
+                            disabled={saving}
+                          >
+                            {saving ? 'Saving...' : 'Save & Continue'}
+                          </Button>
+                        </div>
+                      </form>
+                    </TabsContent>
+                    
+                    {/* Next of Kin Information */}
+                    <TabsContent value="kin" className="space-y-4">
+                      <form onSubmit={handleSaveKin} className="space-y-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <div>
+                            <Label htmlFor="kin_name">Next of Kin Full Name *</Label>
+                            <Input
+                              id="kin_name"
+                              value={kinInfo.kin_name}
+                              onChange={(e) => handleKinInfoChange('kin_name', e.target.value)}
+                              placeholder="Full name of your next of kin"
+                              required
+                            />
+                          </div>
+                          <div>
+                            <Label htmlFor="kin_relationship">Relationship *</Label>
+                            <Select 
+                              value={kinInfo.kin_relationship} 
+                              onValueChange={(value) => handleKinInfoChange('kin_relationship', value)}
+                              required
+                            >
+                              <SelectTrigger>
+                                <SelectValue placeholder="Select Relationship" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="spouse">Spouse</SelectItem>
+                                <SelectItem value="parent">Parent</SelectItem>
+                                <SelectItem value="child">Child</SelectItem>
+                                <SelectItem value="sibling">Sibling</SelectItem>
+                                <SelectItem value="relative">Other Relative</SelectItem>
+                                <SelectItem value="friend">Friend</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          <div>
+                            <Label htmlFor="kin_phone">Phone Number *</Label>
+                            <Input
+                              id="kin_phone"
+                              value={kinInfo.kin_phone}
+                              onChange={(e) => handleKinInfoChange('kin_phone', e.target.value)}
+                              placeholder="+254 7XX XXX XXX"
+                              required
+                            />
+                          </div>
+                          <div>
+                            <Label htmlFor="kin_id_number">ID/Passport Number</Label>
+                            <Input
+                              id="kin_id_number"
+                              value={kinInfo.kin_id_number}
+                              onChange={(e) => handleKinInfoChange('kin_id_number', e.target.value)}
+                              placeholder="National ID or Passport number"
+                            />
+                          </div>
+                          <div className="col-span-1 md:col-span-2">
+                            <Label htmlFor="kin_address">Physical Address</Label>
+                            <Input
+                              id="kin_address"
+                              value={kinInfo.kin_address}
+                              onChange={(e) => handleKinInfoChange('kin_address', e.target.value)}
+                              placeholder="Next of kin's physical address"
+                            />
+                          </div>
+                        </div>
+                        
+                        <div className="pt-4 flex justify-between">
+                          <Button 
+                            type="button" 
+                            variant="outline"
+                            onClick={() => setActiveTab('banking')}
+                          >
+                            Previous
+                          </Button>
+                          <Button 
+                            type="submit" 
+                            className="bg-lending-primary hover:bg-lending-primary/90"
+                            disabled={saving}
+                          >
+                            {saving ? 'Saving...' : 'Complete Profile'}
+                          </Button>
+                        </div>
+                      </form>
+                    </TabsContent>
+                  </StaggeredItems>
+                </Tabs>
+              </CardContent>
+            </Card>
+          </FadeIn>
+        </div>
+      </MainLayout>
+    </ProtectedRoute>
+  );
+};
+
+export default UserProfile;
