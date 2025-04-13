@@ -54,7 +54,13 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           id: authUser.id,
           email: authUser.email || email // Use provided email if not returned
         });
+        
+        // Check if user is admin and redirect accordingly
+        const isAdmin = await dataService.roles.isAdmin(authUser.id);
         toast.success('Signed in successfully');
+        
+        // Return the isAdmin status so the login page can redirect accordingly
+        return isAdmin;
       }
     } catch (error: any) {
       toast.error(error.message || 'Error signing in');
@@ -62,6 +68,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     } finally {
       setLoading(false);
     }
+    
+    return false;
   };
 
   const signUp = async (email: string, password: string, userData: any) => {

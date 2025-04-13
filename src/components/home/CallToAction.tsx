@@ -4,7 +4,11 @@ import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { ArrowRight } from 'lucide-react';
 
-const CallToAction = () => {
+interface CallToActionProps {
+  onApplyClick?: () => void;
+}
+
+const CallToAction = ({ onApplyClick }: CallToActionProps) => {
   return (
     <section className="py-16 bg-gradient-to-br from-lending-primary to-lending-primary/80 text-white">
       <div className="container mx-auto px-4 md:px-6">
@@ -16,12 +20,15 @@ const CallToAction = () => {
             Take the first step towards achieving your financial goals today. Our application process is quick, secure, and user-friendly.
           </p>
           <div className="flex flex-col sm:flex-row justify-center gap-4 animate-fade-in" style={{ animationDelay: '200ms' }}>
-            <Link to="/apply">
-              <Button size="lg" variant="secondary" className="bg-white text-lending-primary hover:bg-gray-100 btn-pulse">
-                Apply Now
-                <ArrowRight className="ml-2 h-5 w-5" />
-              </Button>
-            </Link>
+            <Button 
+              size="lg" 
+              variant="secondary" 
+              className="bg-white text-lending-primary hover:bg-gray-100 btn-pulse"
+              onClick={onApplyClick}
+            >
+              Apply Now
+              <ArrowRight className="ml-2 h-5 w-5" />
+            </Button>
             <Link to="/contact">
               <Button size="lg" variant="outline" className="border-white text-white hover:bg-white/10">
                 Contact Us

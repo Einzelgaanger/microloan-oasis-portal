@@ -7,7 +7,11 @@ import { motion } from 'framer-motion';
 import LoanCalculator from './LoanCalculator';
 import { WavingFlag, KenyaFloatingElements } from '@/components/ui/floating-animations';
 
-const Hero = () => {
+interface HeroProps {
+  onApplyClick?: () => void;
+}
+
+const Hero = ({ onApplyClick }: HeroProps) => {
   return (
     <section className="hero-pattern relative py-16 md:py-24 overflow-hidden">
       {/* Add floating elements for visual interest */}
@@ -56,12 +60,14 @@ const Hero = () => {
             </div>
             
             <div className="flex flex-col sm:flex-row gap-4">
-              <Link to="/apply">
-                <Button size="lg" className="bg-green-600 hover:bg-green-700 btn-pulse">
-                  Apply for a Loan
-                  <ArrowRight className="ml-2 h-5 w-5" />
-                </Button>
-              </Link>
+              <Button 
+                size="lg" 
+                className="bg-green-600 hover:bg-green-700 btn-pulse"
+                onClick={onApplyClick}
+              >
+                Apply for a Loan
+                <ArrowRight className="ml-2 h-5 w-5" />
+              </Button>
               <Link to="/register">
                 <Button variant="outline" size="lg" className="border-lending-primary text-lending-primary hover:bg-lending-primary/10">
                   Register Now

@@ -1,84 +1,47 @@
-
 // Mock data and service functions for development use
 
 export interface Profile {
   id: string;
   user_id: string;
-  avatar_url?: string;
   first_name: string;
   last_name: string;
+  email: string;
   phone_number: string;
-  address: string;
-  city: string;
-  zip_code: string;
-  
-  // Additional Kenyan-specific fields
-  id_number?: string;
+  alternative_phone?: string;
+  id_number: string;
   date_of_birth?: string;
   gender?: string;
   marital_status?: string;
   nationality?: string;
-  id_document_url?: string;
-  selfie_photo_url?: string;
-  
-  // Contact & Residential Information
-  county?: string;
+  address: string;
+  county: string;
   sub_county?: string;
   village?: string;
   landmark?: string;
-  permanent_address?: string;
-  alternative_phone?: string;
-  email?: string;
-  years_at_address?: string;
-  
-  // Employment & Income Details
-  employment_status?: string;
+  residence_duration?: string;
+  employment_status: string;
   occupation?: string;
   employer_name?: string;
   employer_contact?: string;
-  monthly_income?: number;
+  monthly_income: number;
   secondary_income?: string;
   pay_frequency?: string;
   work_location?: string;
-  payslip_document_url?: string;
-  
-  // Banking & Mobile Money Details
   bank_name?: string;
   bank_branch?: string;
   account_number?: string;
-  mpesa_number?: string;
-  statements_document_url?: string;
-  preferred_disbursement?: string;
-  
-  // Credit History & Loan Behavior
-  previous_loans?: string;
-  outstanding_loans?: string;
-  credit_score_consent?: boolean;
-  purpose_of_loan?: string;
-  requested_amount?: string;
-  repayment_period?: string;
-  repayment_channel?: string;
-  
-  // Next of Kin / Guarantor Details
-  kin_name?: string;
-  kin_relationship?: string;
-  kin_phone?: string;
+  mpesa_number: string;
+  kin_name: string;
+  kin_relationship: string;
+  kin_phone: string;
   kin_id_number?: string;
   kin_address?: string;
-  guarantor_consent?: boolean;
-  
-  // Digital Footprint
-  smartphone_ownership?: string;
-  social_media_handles?: string;
-  app_permissions_consent?: boolean;
-  
-  // Legal & Compliance
-  kyc_consent?: boolean;
-  terms_agreement?: boolean;
-  data_usage_consent?: boolean;
-  
-  created_at: string;
-  updated_at: string;
+  id_document_url?: string;
+  selfie_url?: string;
+  payslip_url?: string;
+  statement_url?: string;
+  created_at?: string;
+  updated_at?: string;
 }
 
 export interface UserRole {
@@ -141,6 +104,7 @@ const mockProfiles: Profile[] = [
     user_id: "user1",
     first_name: "John",
     last_name: "Kamau",
+    email: "john.kamau@example.com",
     phone_number: "+254722000001",
     address: "Moi Avenue",
     city: "Nairobi",
@@ -163,6 +127,7 @@ const mockProfiles: Profile[] = [
     user_id: "user2",
     first_name: "Mary",
     last_name: "Wanjiku",
+    email: "mary.wanjiku@example.com",
     phone_number: "+254722000002",
     address: "Ngong Road",
     city: "Nairobi",
