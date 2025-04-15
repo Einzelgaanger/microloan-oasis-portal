@@ -49,7 +49,7 @@ const Login = () => {
   return (
     <AuthLayout
       title="Welcome Back"
-      mode="dark"
+      mode="login"
     >
       <Card className="w-full max-w-md border-2 border-black/10 shadow-md">
         <CardHeader className="space-y-2 bg-gradient-to-r from-black to-gray-800 text-white">

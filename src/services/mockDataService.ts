@@ -336,6 +336,7 @@ export const profileService = {
             user_id: userId, 
             first_name: '', 
             last_name: '', 
+            email: data.email || 'user@example.com',
             phone_number: '', 
             address: '', 
             county: '',
