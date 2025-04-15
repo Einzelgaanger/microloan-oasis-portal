@@ -1,6 +1,6 @@
 
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Navigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import { authService, dataService } from '@/services/dataService';
 
@@ -126,14 +126,6 @@ export const useAuth = () => {
 
 export const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const { user, loading } = useAuth();
-  const navigate = useNavigate();
-
-  useEffect(() => {
-    if (!loading && !user) {
-      toast.error('Please sign in to access this page');
-      navigate('/login');
-    }
-  }, [user, loading, navigate]);
 
   if (loading) {
     return (
@@ -143,14 +135,19 @@ export const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
     );
   }
 
-  return user ? <>{children}</> : null;
+  if (!user) {
+    toast.error('Please sign in to access this page');
+    return <Navigate to="/login" />;
+  }
+
+  return <>{children}</>;
 };
 
 export const AdminRoute = ({ children }: { children: React.ReactNode }) => {
   const { user, loading } = useAuth();
-  const navigate = useNavigate();
   const [isAdmin, setIsAdmin] = useState(false);
   const [checkingAdmin, setCheckingAdmin] = useState(true);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const checkIfAdmin = async () => {
@@ -169,14 +166,12 @@ export const AdminRoute = ({ children }: { children: React.ReactNode }) => {
 
     if (!loading) {
       if (!user) {
-        navigate('/login');
-        toast.error('Please sign in to access this page');
         setCheckingAdmin(false);
       } else {
         checkIfAdmin();
       }
     }
-  }, [user, loading, navigate]);
+  }, [user, loading]);
 
   if (loading || checkingAdmin) {
     return (
@@ -186,10 +181,14 @@ export const AdminRoute = ({ children }: { children: React.ReactNode }) => {
     );
   }
 
+  if (!user) {
+    toast.error('Please sign in to access this page');
+    return <Navigate to="/login" />;
+  }
+
   if (!isAdmin) {
     toast.error('You do not have permission to access this page');
-    navigate('/dashboard');
-    return null;
+    return <Navigate to="/dashboard" />;
   }
 
   return <>{children}</>;
