@@ -14,12 +14,12 @@ const Index = () => {
   const navigate = useNavigate();
 
   const handleApplyNow = () => {
-    if (user) {
-      // If logged in, check if they have completed their profile first
-      navigate('/apply');
-    } else {
-      // If not logged in, redirect to login
+    // Always redirect to login if user is not logged in
+    if (!user) {
       navigate('/login');
+    } else {
+      // Only if logged in, redirect to apply page
+      navigate('/apply');
     }
   };
 

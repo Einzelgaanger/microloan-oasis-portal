@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import MainLayout from '@/components/layout/MainLayout';
 import { useAuth } from '@/lib/auth';
@@ -27,6 +26,7 @@ const LoanApplication = () => {
   const [incomeProof, setIncomeProof] = useState<File | null>(null);
   const [selfiePhoto, setSelfiePhoto] = useState<File | null>(null);
   const [formStep, setFormStep] = useState(0);
+  const [hasDocuments, setHasDocuments] = useState(false);
   
   // Loan application form state
   const [loanData, setLoanData] = useState({
@@ -65,6 +65,11 @@ const LoanApplication = () => {
         if (profileData) {
           setProfile(profileData);
           
+          // Check if user already has documents uploaded
+          if (profileData.id_document_url && profileData.selfie_url) {
+            setHasDocuments(true);
+          }
+          
           // Pre-populate loan form with profile data
           setLoanData(prevData => ({
             ...prevData,
@@ -97,9 +102,15 @@ const LoanApplication = () => {
       return;
     }
     
-    // Validation
-    if (!loanData.amount || !loanData.purpose || !idDocument || !incomeProof || !selfiePhoto) {
-      toast.error('Please fill all required fields and upload required documents');
+    // Validation for basic fields
+    if (!loanData.amount || !loanData.purpose) {
+      toast.error('Please fill all required loan details');
+      return;
+    }
+    
+    // Only validate documents if the user doesn't have them already
+    if (!hasDocuments && (!idDocument || !incomeProof || !selfiePhoto)) {
+      toast.error('Please upload all required documents');
       return;
     }
     
@@ -122,9 +133,16 @@ const LoanApplication = () => {
         employment_status: loanData.employment_status,
         employer_name: loanData.employer_name,
         monthly_income: parseFloat(loanData.monthly_income) || 0,
-        id_document_url: `/mock-documents/id-doc-${Date.now()}.jpg`, // Simulated file upload URL
-        proof_of_income_url: `/mock-documents/income-proof-${Date.now()}.pdf`,
-        selfie_url: `/mock-documents/selfie-${Date.now()}.jpg`,
+        // Use existing document URLs if available, otherwise use the new uploads
+        id_document_url: hasDocuments && profile?.id_document_url ? 
+          profile.id_document_url : 
+          `/mock-documents/id-doc-${Date.now()}.jpg`,
+        proof_of_income_url: hasDocuments && profile?.payslip_url ? 
+          profile.payslip_url : 
+          `/mock-documents/income-proof-${Date.now()}.pdf`,
+        selfie_url: hasDocuments && profile?.selfie_url ? 
+          profile.selfie_url : 
+          `/mock-documents/selfie-${Date.now()}.jpg`,
         county: loanData.county,
         mpesa_number: loanData.mpesa_number,
         next_of_kin_name: loanData.next_of_kin_name,
@@ -156,13 +174,29 @@ const LoanApplication = () => {
     setLoanData(prev => ({ ...prev, [field]: value }));
   };
   
-  const nextStep = () => setFormStep(prev => prev + 1);
-  const prevStep = () => setFormStep(prev => prev - 1);
+  const nextStep = () => {
+    // Skip document upload step if user already has documents
+    if (formStep === 2 && hasDocuments) {
+      setFormStep(4); // Skip to final step or confirmation
+    } else {
+      setFormStep(prev => prev + 1);
+    }
+  };
+  
+  const prevStep = () => {
+    // Handle going back from final step when documents step was skipped
+    if (formStep === 4 && hasDocuments) {
+      setFormStep(2);
+    } else {
+      setFormStep(prev => prev - 1);
+    }
+  };
   
   // Render steps based on current form step
   const renderFormStep = () => {
     switch (formStep) {
       case 0:
+        // Loan details step
         return (
           <div className="space-y-4">
             <h3 className="text-lg font-semibold">Loan Details</h3>
@@ -250,6 +284,7 @@ const LoanApplication = () => {
         );
         
       case 1:
+        // Employment info step
         return (
           <div className="space-y-4">
             <h3 className="text-lg font-semibold">Employment and Income</h3>
@@ -328,6 +363,7 @@ const LoanApplication = () => {
         );
         
       case 2:
+        // Contact info step
         return (
           <div className="space-y-4">
             <h3 className="text-lg font-semibold">Contact and Next of Kin</h3>
@@ -411,6 +447,13 @@ const LoanApplication = () => {
         );
         
       case 3:
+        // Document upload step
+        if (hasDocuments) {
+          // Skip this step by going to final step
+          nextStep();
+          return null;
+        }
+        
         return (
           <div className="space-y-6">
             <h3 className="text-lg font-semibold">Upload Required Documents</h3>
@@ -475,6 +518,71 @@ const LoanApplication = () => {
           </div>
         );
         
+      case 4:
+        // Final confirmation step or summary when documents already exist
+        return (
+          <div className="space-y-6">
+            <h3 className="text-lg font-semibold">Loan Application Summary</h3>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 bg-gray-50 p-4 rounded-lg">
+              <div>
+                <p className="text-sm font-medium">Loan Amount:</p>
+                <p>KSh {parseFloat(loanData.amount).toLocaleString()}</p>
+              </div>
+              
+              <div>
+                <p className="text-sm font-medium">Duration:</p>
+                <p>{loanData.duration} {parseInt(loanData.duration) === 1 ? 'Month' : 'Months'}</p>
+              </div>
+              
+              <div>
+                <p className="text-sm font-medium">Monthly Payment:</p>
+                <p className="text-lending-primary font-semibold">
+                  KSh {calculateMonthlyPayment(parseFloat(loanData.amount), parseInt(loanData.duration)).toLocaleString()}
+                </p>
+              </div>
+              
+              <div>
+                <p className="text-sm font-medium">Total Repayment:</p>
+                <p className="font-semibold">
+                  KSh {(calculateMonthlyPayment(parseFloat(loanData.amount), parseInt(loanData.duration)) * parseInt(loanData.duration)).toLocaleString()}
+                </p>
+              </div>
+              
+              <div className="md:col-span-2">
+                <p className="text-sm font-medium">Purpose:</p>
+                <p>{loanData.purpose}</p>
+              </div>
+            </div>
+            
+            {hasDocuments && (
+              <div className="p-4 bg-green-50 rounded-lg border border-green-200">
+                <div className="flex items-center text-green-700">
+                  <CheckCircle className="h-5 w-5 mr-2" />
+                  <p className="font-medium">Documents Already Provided</p>
+                </div>
+                <p className="text-sm mt-1 text-gray-600">Your identification and verification documents are already on file.</p>
+              </div>
+            )}
+            
+            <div className="flex justify-between mt-6">
+              <Button
+                variant="outline"
+                onClick={prevStep}
+              >
+                Back
+              </Button>
+              <Button
+                onClick={handleSubmit}
+                disabled={submitting}
+                className="bg-lending-primary hover:bg-lending-primary/90"
+              >
+                {submitting ? 'Submitting...' : 'Submit Loan Application'}
+              </Button>
+            </div>
+          </div>
+        );
+        
       default:
         return null;
     }
@@ -504,30 +612,52 @@ const LoanApplication = () => {
                   </div>
                 ) : (
                   <div>
-                    {/* Steps indicator */}
+                    {/* Steps indicator - Adjust for users with existing documents */}
                     <div className="mb-6">
                       <div className="flex justify-between">
-                        {['Loan Details', 'Employment', 'Contact Info', 'Documents'].map((step, index) => (
-                          <div
-                            key={step}
-                            className={`flex flex-col items-center ${index <= formStep ? 'text-lending-primary' : 'text-gray-400'}`}
-                          >
+                        {hasDocuments ? 
+                          ['Loan Details', 'Employment', 'Contact Info', 'Summary'].map((step, index) => (
                             <div
-                              className={`rounded-full w-8 h-8 flex items-center justify-center mb-1
-                                ${index < formStep ? 'bg-lending-primary text-white' : 
-                                  index === formStep ? 'border-2 border-lending-primary text-lending-primary' : 
-                                  'border-2 border-gray-300 text-gray-400'}`}
+                              key={step}
+                              className={`flex flex-col items-center ${
+                                index <= formStep ? 'text-lending-primary' : 'text-gray-400'
+                              }`}
                             >
-                              {index < formStep ? <CheckCircle className="h-5 w-5" /> : index + 1}
+                              <div
+                                className={`rounded-full w-8 h-8 flex items-center justify-center mb-1
+                                  ${index < formStep ? 'bg-lending-primary text-white' : 
+                                    index === formStep ? 'border-2 border-lending-primary text-lending-primary' : 
+                                    'border-2 border-gray-300 text-gray-400'}`}
+                              >
+                                {index < formStep ? <CheckCircle className="h-5 w-5" /> : index + 1}
+                              </div>
+                              <span className={`text-xs ${index <= formStep ? 'font-medium' : ''}`}>{step}</span>
                             </div>
-                            <span className={`text-xs ${index <= formStep ? 'font-medium' : ''}`}>{step}</span>
-                          </div>
-                        ))}
+                          )) :
+                          ['Loan Details', 'Employment', 'Contact Info', 'Documents', 'Summary'].map((step, index) => (
+                            <div
+                              key={step}
+                              className={`flex flex-col items-center ${
+                                index <= formStep ? 'text-lending-primary' : 'text-gray-400'
+                              }`}
+                            >
+                              <div
+                                className={`rounded-full w-8 h-8 flex items-center justify-center mb-1
+                                  ${index < formStep ? 'bg-lending-primary text-white' : 
+                                    index === formStep ? 'border-2 border-lending-primary text-lending-primary' : 
+                                    'border-2 border-gray-300 text-gray-400'}`}
+                              >
+                                {index < formStep ? <CheckCircle className="h-5 w-5" /> : index + 1}
+                              </div>
+                              <span className={`text-xs ${index <= formStep ? 'font-medium' : ''}`}>{step}</span>
+                            </div>
+                          ))
+                        }
                       </div>
                       <div className="mt-2 h-1 bg-gray-200 rounded-full">
                         <div
                           className="h-1 bg-lending-primary rounded-full transition-all duration-300"
-                          style={{ width: `${(formStep / 3) * 100}%` }}
+                          style={{ width: `${(formStep / (hasDocuments ? 3 : 4)) * 100}%` }}
                         ></div>
                       </div>
                     </div>
