@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { CheckCircle, ArrowRight } from 'lucide-react';
 import { motion } from 'framer-motion';
@@ -14,6 +14,19 @@ interface HeroProps {
 
 const Hero = ({ onApplyClick }: HeroProps) => {
   const { user } = useAuth();
+  const navigate = useNavigate();
+
+  const handleApplyClick = () => {
+    if (onApplyClick) {
+      onApplyClick();
+    } else {
+      if (!user) {
+        navigate('/login');
+      } else {
+        navigate('/apply');
+      }
+    }
+  };
 
   return (
     <section className="relative py-16 md:py-24 overflow-hidden bg-white">
@@ -56,7 +69,7 @@ const Hero = ({ onApplyClick }: HeroProps) => {
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ duration: 0.5, delay: (index + 1) * 0.1 }}
                 >
-                  <CheckCircle className="h-5 w-5 text-gold-600 mr-2 flex-shrink-0" />
+                  <CheckCircle className="h-5 w-5 text-emerald-600 mr-2 flex-shrink-0" />
                   <span className="text-gray-800">{feature}</span>
                 </motion.div>
               ))}
@@ -65,14 +78,14 @@ const Hero = ({ onApplyClick }: HeroProps) => {
             <div className="flex flex-col sm:flex-row gap-4">
               <Button 
                 size="lg" 
-                className="bg-black hover:bg-black/90 text-white border border-gold-500"
-                onClick={onApplyClick}
+                className="bg-emerald-600 hover:bg-emerald-700 text-white"
+                onClick={handleApplyClick}
               >
                 Apply for a Loan
                 <ArrowRight className="ml-2 h-5 w-5" />
               </Button>
               <Link to={user ? "/dashboard" : "/register"}>
-                <Button variant="outline" size="lg" className="border-gold-500 text-black hover:bg-gold-50">
+                <Button variant="outline" size="lg" className="border-emerald-600 text-emerald-700 hover:bg-emerald-50">
                   {user ? "My Dashboard" : "Register Now"}
                 </Button>
               </Link>

@@ -14,51 +14,30 @@
     --popover: 0 0% 100%;
     --popover-foreground: 0 0% 0%;
 
-    /* Gold primary color */
-    --primary: 45 80% 60%;
-    --primary-foreground: 0 0% 0%;
+    /* Emerald primary color */
+    --primary: 160 84% 39%;
+    --primary-foreground: 0 0% 100%;
 
     /* White secondary color */
     --secondary: 0 0% 100%;
-    --secondary-foreground: 0 0% 0%;
+    --secondary-foreground: 160 84% 39%;
 
     /* Danger/Red */
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
 
-    --muted: 0 0% 95%;
+    --muted: 0 0% 96%;
     --muted-foreground: 0 0% 45%;
 
-    /* Gold accent */
-    --accent: 45 80% 95%;
-    --accent-foreground: 0 0% 0%;
+    /* Emerald accent */
+    --accent: 160 84% 95%;
+    --accent-foreground: 160 84% 20%;
 
-    --border: 45 30% 85%;
-    --input: 45 30% 85%;
-    --ring: 45 80% 60%;
+    --border: 0 0% 90%;
+    --input: 0 0% 90%;
+    --ring: 160 84% 39%;
 
     --radius: 0.5rem;
-
-    /* Gold shades */
-    --gold-50: 45 80% 95%;
-    --gold-100: 45 80% 90%;
-    --gold-200: 45 80% 85%;
-    --gold-300: 45 80% 75%;
-    --gold-400: 45 80% 65%;
-    --gold-500: 45 80% 60%;
-    --gold-600: 45 70% 50%;
-    --gold-700: 45 60% 40%;
-    --gold-800: 45 60% 30%;
-    --gold-900: 45 60% 20%;
-    
-    --sidebar-background: 0 0% 98%;
-    --sidebar-foreground: 0 0% 20%;
-    --sidebar-primary: 0 0% 10%;
-    --sidebar-primary-foreground: 0 0% 98%;
-    --sidebar-accent: 0 0% 96%;
-    --sidebar-accent-foreground: 0 0% 10%;
-    --sidebar-border: 0 0% 90%;
-    --sidebar-ring: 45 80% 60%;
   }
 
   .dark {
@@ -71,9 +50,9 @@
     --popover: 0 0% 10%;
     --popover-foreground: 0 0% 95%;
 
-    /* Gold primary in dark mode */
-    --primary: 45 70% 60%;
-    --primary-foreground: 0 0% 10%;
+    /* Emerald primary in dark mode */
+    --primary: 160 70% 39%;
+    --primary-foreground: 0 0% 100%;
 
     --secondary: 0 0% 15%;
     --secondary-foreground: 0 0% 95%;
@@ -81,7 +60,7 @@
     --muted: 0 0% 20%;
     --muted-foreground: 0 0% 65%;
 
-    --accent: 45 50% 25%;
+    --accent: 160 50% 20%;
     --accent-foreground: 0 0% 95%;
 
     --destructive: 0 62% 35%;
@@ -89,7 +68,7 @@
 
     --border: 0 0% 20%;
     --input: 0 0% 20%;
-    --ring: 45 70% 50%;
+    --ring: 160 70% 39%;
   }
 }
 
@@ -115,13 +94,13 @@
 }
 
 @layer components {
-  /* Redesigned components with white, gold, black theme */
+  /* Redesigned components with modern clean theme */
   .hover-scale {
     @apply transition-transform duration-300 hover:scale-105;
   }
 
   .card-shadow {
-    @apply shadow-md hover:shadow-lg transition-shadow duration-300 border border-gold-100;
+    @apply shadow-md hover:shadow-lg transition-shadow duration-300 border border-gray-100;
   }
 
   .btn-pulse {
@@ -142,26 +121,26 @@
   .hero-pattern {
     background-color: hsla(var(--background));
     background-image: 
-      radial-gradient(at 85% 28%, hsla(var(--gold-500) / 0.15) 0px, transparent 50%),
-      radial-gradient(at 15% 70%, hsla(var(--gold-300) / 0.1) 0px, transparent 50%),
-      radial-gradient(at 65% 85%, hsla(var(--gold-200) / 0.05) 0px, transparent 50%);
+      radial-gradient(at 85% 28%, hsla(160, 84%, 39%, 0.15) 0px, transparent 50%),
+      radial-gradient(at 15% 70%, hsla(160, 84%, 59%, 0.1) 0px, transparent 50%),
+      radial-gradient(at 65% 85%, hsla(160, 84%, 79%, 0.05) 0px, transparent 50%);
   }
   
   /* Redesigned cards */
-  .kenya-card {
+  .loan-card {
     @apply bg-white rounded-lg shadow-md p-6 transition-all duration-300 border-l-4 hover:shadow-lg;
   }
   
-  .kenya-card-gold {
-    @apply kenya-card border-gold-500;
+  .loan-card-primary {
+    @apply loan-card border-emerald-500;
   }
   
-  .kenya-card-black {
-    @apply kenya-card border-black;
+  .loan-card-black {
+    @apply loan-card border-black;
   }
   
-  .kenya-card-white {
-    @apply kenya-card border-white shadow-md;
+  .loan-card-white {
+    @apply loan-card border-white shadow-md;
   }
   
   /* Loan status badges */
@@ -170,7 +149,7 @@
   }
   
   .loan-status-pending {
-    @apply loan-status-badge bg-gold-100 text-gold-800;
+    @apply loan-status-badge bg-amber-100 text-amber-800;
   }
   
   .loan-status-approved {
@@ -194,8 +173,8 @@
     @apply bg-white rounded-lg shadow-md p-6 transition-all duration-300 border hover:shadow-lg;
   }
   
-  .vibrant-card-gold {
-    @apply vibrant-card border-gold-400;
+  .vibrant-card-primary {
+    @apply vibrant-card border-emerald-400;
   }
   
   .vibrant-card-black {
@@ -211,12 +190,12 @@
     @apply bg-clip-text text-transparent bg-gradient-to-r;
   }
   
-  .gradient-gold {
-    @apply from-gold-600 to-gold-400;
+  .gradient-primary {
+    @apply from-emerald-600 to-emerald-400;
   }
   
-  .gradient-black-gold {
-    @apply from-black to-gold-700;
+  .gradient-black-primary {
+    @apply from-black to-emerald-700;
   }
   
   /* Animations */
@@ -269,8 +248,8 @@
   @apply w-12 h-12 rounded-full flex items-center justify-center text-white mb-4;
 }
 
-.feature-icon-gold {
-  @apply bg-gold-500;
+.feature-icon-primary {
+  @apply bg-emerald-500;
 }
 
 .feature-icon-black {
@@ -278,5 +257,5 @@
 }
 
 .feature-icon-white {
-  @apply bg-white text-black border border-gold-300;
+  @apply bg-white text-emerald-800 border border-emerald-200;
 }

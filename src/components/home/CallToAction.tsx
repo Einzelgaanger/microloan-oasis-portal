@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { ArrowRight } from 'lucide-react';
 import { useAuth } from '@/lib/auth';
@@ -11,9 +11,22 @@ interface CallToActionProps {
 
 const CallToAction = ({ onApplyClick }: CallToActionProps) => {
   const { user } = useAuth();
+  const navigate = useNavigate();
+
+  const handleApplyClick = () => {
+    if (onApplyClick) {
+      onApplyClick();
+    } else {
+      if (!user) {
+        navigate('/login');
+      } else {
+        navigate('/apply');
+      }
+    }
+  };
   
   return (
-    <section className="py-16 bg-gradient-to-br from-black to-gray-800 text-white">
+    <section className="py-16 bg-gradient-to-br from-emerald-800 to-emerald-600 text-white">
       <div className="container mx-auto px-4 md:px-6">
         <div className="max-w-4xl mx-auto text-center">
           <h2 className="text-3xl md:text-4xl font-bold mb-6 animate-fade-in">
@@ -26,8 +39,8 @@ const CallToAction = ({ onApplyClick }: CallToActionProps) => {
             <Button 
               size="lg" 
               variant="secondary" 
-              className="bg-gold-500 text-black hover:bg-gold-600 btn-pulse border border-white"
-              onClick={onApplyClick}
+              className="bg-white text-emerald-800 hover:bg-gray-100 btn-pulse"
+              onClick={handleApplyClick}
             >
               Apply Now
               <ArrowRight className="ml-2 h-5 w-5" />
