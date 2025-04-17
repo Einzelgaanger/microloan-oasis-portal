@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { CheckCircle, ArrowRight } from 'lucide-react';
 import { motion } from 'framer-motion';
 import LoanCalculator from './LoanCalculator';
+import { useAuth } from '@/lib/auth';
 import { WavingFlag, KenyaFloatingElements } from '@/components/ui/floating-animations';
 
 interface HeroProps {
@@ -12,8 +13,10 @@ interface HeroProps {
 }
 
 const Hero = ({ onApplyClick }: HeroProps) => {
+  const { user } = useAuth();
+
   return (
-    <section className="relative py-16 md:py-24 overflow-hidden bg-gradient-to-b from-white to-gray-100">
+    <section className="relative py-16 md:py-24 overflow-hidden bg-white">
       {/* Add floating elements for visual interest */}
       <div className="hidden md:block">
         <KenyaFloatingElements count={4} />
@@ -53,7 +56,7 @@ const Hero = ({ onApplyClick }: HeroProps) => {
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ duration: 0.5, delay: (index + 1) * 0.1 }}
                 >
-                  <CheckCircle className="h-5 w-5 text-green-600 mr-2 flex-shrink-0" />
+                  <CheckCircle className="h-5 w-5 text-gold-600 mr-2 flex-shrink-0" />
                   <span className="text-gray-800">{feature}</span>
                 </motion.div>
               ))}
@@ -62,15 +65,15 @@ const Hero = ({ onApplyClick }: HeroProps) => {
             <div className="flex flex-col sm:flex-row gap-4">
               <Button 
                 size="lg" 
-                className="bg-black hover:bg-black/90 text-white btn-pulse"
+                className="bg-black hover:bg-black/90 text-white border border-gold-500"
                 onClick={onApplyClick}
               >
                 Apply for a Loan
                 <ArrowRight className="ml-2 h-5 w-5" />
               </Button>
-              <Link to="/register">
-                <Button variant="outline" size="lg" className="border-black text-black hover:bg-black/10">
-                  Register Now
+              <Link to={user ? "/dashboard" : "/register"}>
+                <Button variant="outline" size="lg" className="border-gold-500 text-black hover:bg-gold-50">
+                  {user ? "My Dashboard" : "Register Now"}
                 </Button>
               </Link>
             </div>

@@ -70,10 +70,13 @@ const Navbar = ({ applyHandler }: NavbarProps) => {
   const handleApplyClick = () => {
     if (applyHandler) {
       applyHandler();
-    } else if (user) {
-      navigate('/apply');
     } else {
-      navigate('/login');
+      // Direct to login if not logged in, otherwise to apply
+      if (!user) {
+        navigate('/login');
+      } else {
+        navigate('/apply');
+      }
     }
   };
 
@@ -90,12 +93,12 @@ const Navbar = ({ applyHandler }: NavbarProps) => {
   const navLinks = user ? authenticatedNavLinks : publicNavLinks;
 
   return (
-    <header className="sticky top-0 z-50 w-full bg-white shadow-sm border-b border-gray-200">
+    <header className="sticky top-0 z-50 w-full bg-white shadow-sm border-b border-gold-100">
       <div className="container mx-auto px-4 md:px-6">
         <div className="flex items-center justify-between h-16">
           <div className="flex items-center">
             <Link to="/" className="flex items-center">
-              <div className="bg-black rounded-lg p-1 mr-2">
+              <div className="bg-black rounded-lg p-1 mr-2 border border-gold-500">
                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-banknote">
                   <rect width="20" height="12" x="2" y="6" rx="2"/>
                   <circle cx="12" cy="12" r="2"/>
@@ -129,7 +132,7 @@ const Navbar = ({ applyHandler }: NavbarProps) => {
                 <>
                   <Button 
                     onClick={handleApplyClick}
-                    className="mr-2 bg-green-600 hover:bg-green-700 text-white"
+                    className="mr-2 bg-gold-500 hover:bg-gold-600 text-black border border-black/10"
                   >
                     Apply for Loan
                   </Button>
@@ -139,7 +142,7 @@ const Navbar = ({ applyHandler }: NavbarProps) => {
                       onClick={toggleUserMenu}
                       className="flex items-center space-x-2 focus:outline-none"
                     >
-                      <Avatar className="h-8 w-8">
+                      <Avatar className="h-8 w-8 border border-gold-300">
                         {avatarUrl ? (
                           <AvatarImage src={avatarUrl} alt={userName} />
                         ) : (
@@ -156,14 +159,14 @@ const Navbar = ({ applyHandler }: NavbarProps) => {
                     
                     {/* User Dropdown Menu */}
                     {userMenuOpen && (
-                      <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50 border border-gray-200">
-                        <div className="px-4 py-2 border-b border-gray-100">
+                      <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50 border border-gold-100">
+                        <div className="px-4 py-2 border-b border-gold-100">
                           <p className="text-sm font-medium">{userName}</p>
                           <p className="text-xs text-gray-500">{user.email}</p>
                         </div>
                         <Link
                           to="/profile"
-                          className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center"
+                          className="block px-4 py-2 text-sm text-gray-700 hover:bg-gold-50 flex items-center"
                           onClick={() => setUserMenuOpen(false)}
                         >
                           <User className="h-4 w-4 mr-2" />
@@ -171,7 +174,7 @@ const Navbar = ({ applyHandler }: NavbarProps) => {
                         </Link>
                         <Link
                           to="/dashboard"
-                          className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center"
+                          className="block px-4 py-2 text-sm text-gray-700 hover:bg-gold-50 flex items-center"
                           onClick={() => setUserMenuOpen(false)}
                         >
                           <CreditCard className="h-4 w-4 mr-2" />
@@ -179,14 +182,14 @@ const Navbar = ({ applyHandler }: NavbarProps) => {
                         </Link>
                         <Link
                           to="/admin/dashboard"
-                          className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center"
+                          className="block px-4 py-2 text-sm text-gray-700 hover:bg-gold-50 flex items-center"
                           onClick={() => setUserMenuOpen(false)}
                         >
                           <Settings className="h-4 w-4 mr-2" />
                           Admin Panel
                         </Link>
                         <button
-                          className="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100 flex items-center"
+                          className="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gold-50 flex items-center"
                           onClick={handleSignOut}
                         >
                           <LogOut className="h-4 w-4 mr-2" />
@@ -198,13 +201,19 @@ const Navbar = ({ applyHandler }: NavbarProps) => {
                 </>
               ) : (
                 <>
+                  <Button 
+                    onClick={handleApplyClick}
+                    className="mr-2 bg-gold-500 hover:bg-gold-600 text-black"
+                  >
+                    Apply for Loan
+                  </Button>
                   <Link to="/login">
                     <Button variant="outline" size="sm" className="mr-2 border-black text-black hover:bg-black/10">
                       Login
                     </Button>
                   </Link>
                   <Link to="/register">
-                    <Button size="sm" className="bg-black hover:bg-black/90 text-white">
+                    <Button size="sm" className="bg-black hover:bg-black/90 text-white border border-gold-500">
                       Register
                     </Button>
                   </Link>

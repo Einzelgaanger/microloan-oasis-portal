@@ -63,16 +63,18 @@ export default {
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
 				},
-				// Our custom theme colors
-				lending: {
-					primary: '#1a365d',
-					secondary: '#2c7a7b',
-					accent: '#d69e2e',
-					light: '#f7fafc',
-					dark: '#2d3748',
-					success: '#38a169',
-					warning: '#e53e3e',
-					gray: '#718096'
+				// Gold color theme
+				gold: {
+					'50': 'hsl(var(--gold-50))',
+					'100': 'hsl(var(--gold-100))',
+					'200': 'hsl(var(--gold-200))',
+					'300': 'hsl(var(--gold-300))',
+					'400': 'hsl(var(--gold-400))',
+					'500': 'hsl(var(--gold-500))',
+					'600': 'hsl(var(--gold-600))',
+					'700': 'hsl(var(--gold-700))',
+					'800': 'hsl(var(--gold-800))',
+					'900': 'hsl(var(--gold-900))',
 				}
 			},
 			borderRadius: {

@@ -5,95 +5,91 @@
 
 @layer base {
   :root {
-    --background: 210 40% 98%;
-    --foreground: 222 47% 11%;
+    --background: 0 0% 100%; /* White */
+    --foreground: 0 0% 0%; /* Black */
 
     --card: 0 0% 100%;
-    --card-foreground: 222 47% 11%;
+    --card-foreground: 0 0% 0%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 222 47% 11%;
+    --popover-foreground: 0 0% 0%;
 
-    /* Vibrant primary colors - Kenyan blue */
-    --primary: 210 100% 30%;
-    --primary-foreground: 210 40% 98%;
+    /* Gold primary color */
+    --primary: 45 80% 60%;
+    --primary-foreground: 0 0% 0%;
 
-    /* Kenyan green */
-    --secondary: 142 71% 45%;
-    --secondary-foreground: 210 40% 98%;
+    /* White secondary color */
+    --secondary: 0 0% 100%;
+    --secondary-foreground: 0 0% 0%;
 
-    /* Kenyan gold/yellow */
-    --accent: 43 74% 51%;
-    --accent-foreground: 222 47% 11%;
-
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
-
-    /* Kenyan red */
+    /* Danger/Red */
     --destructive: 0 84% 60%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive-foreground: 0 0% 100%;
 
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222 84% 23%;
+    --muted: 0 0% 95%;
+    --muted-foreground: 0 0% 45%;
+
+    /* Gold accent */
+    --accent: 45 80% 95%;
+    --accent-foreground: 0 0% 0%;
+
+    --border: 45 30% 85%;
+    --input: 45 30% 85%;
+    --ring: 45 80% 60%;
 
     --radius: 0.5rem;
 
-    /* Lending-specific colors for legacy support */
-    --lending-primary: 210 100% 30%;
-    --lending-secondary: 142 71% 45%;
-    --lending-accent: 43 74% 51%;
+    /* Gold shades */
+    --gold-50: 45 80% 95%;
+    --gold-100: 45 80% 90%;
+    --gold-200: 45 80% 85%;
+    --gold-300: 45 80% 75%;
+    --gold-400: 45 80% 65%;
+    --gold-500: 45 80% 60%;
+    --gold-600: 45 70% 50%;
+    --gold-700: 45 60% 40%;
+    --gold-800: 45 60% 30%;
+    --gold-900: 45 60% 20%;
     
     --sidebar-background: 0 0% 98%;
-    --sidebar-foreground: 240 5.3% 26.1%;
-    --sidebar-primary: 240 5.9% 10%;
+    --sidebar-foreground: 0 0% 20%;
+    --sidebar-primary: 0 0% 10%;
     --sidebar-primary-foreground: 0 0% 98%;
-    --sidebar-accent: 240 4.8% 95.9%;
-    --sidebar-accent-foreground: 240 5.9% 10%;
-    --sidebar-border: 220 13% 91%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
-    
-    /* Vibrant Color Theme */
-    --vibrant-blue: 210 100% 50%;
-    --vibrant-green: 142 71% 45%;
-    --vibrant-yellow: 48 100% 50%;
-    --vibrant-red: 0 100% 50%;
-    --vibrant-purple: 270 100% 60%;
-    
-    /* Kenya specific colors */
-    --kenya-green: 120 55% 35%;
-    --kenya-red: 0 100% 45%;
-    --kenya-black: 0 0% 10%;
+    --sidebar-accent: 0 0% 96%;
+    --sidebar-accent-foreground: 0 0% 10%;
+    --sidebar-border: 0 0% 90%;
+    --sidebar-ring: 45 80% 60%;
   }
 
   .dark {
-    --background: 224 71% 4%;
-    --foreground: 210 40% 98%;
+    --background: 0 0% 10%;
+    --foreground: 0 0% 95%;
 
-    --card: 224 71% 4%;
-    --card-foreground: 210 40% 98%;
+    --card: 0 0% 7%;
+    --card-foreground: 0 0% 95%;
 
-    --popover: 224 71% 4%;
-    --popover-foreground: 210 40% 98%;
+    --popover: 0 0% 10%;
+    --popover-foreground: 0 0% 95%;
 
-    --primary: 217 91% 60%;
-    --primary-foreground: 222 47% 11%;
+    /* Gold primary in dark mode */
+    --primary: 45 70% 60%;
+    --primary-foreground: 0 0% 10%;
 
-    --secondary: 186 43% 33%;
-    --secondary-foreground: 210 40% 98%;
+    --secondary: 0 0% 15%;
+    --secondary-foreground: 0 0% 95%;
 
-    --accent: 43 74% 51%;
-    --accent-foreground: 210 40% 98%;
+    --muted: 0 0% 20%;
+    --muted-foreground: 0 0% 65%;
 
-    --muted: 217 33% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
+    --accent: 45 50% 25%;
+    --accent-foreground: 0 0% 95%;
 
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive: 0 62% 35%;
+    --destructive-foreground: 0 0% 95%;
 
-    --border: 217 33% 17.5%;
-    --input: 217 33% 17.5%;
-    --ring: 224 71% 4%;
+    --border: 0 0% 20%;
+    --input: 0 0% 20%;
+    --ring: 45 70% 50%;
   }
 }
 
@@ -119,12 +115,13 @@
 }
 
 @layer components {
+  /* Redesigned components with white, gold, black theme */
   .hover-scale {
     @apply transition-transform duration-300 hover:scale-105;
   }
 
   .card-shadow {
-    @apply shadow-lg hover:shadow-xl transition-shadow duration-300;
+    @apply shadow-md hover:shadow-lg transition-shadow duration-300 border border-gold-100;
   }
 
   .btn-pulse {
@@ -144,26 +141,27 @@
   
   .hero-pattern {
     background-color: hsla(var(--background));
-    background-image: radial-gradient(at 85% 28%, hsla(var(--primary) / 0.15) 0px, transparent 50%),
-                      radial-gradient(at 15% 70%, hsla(var(--secondary) / 0.15) 0px, transparent 50%),
-                      radial-gradient(at 65% 85%, hsla(var(--accent) / 0.15) 0px, transparent 50%);
+    background-image: 
+      radial-gradient(at 85% 28%, hsla(var(--gold-500) / 0.15) 0px, transparent 50%),
+      radial-gradient(at 15% 70%, hsla(var(--gold-300) / 0.1) 0px, transparent 50%),
+      radial-gradient(at 65% 85%, hsla(var(--gold-200) / 0.05) 0px, transparent 50%);
   }
   
-  /* Kenya-themed UI components */
+  /* Redesigned cards */
   .kenya-card {
-    @apply bg-white rounded-lg shadow-lg p-6 transition-all duration-300 border-l-4 hover:shadow-xl;
+    @apply bg-white rounded-lg shadow-md p-6 transition-all duration-300 border-l-4 hover:shadow-lg;
   }
   
-  .kenya-card-green {
-    @apply kenya-card border-green-600;
-  }
-  
-  .kenya-card-red {
-    @apply kenya-card border-red-600;
+  .kenya-card-gold {
+    @apply kenya-card border-gold-500;
   }
   
   .kenya-card-black {
     @apply kenya-card border-black;
+  }
+  
+  .kenya-card-white {
+    @apply kenya-card border-white shadow-md;
   }
   
   /* Loan status badges */
@@ -172,7 +170,7 @@
   }
   
   .loan-status-pending {
-    @apply loan-status-badge bg-yellow-100 text-yellow-800;
+    @apply loan-status-badge bg-gold-100 text-gold-800;
   }
   
   .loan-status-approved {
@@ -191,53 +189,37 @@
     @apply loan-status-badge bg-purple-100 text-purple-800;
   }
   
-  /* Enhanced vibrant UI components */
+  /* Minimalist vibrant UI components */
   .vibrant-card {
-    @apply bg-white rounded-lg shadow-lg p-6 transition-all duration-300 border-l-4 hover:shadow-xl;
+    @apply bg-white rounded-lg shadow-md p-6 transition-all duration-300 border hover:shadow-lg;
   }
   
-  .vibrant-card-blue {
-    @apply vibrant-card border-blue-500;
+  .vibrant-card-gold {
+    @apply vibrant-card border-gold-400;
   }
   
-  .vibrant-card-green {
-    @apply vibrant-card border-green-500;
+  .vibrant-card-black {
+    @apply vibrant-card border-black;
   }
   
-  .vibrant-card-yellow {
-    @apply vibrant-card border-yellow-500;
+  .vibrant-card-white {
+    @apply vibrant-card border-white shadow-md;
   }
   
-  .vibrant-card-red {
-    @apply vibrant-card border-red-500;
-  }
-  
-  .vibrant-card-purple {
-    @apply vibrant-card border-purple-500;
-  }
-  
+  /* Text gradients */
   .gradient-text {
     @apply bg-clip-text text-transparent bg-gradient-to-r;
   }
   
-  .gradient-blue-purple {
-    @apply from-blue-500 to-purple-600;
+  .gradient-gold {
+    @apply from-gold-600 to-gold-400;
   }
   
-  .gradient-green-blue {
-    @apply from-green-500 to-blue-500;
+  .gradient-black-gold {
+    @apply from-black to-gold-700;
   }
   
-  .gradient-yellow-red {
-    @apply from-yellow-400 to-red-500;
-  }
-  
-  /* Kenya flag colors */
-  .kenya-flag-text {
-    @apply bg-clip-text text-transparent bg-gradient-to-r from-green-600 via-red-600 to-black;
-  }
-  
-  /* Enhanced animations */
+  /* Animations */
   .float {
     animation: float 3s ease-in-out infinite;
   }
@@ -248,34 +230,7 @@
     100% { transform: translateY(0); }
   }
   
-  .scale-in {
-    animation: scale-in 0.3s ease-out forwards;
-  }
-  
-  @keyframes scale-in {
-    from { transform: scale(0.8); opacity: 0; }
-    to { transform: scale(1); opacity: 1; }
-  }
-  
-  .slide-in-right {
-    animation: slide-in-right 0.5s ease-out forwards;
-  }
-  
-  @keyframes slide-in-right {
-    from { transform: translateX(50px); opacity: 0; }
-    to { transform: translateX(0); opacity: 1; }
-  }
-  
-  .slide-in-left {
-    animation: slide-in-left 0.5s ease-out forwards;
-  }
-  
-  @keyframes slide-in-left {
-    from { transform: translateX(-50px); opacity: 0; }
-    to { transform: translateX(0); opacity: 1; }
-  }
-  
-  /* Responsive design improvements */
+  /* Responsive design */
   .responsive-container {
     @apply w-full px-4 md:px-6 lg:px-8 mx-auto max-w-7xl;
   }
@@ -286,40 +241,6 @@
   
   .responsive-flex {
     @apply flex flex-col md:flex-row items-center gap-4;
-  }
-  
-  /* Gamification elements */
-  .badge {
-    @apply inline-flex items-center justify-center px-2.5 py-0.5 rounded-full text-xs font-medium;
-  }
-  
-  .badge-blue {
-    @apply badge bg-blue-100 text-blue-800;
-  }
-  
-  .badge-green {
-    @apply badge bg-green-100 text-green-800;
-  }
-  
-  .badge-yellow {
-    @apply badge bg-yellow-100 text-yellow-800;
-  }
-  
-  .badge-red {
-    @apply badge bg-red-100 text-red-800;
-  }
-  
-  .badge-purple {
-    @apply badge bg-purple-100 text-purple-800;
-  }
-  
-  /* Kenya-themed page backgrounds */
-  .kenya-bg-pattern {
-    @apply bg-white;
-    background-image: 
-      radial-gradient(at 10% 20%, hsla(var(--kenya-green) / 0.1) 0px, transparent 50%),
-      radial-gradient(at 90% 80%, hsla(var(--kenya-red) / 0.1) 0px, transparent 50%),
-      radial-gradient(at 50% 50%, hsla(var(--kenya-black) / 0.05) 0px, transparent 50%);
   }
 }
 
@@ -341,15 +262,6 @@
     width: 100% !important;
     max-width: 100% !important;
   }
-  
-  /* Improved mobile navigation styles */
-  .mobile-nav {
-    @apply fixed top-0 left-0 right-0 bg-white shadow-lg z-50 py-2 px-4;
-  }
-  
-  .mobile-nav-menu {
-    @apply absolute top-full left-0 right-0 bg-white shadow-lg z-40 py-4;
-  }
 }
 
 /* Feature icons */
@@ -357,18 +269,14 @@
   @apply w-12 h-12 rounded-full flex items-center justify-center text-white mb-4;
 }
 
-.feature-icon-green {
-  @apply bg-green-600;
+.feature-icon-gold {
+  @apply bg-gold-500;
 }
 
-.feature-icon-red {
-  @apply bg-red-600;
+.feature-icon-black {
+  @apply bg-black;
 }
 
-.feature-icon-blue {
-  @apply bg-blue-600;
-}
-
-.feature-icon-yellow {
-  @apply bg-yellow-500;
+.feature-icon-white {
+  @apply bg-white text-black border border-gold-300;
 }

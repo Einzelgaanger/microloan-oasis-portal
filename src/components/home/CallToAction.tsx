@@ -3,12 +3,15 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { ArrowRight } from 'lucide-react';
+import { useAuth } from '@/lib/auth';
 
 interface CallToActionProps {
   onApplyClick?: () => void;
 }
 
 const CallToAction = ({ onApplyClick }: CallToActionProps) => {
+  const { user } = useAuth();
+  
   return (
     <section className="py-16 bg-gradient-to-br from-black to-gray-800 text-white">
       <div className="container mx-auto px-4 md:px-6">
@@ -23,7 +26,7 @@ const CallToAction = ({ onApplyClick }: CallToActionProps) => {
             <Button 
               size="lg" 
               variant="secondary" 
-              className="bg-white text-black hover:bg-gray-100 btn-pulse"
+              className="bg-gold-500 text-black hover:bg-gold-600 btn-pulse border border-white"
               onClick={onApplyClick}
             >
               Apply Now
