@@ -37,7 +37,13 @@ export const useProfileData = () => {
       
       try {
         const profileData = await dataService.profiles.getProfile(user.id);
-        setProfile(profileData);
+        
+        // Make sure profileData has created_at
+        if (profileData && !profileData.created_at) {
+          profileData.created_at = new Date().toISOString();
+        }
+        
+        setProfile(profileData as Profile);
         
         // Check if all required fields are filled
         const isComplete = requiredFields.every(field => 
@@ -61,12 +67,18 @@ export const useProfileData = () => {
     
     try {
       // Ensure monthly_income is a number if provided
-      if (profileData.monthly_income && typeof profileData.monthly_income === 'string') {
+      if (profileData.monthly_income !== undefined && typeof profileData.monthly_income === 'string') {
         profileData.monthly_income = parseFloat(profileData.monthly_income);
       }
       
       const updatedProfile = await dataService.profiles.updateProfile(user.id, profileData);
-      setProfile(prev => ({...prev, ...updatedProfile} as Profile));
+      
+      // Make sure updatedProfile has created_at
+      if (updatedProfile && !updatedProfile.created_at) {
+        updatedProfile.created_at = new Date().toISOString();
+      }
+      
+      setProfile(prev => (prev ? {...prev, ...updatedProfile as Profile} : updatedProfile as Profile));
       
       // Re-check if profile is complete after update
       const isComplete = requiredFields.every(field => 
