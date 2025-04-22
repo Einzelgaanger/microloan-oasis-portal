@@ -7,18 +7,20 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import AuthLayout from '@/components/auth/AuthLayout';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { useAuth } from '@/lib/auth';
 
 // Define the login form schema with Zod
 const loginSchema = z.object({
   email: z.string().email({ message: "Please enter a valid email address" }),
-  password: z.string().min(6, { message: "Password must be at least 6 characters long" }),
+  password: z.string().min(1, { message: "Password is required" }),
 });
 
+type LoginFormValues = z.infer<typeof loginSchema>;
+
 const Login = () => {
-  const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm({
+  const form = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
       email: '',
@@ -29,94 +31,95 @@ const Login = () => {
   const { signIn } = useAuth();
   const navigate = useNavigate();
   const [loginError, setLoginError] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const onSubmit = async (data: z.infer<typeof loginSchema>) => {
+  const onSubmit = async (data: LoginFormValues) => {
     try {
+      setIsSubmitting(true);
       setLoginError(null);
-      const { email, password } = data;
       
-      // Sign in
+      const { email, password } = data;
       await signIn(email, password);
       
-      // Note: Navigation is handled in the signIn function based on user role
+      // Navigation is handled in the auth context
       
     } catch (error: any) {
       setLoginError(error.message || 'Sign in failed. Please check your credentials.');
+      setIsSubmitting(false);
     }
   };
 
   return (
-    <AuthLayout
-      title="Welcome Back"
-      mode="login"
-    >
+    <AuthLayout title="Welcome Back" mode="login">
       <Card className="w-full max-w-md border shadow-md">
-        <CardHeader className="space-y-2 bg-gradient-to-r from-black to-gray-800 text-white">
+        <CardHeader className="space-y-2 bg-gradient-to-r from-gold-600 to-gold-500 text-black">
           <CardTitle className="text-2xl font-bold text-center">Sign In</CardTitle>
-          <CardDescription className="text-center text-gray-300">
+          <CardDescription className="text-center text-black/80">
             Access your account to continue
           </CardDescription>
         </CardHeader>
-        <form onSubmit={handleSubmit(onSubmit)}>
-          <CardContent className="space-y-4 pt-6">
-            {loginError && (
-              <div className="p-3 rounded-md bg-red-50 text-red-500 text-sm">
-                {loginError}
-              </div>
-            )}
-            
-            <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
-              <Input 
-                id="email"
-                type="email"
-                placeholder="you@example.com"
-                className="border-gray-300 focus:border-gold-600 focus:ring-gold-500"
-                {...register('email')}
-              />
-              {errors.email && (
-                <p className="text-sm text-red-500">{errors.email.message}</p>
+        
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)}>
+            <CardContent className="space-y-4 pt-6">
+              {loginError && (
+                <div className="p-3 rounded-md bg-red-50 text-red-500 text-sm">
+                  {loginError}
+                </div>
               )}
-            </div>
+              
+              <FormField
+                control={form.control}
+                name="email"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Email</FormLabel>
+                    <FormControl>
+                      <Input type="email" placeholder="you@example.com" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
+              <FormField
+                control={form.control}
+                name="password"
+                render={({ field }) => (
+                  <FormItem>
+                    <div className="flex items-center justify-between">
+                      <FormLabel>Password</FormLabel>
+                      <Link to="/forgot-password" className="text-sm text-gold-600 hover:text-gold-700">
+                        Forgot password?
+                      </Link>
+                    </div>
+                    <FormControl>
+                      <Input type="password" placeholder="••••••••" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </CardContent>
             
-            <div className="space-y-2">
-              <div className="flex justify-between">
-                <Label htmlFor="password">Password</Label>
-                <Link to="/forgot-password" className="text-sm text-black hover:text-gold-700">
-                  Forgot password?
+            <CardFooter className="flex flex-col gap-4">
+              <Button 
+                type="submit" 
+                className="w-full bg-gradient-to-r from-gold-600 to-gold-500 text-black hover:from-gold-700 hover:to-gold-600"
+                disabled={isSubmitting}
+              >
+                {isSubmitting ? 'Signing In...' : 'Sign In'}
+              </Button>
+              
+              <p className="text-sm text-center text-gray-500">
+                Don't have an account?{' '}
+                <Link to="/register" className="text-gold-600 hover:text-gold-700 font-medium">
+                  Sign up
                 </Link>
-              </div>
-              <Input 
-                id="password"
-                type="password"
-                placeholder="••••••••"
-                className="border-gray-300 focus:border-gold-600 focus:ring-gold-500"
-                {...register('password')}
-              />
-              {errors.password && (
-                <p className="text-sm text-red-500">{errors.password.message}</p>
-              )}
-            </div>
-          </CardContent>
-          
-          <CardFooter className="flex flex-col gap-4">
-            <Button 
-              type="submit" 
-              variant="secondary"
-              className="w-full"
-              disabled={isSubmitting}
-            >
-              {isSubmitting ? 'Signing In...' : 'Sign In'}
-            </Button>
-            
-            <p className="text-sm text-center text-gray-500">
-              Don't have an account?{' '}
-              <Link to="/register" className="text-black hover:text-gold-700 font-medium">
-                Sign up
-              </Link>
-            </p>
-          </CardFooter>
-        </form>
+              </p>
+            </CardFooter>
+          </form>
+        </Form>
       </Card>
     </AuthLayout>
   );

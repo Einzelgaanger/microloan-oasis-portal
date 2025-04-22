@@ -15,7 +15,7 @@ const buttonVariants = cva(
         outline: "border border-gray-300 bg-white text-black hover:bg-gray-50 hover:border-gray-400 shadow-sm",
         secondary: "bg-gradient-to-r from-gold-600 to-gold-500 text-black hover:from-gold-700 hover:to-gold-600 shadow-sm",
         ghost: "hover:bg-gray-100 hover:text-gray-900 text-gray-700",
-        link: "text-black underline-offset-4 hover:underline hover:text-gold-700",
+        link: "text-gold-600 underline-offset-4 hover:underline hover:text-gold-700",
       },
       size: {
         default: "h-10 px-5 py-2",

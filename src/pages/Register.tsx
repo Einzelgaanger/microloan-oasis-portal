@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { z } from 'zod';
 import { useForm } from 'react-hook-form';
@@ -7,26 +7,27 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import AuthLayout from '@/components/auth/AuthLayout';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { toast } from 'sonner';
 import { useAuth } from '@/lib/auth';
 
 // Define the registration form schema with Zod
 const registerSchema = z.object({
-  firstName: z.string().min(2, { message: "First name is required" }),
-  lastName: z.string().min(2, { message: "Last name is required" }),
+  firstName: z.string().min(1, { message: "First name is required" }),
+  lastName: z.string().min(1, { message: "Last name is required" }),
   username: z.string().min(3, { message: "Username must be at least 3 characters" }),
   email: z.string().email({ message: "Please enter a valid email address" }),
   password: z.string().min(6, { message: "Password must be at least 6 characters long" }),
-  confirmPassword: z.string()
+  confirmPassword: z.string().min(6, { message: "Please confirm your password" })
 }).refine(data => data.password === data.confirmPassword, {
-  message: "Passwords don't match",
-  path: ["confirmPassword"],
+  message: "Passwords do not match",
+  path: ["confirmPassword"]
 });
 
+type RegisterFormValues = z.infer<typeof registerSchema>;
+
 const Register = () => {
-  const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm({
+  const form = useForm<RegisterFormValues>({
     resolver: zodResolver(registerSchema),
     defaultValues: {
       firstName: '',
@@ -35,143 +36,175 @@ const Register = () => {
       email: '',
       password: '',
       confirmPassword: '',
-    },
+    }
   });
   
   const { signUp } = useAuth();
   const navigate = useNavigate();
+  const [registrationError, setRegistrationError] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const onSubmit = async (data: z.infer<typeof registerSchema>) => {
+  const onSubmit = async (data: RegisterFormValues) => {
     try {
+      setIsSubmitting(true);
+      setRegistrationError(null);
+      
+      // Prepare user data for registration
       const userData = {
         first_name: data.firstName,
         last_name: data.lastName,
         username: data.username,
       };
-
+      
       await signUp(data.email, data.password, userData);
-      toast.success("Account created successfully! Redirecting to complete your profile.");
-      navigate('/profile');
+      // Success is handled in the auth context by redirecting to profile completion
+      
     } catch (error: any) {
-      toast.error(error.message || 'Registration failed. Please try again.');
+      setRegistrationError(error.message || 'Registration failed. Please try again.');
+      setIsSubmitting(false);
     }
   };
 
   return (
-    <AuthLayout
-      title="Create an Account"
-      mode="register"
-    >
+    <AuthLayout title="Create Your Account" mode="register">
       <Card className="w-full max-w-md border shadow-md">
-        <CardHeader className="space-y-2 bg-gradient-to-r from-black to-gray-800 text-white">
+        <CardHeader className="space-y-2 bg-gradient-to-r from-gold-600 to-gold-500 text-black">
           <CardTitle className="text-2xl font-bold text-center">Sign Up</CardTitle>
-          <CardDescription className="text-center text-gray-300">
+          <CardDescription className="text-center text-black/80">
             Create your account to get started
           </CardDescription>
         </CardHeader>
-        <form onSubmit={handleSubmit(onSubmit)}>
-          <CardContent className="space-y-4 pt-6">
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="firstName">First Name</Label>
-                <Input
-                  id="firstName"
-                  placeholder="John"
-                  className="border-gray-300 focus:border-gold-600 focus:ring-gold-500"
-                  {...register('firstName')}
+        
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)}>
+            <CardContent className="space-y-4 pt-6">
+              {registrationError && (
+                <div className="p-3 rounded-md bg-red-50 text-red-500 text-sm">
+                  {registrationError}
+                </div>
+              )}
+              
+              {/* Name Fields */}
+              <div className="grid grid-cols-2 gap-4">
+                <FormField
+                  control={form.control}
+                  name="firstName"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>First Name</FormLabel>
+                      <FormControl>
+                        <Input placeholder="John" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
                 />
-                {errors.firstName && (
-                  <p className="text-sm text-red-500">{errors.firstName.message}</p>
-                )}
+                
+                <FormField
+                  control={form.control}
+                  name="lastName"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Last Name</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Doe" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
               </div>
               
-              <div className="space-y-2">
-                <Label htmlFor="lastName">Last Name</Label>
-                <Input
-                  id="lastName"
-                  placeholder="Doe"
-                  className="border-gray-300 focus:border-gold-600 focus:ring-gold-500"
-                  {...register('lastName')}
-                />
-                {errors.lastName && (
-                  <p className="text-sm text-red-500">{errors.lastName.message}</p>
+              {/* Username */}
+              <FormField
+                control={form.control}
+                name="username"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Username</FormLabel>
+                    <FormControl>
+                      <Input placeholder="johndoe123" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
                 )}
-              </div>
-            </div>
-            
-            <div className="space-y-2">
-              <Label htmlFor="username">Username</Label>
-              <Input
-                id="username"
-                placeholder="johndoe"
-                className="border-gray-300 focus:border-gold-600 focus:ring-gold-500"
-                {...register('username')}
               />
-              {errors.username && (
-                <p className="text-sm text-red-500">{errors.username.message}</p>
-              )}
-            </div>
-            
-            <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
-              <Input
-                id="email"
-                type="email"
-                placeholder="you@example.com"
-                className="border-gray-300 focus:border-gold-600 focus:ring-gold-500"
-                {...register('email')}
+              
+              {/* Email */}
+              <FormField
+                control={form.control}
+                name="email"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Email</FormLabel>
+                    <FormControl>
+                      <Input type="email" placeholder="you@example.com" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
               />
-              {errors.email && (
-                <p className="text-sm text-red-500">{errors.email.message}</p>
-              )}
-            </div>
-            
-            <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
-              <Input
-                id="password"
-                type="password"
-                placeholder="••••••••"
-                className="border-gray-300 focus:border-gold-600 focus:ring-gold-500"
-                {...register('password')}
+              
+              {/* Password */}
+              <FormField
+                control={form.control}
+                name="password"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Password</FormLabel>
+                    <FormControl>
+                      <Input type="password" placeholder="••••••••" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
               />
-              {errors.password && (
-                <p className="text-sm text-red-500">{errors.password.message}</p>
-              )}
-            </div>
-            
-            <div className="space-y-2">
-              <Label htmlFor="confirmPassword">Confirm Password</Label>
-              <Input
-                id="confirmPassword"
-                type="password"
-                placeholder="••••••••"
-                className="border-gray-300 focus:border-gold-600 focus:ring-gold-500"
-                {...register('confirmPassword')}
+              
+              {/* Confirm Password */}
+              <FormField
+                control={form.control}
+                name="confirmPassword"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Confirm Password</FormLabel>
+                    <FormControl>
+                      <Input type="password" placeholder="••••••••" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
               />
-              {errors.confirmPassword && (
-                <p className="text-sm text-red-500">{errors.confirmPassword.message}</p>
-              )}
-            </div>
-          </CardContent>
-          
-          <CardFooter className="flex flex-col gap-4">
-            <Button 
-              type="submit" 
-              className="w-full bg-gradient-to-r from-gold-600 to-gold-500 hover:from-gold-700 hover:to-gold-600 text-black font-medium"
-              disabled={isSubmitting}
-            >
-              {isSubmitting ? 'Creating Account...' : 'Create Account'}
-            </Button>
+            </CardContent>
             
-            <p className="text-sm text-center text-gray-500">
-              Already have an account?{' '}
-              <Link to="/login" className="text-black hover:text-gold-700 font-medium">
-                Sign in
-              </Link>
-            </p>
-          </CardFooter>
-        </form>
+            <CardFooter className="flex flex-col gap-4">
+              <Button 
+                type="submit" 
+                className="w-full bg-gradient-to-r from-gold-600 to-gold-500 text-black hover:from-gold-700 hover:to-gold-600"
+                disabled={isSubmitting}
+              >
+                {isSubmitting ? 'Creating Account...' : 'Create Account'}
+              </Button>
+              
+              <p className="text-sm text-center text-gray-500">
+                Already have an account?{' '}
+                <Link to="/login" className="text-gold-600 hover:text-gold-700 font-medium">
+                  Sign in
+                </Link>
+              </p>
+              
+              <p className="text-xs text-center text-gray-500">
+                By signing up, you agree to our{' '}
+                <Link to="/terms" className="text-gold-600 hover:underline">
+                  Terms of Service
+                </Link>{' '}
+                and{' '}
+                <Link to="/privacy" className="text-gold-600 hover:underline">
+                  Privacy Policy
+                </Link>
+              </p>
+            </CardFooter>
+          </form>
+        </Form>
       </Card>
     </AuthLayout>
   );

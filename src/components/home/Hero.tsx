@@ -1,24 +1,15 @@
 
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { ArrowRight } from 'lucide-react';
 import { motion } from 'framer-motion';
 import LoanCalculator from './LoanCalculator';
-import { useAuth } from '@/lib/auth';
 
-const Hero = () => {
-  const { user } = useAuth();
-  const navigate = useNavigate();
+interface HeroProps {
+  onApply: () => void;
+}
 
-  const handleApplyClick = () => {
-    if (!user) {
-      navigate('/login');
-    } else {
-      navigate('/apply');
-    }
-  };
-
+const Hero = ({ onApply }: HeroProps) => {
   return (
     <section className="relative py-20 md:py-28 overflow-hidden bg-white">
       <div className="container mx-auto px-4 md:px-6">
@@ -63,7 +54,7 @@ const Hero = () => {
             <Button 
               size="lg"
               variant="secondary"
-              onClick={handleApplyClick}
+              onClick={onApply}
               className="group shadow-lg"
             >
               Apply for a Loan

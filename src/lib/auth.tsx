@@ -7,6 +7,9 @@ import { authService, dataService } from '@/services/dataService';
 interface AuthUser {
   id: string;
   email: string;
+  username?: string;
+  first_name?: string;
+  last_name?: string;
 }
 
 interface AuthContextProps {
@@ -31,7 +34,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         if (authUser) {
           setUser({
             id: authUser.id,
-            email: authUser.email || 'user@example.com' // Ensure email is never undefined
+            email: authUser.email || 'user@example.com',
+            username: authUser.user_metadata?.username,
+            first_name: authUser.user_metadata?.first_name,
+            last_name: authUser.user_metadata?.last_name
           });
         } else {
           setUser(null);
@@ -53,7 +59,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       if (authUser) {
         setUser({
           id: authUser.id,
-          email: authUser.email || email // Use provided email if not returned
+          email: authUser.email || email, 
+          username: authUser.user_metadata?.username,
+          first_name: authUser.user_metadata?.first_name,
+          last_name: authUser.user_metadata?.last_name
         });
         
         // Check if user is admin and redirect accordingly
@@ -82,10 +91,13 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       if (authUser) {
         setUser({
           id: authUser.id,
-          email: authUser.email || email // Use provided email if not returned
+          email: authUser.email || email,
+          username: userData.username,
+          first_name: userData.first_name,
+          last_name: userData.last_name
         });
         toast.success('Account created successfully');
-        navigate('/profile');
+        navigate('/kyc'); // Redirect to KYC form for verification
       }
     } catch (error: any) {
       toast.error(error.message || 'Error creating account');
@@ -147,7 +159,6 @@ export const AdminRoute = ({ children }: { children: React.ReactNode }) => {
   const { user, loading } = useAuth();
   const [isAdmin, setIsAdmin] = useState(false);
   const [checkingAdmin, setCheckingAdmin] = useState(true);
-  const navigate = useNavigate();
 
   useEffect(() => {
     const checkIfAdmin = async () => {

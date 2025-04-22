@@ -14,6 +14,7 @@ import LoanApplication from "./pages/LoanApplication";
 import AdminDashboard from "./pages/AdminDashboard";
 import UserProfile from "./pages/UserProfile";
 import AdminLogin from "./pages/AdminLogin";
+import KYC from "./pages/KYC";
 
 // Create a new query client with optimized settings
 const queryClient = new QueryClient({
@@ -36,6 +37,7 @@ const App = () => (
           <Route path="/" element={<Index />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
+          <Route path="/kyc" element={<KYC />} />
           <Route path="/dashboard" element={
             <ProtectedRoute>
               <Dashboard />

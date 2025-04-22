@@ -1,112 +1,232 @@
+
+// Mocked data service for demonstration purposes
+// In a real application, this would be replaced by actual API calls to Supabase
+
 import { supabase } from '@/integrations/supabase/client';
-import {
-  Profile,
-  Loan,
-  Payment,
-  profileService,
-  loanService,
-  paymentService,
-  roleService,
-  mockAuthService
-} from './mockDataService';
 
-// Helper to determine if we should use mock data
-// Always use mock data until Supabase is properly configured
-const useMockData = () => {
-  return true; // Always use mock data for development
-};
-
-// Auth service
-export const authService = useMockData() ? mockAuthService : {
-  signIn: async (email: string, password: string) => {
-    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+// Auth service for handling authentication
+export const authService = {
+  // Get the current session
+  getSession: async () => {
+    const { data, error } = await supabase.auth.getSession();
     if (error) throw error;
-    return data.user;
+    return data;
   },
-  
-  signUp: async (email: string, password: string, userData: any) => {
-    const { data, error } = await supabase.auth.signUp({
+
+  // Sign in with email and password
+  signIn: async (email: string, password: string) => {
+    const { data, error } = await supabase.auth.signInWithPassword({
       email,
       password,
-      options: { data: userData }
     });
     if (error) throw error;
     return data.user;
   },
-  
+
+  // Sign up with email and password
+  signUp: async (email: string, password: string, userData: any) => {
+    const { data, error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        data: userData
+      }
+    });
+    if (error) throw error;
+    return data.user;
+  },
+
+  // Sign out
   signOut: async () => {
-    await supabase.auth.signOut();
+    const { error } = await supabase.auth.signOut();
+    if (error) throw error;
   },
-  
-  getSession: async () => {
-    const { data } = await supabase.auth.getSession();
-    return { user: data.session?.user || null };
-  }
 };
 
-// Since we're using mock data, we don't need to worry about the TypeScript errors
-// from Supabase client, as that code path is never executed
+// Data service for handling data operations
 export const dataService = {
-  profiles: profileService,
-  roles: roleService,
-  loans: loanService,
-  payments: paymentService
-};
-
-/* 
- * The code below would be used once we have proper Supabase tables set up,
- * but for now we're using the mock services above.
- *
- * This avoids TypeScript errors because we're not actually using the Supabase client
- * with these table names yet.
-
-export const dataService = {
-  profiles: useMockData() ? profileService : {
-    getProfile: async (userId: string) => {
-      // Supabase implementation
-    },
-    
-    updateProfile: async (userId: string, profileData: Partial<Profile>) => {
-      // Supabase implementation
-    }
-  },
-  
-  roles: useMockData() ? roleService : {
-    getUserRole: async (userId: string) => {
-      // Supabase implementation
-    },
-    
-    isAdmin: async (userId: string) => {
-      // Supabase implementation
-    }
-  },
-  
-  loans: useMockData() ? loanService : {
-    getUserLoans: async (userId: string) => {
-      // Supabase implementation
-    },
-    
+  // Loan related operations
+  loans: {
+    // Get all loans (for admin)
     getAllLoans: async () => {
-      // Supabase implementation
+      const { data, error } = await supabase
+        .from('loans')
+        .select('*')
+        .order('created_at', { ascending: false });
+      
+      if (error) throw error;
+      return data;
     },
-    
-    createLoan: async (loanData: Omit<Loan, 'id' | 'created_at' | 'updated_at'>) => {
-      // Supabase implementation
+
+    // Get user loans
+    getUserLoans: async (userId: string) => {
+      const { data, error } = await supabase
+        .from('loans')
+        .select('*')
+        .eq('user_id', userId)
+        .order('created_at', { ascending: false });
+      
+      if (error) throw error;
+      return data;
     },
-    
-    updateLoan: async (loanId: string, loanData: Partial<Loan>) => {
-      // Supabase implementation
-    }
+
+    // Create a loan application
+    createLoan: async (loanData: any) => {
+      const { data, error } = await supabase
+        .from('loans')
+        .insert([loanData])
+        .select();
+      
+      if (error) throw error;
+      return data[0];
+    },
+
+    // Update a loan
+    updateLoan: async (loanId: string, updateData: any) => {
+      const { data, error } = await supabase
+        .from('loans')
+        .update(updateData)
+        .eq('id', loanId)
+        .select();
+      
+      if (error) throw error;
+      return data[0];
+    },
+
+    // Get loan details
+    getLoan: async (loanId: string) => {
+      const { data, error } = await supabase
+        .from('loans')
+        .select('*')
+        .eq('id', loanId)
+        .single();
+      
+      if (error) throw error;
+      return data;
+    },
   },
-  
-  payments: useMockData() ? paymentService : {
-    getLoanPayments: async (loanId: string) => {
-      // Supabase implementation
+
+  // Profile related operations
+  profiles: {
+    // Get user profile
+    getProfile: async (userId: string) => {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', userId)
+        .single();
+      
+      if (error) {
+        console.error('Error fetching profile:', error);
+        // Return default profile if not found
+        return {
+          id: userId,
+          first_name: '',
+          last_name: '',
+        };
+      }
+      
+      return data;
     },
-    
-    createPayment: async (paymentData: Omit<Payment, 'id'>) => {
-      // Supabase implementation
-    }
-  }
+
+    // Update user profile
+    updateProfile: async (userId: string, profileData: any) => {
+      const { data, error } = await supabase
+        .from('profiles')
+        .update(profileData)
+        .eq('id', userId)
+        .select();
+      
+      if (error) throw error;
+      return data[0];
+    },
+  },
+
+  // KYC related operations
+  kyc: {
+    // Create KYC profile
+    createKycProfile: async (kycData: any) => {
+      const { data, error } = await supabase
+        .from('kyc_profiles')
+        .insert([kycData])
+        .select();
+      
+      if (error) throw error;
+      return data[0];
+    },
+
+    // Get KYC profile for a user
+    getKycProfile: async (userId: string) => {
+      const { data, error } = await supabase
+        .from('kyc_profiles')
+        .select('*')
+        .eq('user_id', userId)
+        .single();
+      
+      if (error && error.code !== 'PGRST116') throw error; // Not found is okay
+      return data;
+    },
+
+    // Update KYC profile status
+    updateKycStatus: async (kycId: string, status: 'pending' | 'approved' | 'rejected', reason?: string) => {
+      const { data, error } = await supabase
+        .from('kyc_profiles')
+        .update({
+          status,
+          rejection_reason: reason || null,
+          reviewed_at: new Date().toISOString(),
+        })
+        .eq('id', kycId)
+        .select();
+      
+      if (error) throw error;
+      return data[0];
+    },
+  },
+
+  // Role related operations
+  roles: {
+    // Check if user is admin
+    isAdmin: async (userId: string) => {
+      const { data, error } = await supabase
+        .from('user_roles')
+        .select('role')
+        .eq('user_id', userId)
+        .eq('role', 'admin')
+        .maybeSingle();
+      
+      if (error) {
+        console.error('Error checking admin role:', error);
+        return false;
+      }
+      
+      return !!data;
+    },
+
+    // Get user roles
+    getUserRoles: async (userId: string) => {
+      const { data, error } = await supabase
+        .from('user_roles')
+        .select('role')
+        .eq('user_id', userId);
+      
+      if (error) throw error;
+      return data.map(item => item.role);
+    },
+  },
+
+  // Payment related operations
+  payments: {
+    // Get loan payments
+    getLoanPayments: async (loanId: string) => {
+      const { data, error } = await supabase
+        .from('payments')
+        .select('*')
+        .eq('loan_id', loanId)
+        .order('due_date', { ascending: true });
+      
+      if (error) throw error;
+      return data;
+    },
+  },
 };
-*/

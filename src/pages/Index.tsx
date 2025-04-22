@@ -22,12 +22,12 @@ const Index = () => {
   };
 
   return (
-    <MainLayout applyHandler={handleApply}>
-      <Hero />
+    <MainLayout>
+      <Hero onApply={handleApply} />
       <Features />
       <HowItWorks />
       <Testimonials />
-      <CallToAction />
+      <CallToAction onApply={handleApply} />
     </MainLayout>
   );
 };
