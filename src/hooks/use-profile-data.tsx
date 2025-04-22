@@ -38,16 +38,20 @@ export const useProfileData = () => {
       try {
         const profileData = await dataService.profiles.getProfile(user.id);
         
-        // Make sure profileData has created_at
-        if (profileData && !profileData.created_at) {
-          profileData.created_at = new Date().toISOString();
-        }
+        // Make sure profileData has all required fields with defaults
+        const safeProfile: Profile = {
+          id: profileData?.id || user.id,
+          first_name: profileData?.first_name || '',
+          last_name: profileData?.last_name || '',
+          created_at: profileData?.created_at || new Date().toISOString(),
+        };
         
-        setProfile(profileData as Profile);
+        // Set the profile with all the fields from profileData
+        setProfile(profileData ? { ...safeProfile, ...profileData } : safeProfile);
         
         // Check if all required fields are filled
         const isComplete = requiredFields.every(field => 
-          profileData && profileData[field as keyof Profile]
+          profileData && profileData[field as keyof typeof profileData]
         );
         setProfileComplete(isComplete);
         
@@ -73,18 +77,22 @@ export const useProfileData = () => {
       
       const updatedProfile = await dataService.profiles.updateProfile(user.id, profileData);
       
-      // Make sure updatedProfile has created_at
-      if (updatedProfile && !updatedProfile.created_at) {
-        updatedProfile.created_at = new Date().toISOString();
+      if (updatedProfile) {
+        // Ensure created_at exists
+        const safeUpdatedProfile = {
+          ...updatedProfile,
+          created_at: updatedProfile.created_at || new Date().toISOString()
+        };
+        
+        // Update the profile state with all fields merged
+        setProfile(prev => (prev ? { ...prev, ...safeUpdatedProfile } : safeUpdatedProfile as Profile));
+        
+        // Re-check if profile is complete after update
+        const isComplete = requiredFields.every(field => 
+          safeUpdatedProfile[field as keyof typeof safeUpdatedProfile]
+        );
+        setProfileComplete(isComplete);
       }
-      
-      setProfile(prev => (prev ? {...prev, ...updatedProfile as Profile} : updatedProfile as Profile));
-      
-      // Re-check if profile is complete after update
-      const isComplete = requiredFields.every(field => 
-        updatedProfile && updatedProfile[field as keyof Profile]
-      );
-      setProfileComplete(isComplete);
       
       return true;
     } catch (error) {

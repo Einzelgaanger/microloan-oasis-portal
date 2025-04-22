@@ -1,13 +1,43 @@
 // Mock data types and functions for development
 // This will be replaced by real data from Supabase in production
 
+export interface Loan {
+  id: string;
+  user_id: string;
+  amount: number;
+  purpose: string;
+  duration: number;
+  interest_rate: number;
+  monthly_payment: number;
+  id_document_url?: string;
+  proof_of_income_url?: string;
+  selfie_url?: string;
+  employment_status: string;
+  employer_name: string;
+  monthly_income: number;
+  next_of_kin_name: string;
+  next_of_kin_phone: string;
+  next_of_kin_relation: string;
+  status: "pending" | "approved" | "rejected";
+  is_repaid: boolean;
+  created_at?: string;
+  updated_at?: string;
+  mpesa_number: string;
+  county: string;
+}
+
 export interface Profile {
   id: string;
   first_name: string;
   last_name: string;
-  avatar_url?: string;
-  created_at: string;
-  // Added fields for profile
+  created_at?: string;
+  // Personal details
+  id_number?: string;
+  date_of_birth?: string;
+  gender?: string;
+  marital_status?: string;
+  nationality?: string;
+  // Contact details
   phone_number?: string;
   alternative_phone?: string;
   email?: string;
@@ -17,56 +47,31 @@ export interface Profile {
   village?: string;
   landmark?: string;
   residence_duration?: string;
+  // Employment details
   employment_status?: string;
   occupation?: string;
   employer_name?: string;
   employer_contact?: string;
   monthly_income?: number;
-  secondary_income?: number;
+  secondary_income?: string;
   pay_frequency?: string;
   work_location?: string;
+  // Financial details
   bank_name?: string;
   bank_branch?: string;
   account_number?: string;
   mpesa_number?: string;
+  // Next of kin details
   kin_name?: string;
   kin_relationship?: string;
   kin_phone?: string;
   kin_id_number?: string;
   kin_address?: string;
-  id_number?: string;
-  date_of_birth?: string;
-  gender?: string;
-  marital_status?: string;
-  nationality?: string;
+  // Document URLs
   id_document_url?: string;
   selfie_url?: string;
   payslip_url?: string;
   statement_url?: string;
-}
-
-export interface Loan {
-  id: string;
-  user_id: string;
-  amount: number;
-  interest_rate: number;
-  duration: number;
-  purpose: string;
-  status: 'pending' | 'approved' | 'rejected';
-  monthly_payment: number;
-  total_repayment: number;
-  is_repaid: boolean;
-  created_at: string;
-  approved_at?: string;
-  rejected_at?: string;
-  rejected_reason?: string;
-  employment_status: string;
-  employer_name?: string;
-  monthly_income: number;
-  id_document_url?: string;
-  proof_of_income_url?: string;
-  selfie_url?: string;
-  other_documents_url?: string;
 }
 
 export interface KycProfile {

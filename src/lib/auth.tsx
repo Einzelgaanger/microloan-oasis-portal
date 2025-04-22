@@ -30,15 +30,15 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   useEffect(() => {
     const checkAuth = async () => {
       try {
-        // Fix the property access for session
-        const { session } = await authService.getSession();
-        if (session?.user) {
+        const sessionData = await authService.getSession();
+        // Check if session and user exist
+        if (sessionData && sessionData.session && sessionData.session.user) {
           setUser({
-            id: session.user.id,
-            email: session.user.email || 'user@example.com',
-            username: session.user.user_metadata?.username,
-            first_name: session.user.user_metadata?.first_name,
-            last_name: session.user.user_metadata?.last_name
+            id: sessionData.session.user.id,
+            email: sessionData.session.user.email || 'user@example.com',
+            username: sessionData.session.user.user_metadata?.username,
+            first_name: sessionData.session.user.user_metadata?.first_name,
+            last_name: sessionData.session.user.user_metadata?.last_name
           });
         } else {
           setUser(null);
