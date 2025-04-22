@@ -5,70 +5,75 @@
 
 @layer base {
   :root {
-    --background: 0 0% 100%; /* White */
-    --foreground: 0 0% 0%; /* Black */
-
+    /* Basic colors */
+    --background: 0 0% 100%;
+    --foreground: 0 0% 10%;
+    
+    /* Card */
     --card: 0 0% 100%;
-    --card-foreground: 0 0% 0%;
-
+    --card-foreground: 0 0% 10%;
+    
+    /* Popover */
     --popover: 0 0% 100%;
-    --popover-foreground: 0 0% 0%;
-
-    /* Emerald primary color */
-    --primary: 160 84% 39%;
+    --popover-foreground: 0 0% 10%;
+    
+    /* Black as primary */
+    --primary: 0 0% 0%;
     --primary-foreground: 0 0% 100%;
-
-    /* White secondary color */
-    --secondary: 0 0% 100%;
-    --secondary-foreground: 160 84% 39%;
-
-    /* Danger/Red */
+    
+    /* Gold as secondary */
+    --secondary: 43 74% 66%;
+    --secondary-foreground: 0 0% 10%;
+    
+    /* Red for destructive actions */
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
-
+    
+    /* Muted */
     --muted: 0 0% 96%;
     --muted-foreground: 0 0% 45%;
-
-    /* Emerald accent */
-    --accent: 160 84% 95%;
-    --accent-foreground: 160 84% 20%;
-
+    
+    /* Accent */
+    --accent: 43 74% 96%;
+    --accent-foreground: 43 74% 30%;
+    
+    /* Border */
     --border: 0 0% 90%;
     --input: 0 0% 90%;
-    --ring: 160 84% 39%;
-
+    --ring: 0 0% 80%;
+    
+    /* Border radius */
     --radius: 0.5rem;
   }
 
   .dark {
     --background: 0 0% 10%;
     --foreground: 0 0% 95%;
-
+    
     --card: 0 0% 7%;
     --card-foreground: 0 0% 95%;
-
+    
     --popover: 0 0% 10%;
     --popover-foreground: 0 0% 95%;
-
-    /* Emerald primary in dark mode */
-    --primary: 160 70% 39%;
-    --primary-foreground: 0 0% 100%;
-
-    --secondary: 0 0% 15%;
-    --secondary-foreground: 0 0% 95%;
-
+    
+    --primary: 0 0% 95%;
+    --primary-foreground: 0 0% 10%;
+    
+    --secondary: 43 74% 60%;
+    --secondary-foreground: 0 0% 10%;
+    
     --muted: 0 0% 20%;
     --muted-foreground: 0 0% 65%;
-
-    --accent: 160 50% 20%;
+    
+    --accent: 43 60% 30%;
     --accent-foreground: 0 0% 95%;
-
+    
     --destructive: 0 62% 35%;
     --destructive-foreground: 0 0% 95%;
-
+    
     --border: 0 0% 20%;
     --input: 0 0% 20%;
-    --ring: 160 70% 39%;
+    --ring: 43 74% 60%;
   }
 }
 
@@ -94,168 +99,57 @@
 }
 
 @layer components {
-  /* Redesigned components with modern clean theme */
-  .hover-scale {
-    @apply transition-transform duration-300 hover:scale-105;
-  }
-
+  /* Minimalist card designs */
   .card-shadow {
-    @apply shadow-md hover:shadow-lg transition-shadow duration-300 border border-gray-100;
-  }
-
-  .btn-pulse {
-    @apply relative overflow-hidden;
-  }
-
-  .btn-pulse::after {
-    @apply content-[''] absolute block w-full h-full top-0 left-0 transform -translate-x-full bg-white opacity-20 skew-x-[-15deg];
-    animation: pulse 2s infinite;
-  }
-
-  @keyframes pulse {
-    100% {
-      transform: translateX(200%);
-    }
-  }
-  
-  .hero-pattern {
-    background-color: hsla(var(--background));
-    background-image: 
-      radial-gradient(at 85% 28%, hsla(160, 84%, 39%, 0.15) 0px, transparent 50%),
-      radial-gradient(at 15% 70%, hsla(160, 84%, 59%, 0.1) 0px, transparent 50%),
-      radial-gradient(at 65% 85%, hsla(160, 84%, 79%, 0.05) 0px, transparent 50%);
-  }
-  
-  /* Redesigned cards */
-  .loan-card {
-    @apply bg-white rounded-lg shadow-md p-6 transition-all duration-300 border-l-4 hover:shadow-lg;
-  }
-  
-  .loan-card-primary {
-    @apply loan-card border-emerald-500;
-  }
-  
-  .loan-card-black {
-    @apply loan-card border-black;
-  }
-  
-  .loan-card-white {
-    @apply loan-card border-white shadow-md;
-  }
-  
-  /* Loan status badges */
-  .loan-status-badge {
-    @apply inline-flex items-center justify-center px-2.5 py-0.5 rounded-full text-xs font-medium;
-  }
-  
-  .loan-status-pending {
-    @apply loan-status-badge bg-amber-100 text-amber-800;
-  }
-  
-  .loan-status-approved {
-    @apply loan-status-badge bg-green-100 text-green-800;
-  }
-  
-  .loan-status-rejected {
-    @apply loan-status-badge bg-red-100 text-red-800;
-  }
-  
-  .loan-status-disbursed {
-    @apply loan-status-badge bg-blue-100 text-blue-800;
-  }
-  
-  .loan-status-repaid {
-    @apply loan-status-badge bg-purple-100 text-purple-800;
-  }
-  
-  /* Minimalist vibrant UI components */
-  .vibrant-card {
-    @apply bg-white rounded-lg shadow-md p-6 transition-all duration-300 border hover:shadow-lg;
-  }
-  
-  .vibrant-card-primary {
-    @apply vibrant-card border-emerald-400;
-  }
-  
-  .vibrant-card-black {
-    @apply vibrant-card border-black;
-  }
-  
-  .vibrant-card-white {
-    @apply vibrant-card border-white shadow-md;
-  }
-  
-  /* Text gradients */
-  .gradient-text {
-    @apply bg-clip-text text-transparent bg-gradient-to-r;
-  }
-  
-  .gradient-primary {
-    @apply from-emerald-600 to-emerald-400;
-  }
-  
-  .gradient-black-primary {
-    @apply from-black to-emerald-700;
+    @apply shadow-md transition-shadow duration-300 border border-gray-100;
   }
   
   /* Animations */
-  .float {
-    animation: float 3s ease-in-out infinite;
+  .animate-fade-in {
+    @apply opacity-0;
+    animation: fadeIn 0.6s ease-out forwards;
   }
   
-  @keyframes float {
-    0% { transform: translateY(0); }
-    50% { transform: translateY(-10px); }
-    100% { transform: translateY(0); }
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
   }
   
-  /* Responsive design */
-  .responsive-container {
-    @apply w-full px-4 md:px-6 lg:px-8 mx-auto max-w-7xl;
+  /* Status badges */
+  .status-badge {
+    @apply inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium;
   }
   
-  .responsive-grid {
-    @apply grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6;
+  .status-pending {
+    @apply status-badge bg-yellow-100 text-yellow-800;
   }
   
-  .responsive-flex {
-    @apply flex flex-col md:flex-row items-center gap-4;
-  }
-}
-
-/* Mobile optimization */
-@media (max-width: 640px) {
-  .hide-on-mobile {
-    display: none !important;
+  .status-approved {
+    @apply status-badge bg-green-100 text-green-800;
   }
   
-  .mobile-padding {
-    padding: 1rem !important;
+  .status-rejected {
+    @apply status-badge bg-red-100 text-red-800;
   }
   
-  .mobile-text-center {
-    text-align: center !important;
+  .status-active {
+    @apply status-badge bg-blue-100 text-blue-800;
   }
   
-  .mobile-full-width {
-    width: 100% !important;
-    max-width: 100% !important;
+  .status-completed {
+    @apply status-badge bg-purple-100 text-purple-800;
   }
-}
-
-/* Feature icons */
-.feature-icon {
-  @apply w-12 h-12 rounded-full flex items-center justify-center text-white mb-4;
-}
-
-.feature-icon-primary {
-  @apply bg-emerald-500;
-}
-
-.feature-icon-black {
-  @apply bg-black;
-}
-
-.feature-icon-white {
-  @apply bg-white text-emerald-800 border border-emerald-200;
+  
+  /* Feature icons */
+  .feature-icon {
+    @apply w-12 h-12 rounded-full flex items-center justify-center mb-4;
+  }
+  
+  .feature-icon-primary {
+    @apply bg-black text-white;
+  }
+  
+  .feature-icon-secondary {
+    @apply bg-secondary text-black;
+  }
 }

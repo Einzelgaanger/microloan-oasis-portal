@@ -13,23 +13,13 @@ const Index = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
 
-  const handleApplyNow = () => {
-    // Always redirect to login if user is not logged in
-    if (!user) {
-      navigate('/login');
-    } else {
-      // Only if logged in, redirect to apply page
-      navigate('/apply');
-    }
-  };
-
   return (
-    <MainLayout applyHandler={handleApplyNow}>
-      <Hero onApplyClick={handleApplyNow} />
+    <MainLayout>
+      <Hero />
       <Features />
       <HowItWorks />
       <Testimonials />
-      <CallToAction onApplyClick={handleApplyNow} />
+      <CallToAction />
     </MainLayout>
   );
 };

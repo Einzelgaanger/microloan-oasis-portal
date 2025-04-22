@@ -53,28 +53,17 @@ export default {
 					DEFAULT: 'hsl(var(--card))',
 					foreground: 'hsl(var(--card-foreground))'
 				},
-				sidebar: {
-					DEFAULT: 'hsl(var(--sidebar-background))',
-					foreground: 'hsl(var(--sidebar-foreground))',
-					primary: 'hsl(var(--sidebar-primary))',
-					'primary-foreground': 'hsl(var(--sidebar-primary-foreground))',
-					accent: 'hsl(var(--sidebar-accent))',
-					'accent-foreground': 'hsl(var(--sidebar-accent-foreground))',
-					border: 'hsl(var(--sidebar-border))',
-					ring: 'hsl(var(--sidebar-ring))'
-				},
-				// Gold color theme
 				gold: {
-					'50': 'hsl(var(--gold-50))',
-					'100': 'hsl(var(--gold-100))',
-					'200': 'hsl(var(--gold-200))',
-					'300': 'hsl(var(--gold-300))',
-					'400': 'hsl(var(--gold-400))',
-					'500': 'hsl(var(--gold-500))',
-					'600': 'hsl(var(--gold-600))',
-					'700': 'hsl(var(--gold-700))',
-					'800': 'hsl(var(--gold-800))',
-					'900': 'hsl(var(--gold-900))',
+					'50': '#FBF8F1',
+					'100': '#F7F1E5',
+					'200': '#F0E4C9',
+					'300': '#E9D7AD',
+					'400': '#E2CA91',
+					'500': '#DBBD75',
+					'600': '#C9A84F',
+					'700': '#A58730',
+					'800': '#876F27',
+					'900': '#6E5B1F',
 				}
 			},
 			borderRadius: {
@@ -106,26 +95,6 @@ export default {
 				'scale-out': {
 					from: { transform: 'scale(1)', opacity: '1' },
 					to: { transform: 'scale(0.95)', opacity: '0' }
-				},
-				'slide-in-right': {
-					'0%': { transform: 'translateX(100%)' },
-					'100%': { transform: 'translateX(0)' }
-				},
-				'slide-in-left': {
-					'0%': { transform: 'translateX(-100%)' },
-					'100%': { transform: 'translateX(0)' }
-				},
-				'slide-in-bottom': {
-					'0%': { transform: 'translateY(100%)' },
-					'100%': { transform: 'translateY(0)' }
-				},
-				'slide-in-top': {
-					'0%': { transform: 'translateY(-100%)' },
-					'100%': { transform: 'translateY(0)' }
-				},
-				'pulse-slow': {
-					'0%, 100%': { opacity: '1' },
-					'50%': { opacity: '0.8' }
 				}
 			},
 			animation: {
@@ -134,12 +103,7 @@ export default {
 				'fade-in': 'fade-in 0.5s ease-out',
 				'fade-out': 'fade-out 0.5s ease-out',
 				'scale-in': 'scale-in 0.3s ease-out',
-				'scale-out': 'scale-out 0.3s ease-out',
-				'slide-in-right': 'slide-in-right 0.5s ease-out',
-				'slide-in-left': 'slide-in-left 0.5s ease-out',
-				'slide-in-bottom': 'slide-in-bottom 0.5s ease-out',
-				'slide-in-top': 'slide-in-top 0.5s ease-out',
-				'pulse-slow': 'pulse-slow 3s infinite ease-in-out'
+				'scale-out': 'scale-out 0.3s ease-out'
 			}
 		}
 	},

@@ -3,7 +3,7 @@ import React from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider, ProtectedRoute, AdminRoute } from "@/lib/auth";
 import Index from "./pages/Index";
 import Login from "./pages/Login";
@@ -14,7 +14,6 @@ import LoanApplication from "./pages/LoanApplication";
 import AdminDashboard from "./pages/AdminDashboard";
 import UserProfile from "./pages/UserProfile";
 import AdminLogin from "./pages/AdminLogin";
-import { DynamicBackground } from "@/components/ui/floating-animations";
 
 // Create a new query client with optimized settings
 const queryClient = new QueryClient({
@@ -27,12 +26,8 @@ const queryClient = new QueryClient({
   },
 });
 
-// Add vibrant theme colors
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    {/* Add animated background */}
-    <DynamicBackground className="opacity-10" />
-    
     <Toaster />
     <Sonner richColors closeButton position="top-right" />
     <BrowserRouter>

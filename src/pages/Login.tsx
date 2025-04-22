@@ -10,7 +10,6 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { useAuth } from '@/lib/auth';
-import { dataService } from '@/services/dataService';
 
 // Define the login form schema with Zod
 const loginSchema = z.object({
@@ -51,11 +50,11 @@ const Login = () => {
       title="Welcome Back"
       mode="login"
     >
-      <Card className="w-full max-w-md border-2 border-black/10 shadow-md">
-        <CardHeader className="space-y-2 bg-gradient-to-r from-black to-gray-800 text-white">
-          <CardTitle className="text-2xl font-bold text-center">Welcome Back</CardTitle>
+      <Card className="w-full max-w-md border shadow-md">
+        <CardHeader className="space-y-2 bg-black text-white">
+          <CardTitle className="text-2xl font-bold text-center">Sign In</CardTitle>
           <CardDescription className="text-center text-gray-300">
-            Sign in to your account to continue
+            Access your account to continue
           </CardDescription>
         </CardHeader>
         <form onSubmit={handleSubmit(onSubmit)}>
@@ -82,7 +81,7 @@ const Login = () => {
             <div className="space-y-2">
               <div className="flex justify-between">
                 <Label htmlFor="password">Password</Label>
-                <Link to="/forgot-password" className="text-sm text-green-700 hover:underline">
+                <Link to="/forgot-password" className="text-sm text-black hover:underline">
                   Forgot password?
                 </Link>
               </div>
@@ -101,7 +100,7 @@ const Login = () => {
           <CardFooter className="flex flex-col gap-4">
             <Button 
               type="submit" 
-              className="w-full bg-black hover:bg-black/90 text-white"
+              className="w-full"
               disabled={isSubmitting}
             >
               {isSubmitting ? 'Signing In...' : 'Sign In'}
@@ -109,7 +108,7 @@ const Login = () => {
             
             <p className="text-sm text-center text-gray-500">
               Don't have an account?{' '}
-              <Link to="/register" className="text-green-700 hover:underline font-medium">
+              <Link to="/register" className="text-black hover:underline font-medium">
                 Sign up
               </Link>
             </p>

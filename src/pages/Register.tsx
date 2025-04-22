@@ -1,217 +1,172 @@
 
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
+import { z } from 'zod';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
 import AuthLayout from '@/components/auth/AuthLayout';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { toast } from 'sonner';
 import { useAuth } from '@/lib/auth';
-import { PhoneInput } from '@/components/ui/phone-input';
+
+// Define the registration form schema with Zod
+const registerSchema = z.object({
+  firstName: z.string().min(2, { message: "First name is required" }),
+  lastName: z.string().min(2, { message: "Last name is required" }),
+  username: z.string().min(3, { message: "Username must be at least 3 characters" }),
+  email: z.string().email({ message: "Please enter a valid email address" }),
+  password: z.string().min(6, { message: "Password must be at least 6 characters long" }),
+  confirmPassword: z.string()
+}).refine(data => data.password === data.confirmPassword, {
+  message: "Passwords don't match",
+  path: ["confirmPassword"],
+});
 
 const Register = () => {
-  const navigate = useNavigate();
-  const { signUp, loading } = useAuth();
-  const [formData, setFormData] = React.useState({
-    firstName: '',
-    lastName: '',
-    email: '',
-    password: '',
-    confirmPassword: '',
-    phoneNumber: '',
-    address: '',
-    city: '',
-    zipCode: '',
-    agreeTerms: false
+  const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm({
+    resolver: zodResolver(registerSchema),
+    defaultValues: {
+      firstName: '',
+      lastName: '',
+      username: '',
+      email: '',
+      password: '',
+      confirmPassword: '',
+    },
   });
+  
+  const { signUp } = useAuth();
+  const navigate = useNavigate();
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value, type, checked } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: type === 'checkbox' ? checked : value,
-    }));
-  };
-
-  const handlePhoneChange = (value: string) => {
-    setFormData(prev => ({
-      ...prev,
-      phoneNumber: value
-    }));
-  };
-
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    
-    if (formData.password !== formData.confirmPassword) {
-      toast.error("Passwords do not match.");
-      return;
-    }
-    
-    if (!formData.agreeTerms) {
-      toast.error("You must agree to the terms and conditions.");
-      return;
-    }
-    
+  const onSubmit = async (data: z.infer<typeof registerSchema>) => {
     try {
       const userData = {
-        first_name: formData.firstName,
-        last_name: formData.lastName,
-        phone_number: formData.phoneNumber,
-        address: formData.address,
-        city: formData.city,
-        zip_code: formData.zipCode
+        first_name: data.firstName,
+        last_name: data.lastName,
+        username: data.username,
       };
 
-      await signUp(formData.email, formData.password, userData);
-      navigate('/login');
-    } catch (error) {
-      console.error('Registration error:', error);
+      await signUp(data.email, data.password, userData);
+      toast.success("Account created successfully! Redirecting to complete your profile.");
+      navigate('/profile');
+    } catch (error: any) {
+      toast.error(error.message || 'Registration failed. Please try again.');
     }
   };
 
   return (
-    <AuthLayout 
-      title="Create an account" 
-      description="Sign up to get started with MicroLoan Oasis" 
+    <AuthLayout
+      title="Create an Account"
       mode="register"
     >
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <div className="grid grid-cols-2 gap-4">
-          <div className="space-y-2">
-            <Label htmlFor="firstName">First Name</Label>
-            <Input
-              id="firstName"
-              name="firstName"
-              placeholder="John"
-              required
-              value={formData.firstName}
-              onChange={handleChange}
-            />
-          </div>
+      <Card className="w-full max-w-md border shadow-md">
+        <CardHeader className="space-y-2 bg-black text-white">
+          <CardTitle className="text-2xl font-bold text-center">Sign Up</CardTitle>
+          <CardDescription className="text-center text-gray-300">
+            Create your account to get started
+          </CardDescription>
+        </CardHeader>
+        <form onSubmit={handleSubmit(onSubmit)}>
+          <CardContent className="space-y-4 pt-6">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="firstName">First Name</Label>
+                <Input
+                  id="firstName"
+                  placeholder="John"
+                  {...register('firstName')}
+                />
+                {errors.firstName && (
+                  <p className="text-sm text-red-500">{errors.firstName.message}</p>
+                )}
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="lastName">Last Name</Label>
+                <Input
+                  id="lastName"
+                  placeholder="Doe"
+                  {...register('lastName')}
+                />
+                {errors.lastName && (
+                  <p className="text-sm text-red-500">{errors.lastName.message}</p>
+                )}
+              </div>
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="username">Username</Label>
+              <Input
+                id="username"
+                placeholder="johndoe"
+                {...register('username')}
+              />
+              {errors.username && (
+                <p className="text-sm text-red-500">{errors.username.message}</p>
+              )}
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="email">Email</Label>
+              <Input
+                id="email"
+                type="email"
+                placeholder="you@example.com"
+                {...register('email')}
+              />
+              {errors.email && (
+                <p className="text-sm text-red-500">{errors.email.message}</p>
+              )}
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="password">Password</Label>
+              <Input
+                id="password"
+                type="password"
+                placeholder="••••••••"
+                {...register('password')}
+              />
+              {errors.password && (
+                <p className="text-sm text-red-500">{errors.password.message}</p>
+              )}
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="confirmPassword">Confirm Password</Label>
+              <Input
+                id="confirmPassword"
+                type="password"
+                placeholder="••••••••"
+                {...register('confirmPassword')}
+              />
+              {errors.confirmPassword && (
+                <p className="text-sm text-red-500">{errors.confirmPassword.message}</p>
+              )}
+            </div>
+          </CardContent>
           
-          <div className="space-y-2">
-            <Label htmlFor="lastName">Last Name</Label>
-            <Input
-              id="lastName"
-              name="lastName"
-              placeholder="Doe"
-              required
-              value={formData.lastName}
-              onChange={handleChange}
-            />
-          </div>
-        </div>
-        
-        <div className="space-y-2">
-          <Label htmlFor="email">Email</Label>
-          <Input
-            id="email"
-            name="email"
-            type="email"
-            placeholder="your@email.com"
-            required
-            value={formData.email}
-            onChange={handleChange}
-          />
-        </div>
-
-        <div className="space-y-2">
-          <Label htmlFor="phoneNumber">Phone Number</Label>
-          <PhoneInput
-            id="phoneNumber"
-            value={formData.phoneNumber}
-            onChange={handlePhoneChange}
-            placeholder="+1 (555) 000-0000"
-          />
-        </div>
-
-        <div className="space-y-2">
-          <Label htmlFor="address">Address</Label>
-          <Input
-            id="address"
-            name="address"
-            placeholder="123 Main St"
-            required
-            value={formData.address}
-            onChange={handleChange}
-          />
-        </div>
-
-        <div className="grid grid-cols-2 gap-4">
-          <div className="space-y-2">
-            <Label htmlFor="city">City</Label>
-            <Input
-              id="city"
-              name="city"
-              placeholder="New York"
-              required
-              value={formData.city}
-              onChange={handleChange}
-            />
-          </div>
-          
-          <div className="space-y-2">
-            <Label htmlFor="zipCode">Zip Code</Label>
-            <Input
-              id="zipCode"
-              name="zipCode"
-              placeholder="10001"
-              required
-              value={formData.zipCode}
-              onChange={handleChange}
-            />
-          </div>
-        </div>
-        
-        <div className="space-y-2">
-          <Label htmlFor="password">Password</Label>
-          <Input
-            id="password"
-            name="password"
-            type="password"
-            placeholder="••••••••"
-            required
-            value={formData.password}
-            onChange={handleChange}
-          />
-        </div>
-        
-        <div className="space-y-2">
-          <Label htmlFor="confirmPassword">Confirm Password</Label>
-          <Input
-            id="confirmPassword"
-            name="confirmPassword"
-            type="password"
-            placeholder="••••••••"
-            required
-            value={formData.confirmPassword}
-            onChange={handleChange}
-          />
-        </div>
-        
-        <div className="flex items-start space-x-2">
-          <input
-            type="checkbox"
-            id="agreeTerms"
-            name="agreeTerms"
-            checked={formData.agreeTerms}
-            onChange={handleChange}
-            className="h-4 w-4 mt-1 rounded border-gray-300 text-lending-primary focus:ring-lending-primary"
-          />
-          <Label htmlFor="agreeTerms" className="text-sm text-gray-600">
-            I agree to the <a href="/terms" className="text-lending-primary underline">Terms of Service</a> and <a href="/privacy" className="text-lending-primary underline">Privacy Policy</a>
-          </Label>
-        </div>
-        
-        <Button 
-          type="submit" 
-          className="w-full bg-lending-primary hover:bg-lending-primary/90"
-          disabled={loading}
-        >
-          {loading ? 'Creating account...' : 'Create account'}
-        </Button>
-      </form>
+          <CardFooter className="flex flex-col gap-4">
+            <Button 
+              type="submit" 
+              className="w-full"
+              disabled={isSubmitting}
+            >
+              {isSubmitting ? 'Creating Account...' : 'Create Account'}
+            </Button>
+            
+            <p className="text-sm text-center text-gray-500">
+              Already have an account?{' '}
+              <Link to="/login" className="text-black hover:underline font-medium">
+                Sign in
+              </Link>
+            </p>
+          </CardFooter>
+        </form>
+      </Card>
     </AuthLayout>
   );
 };

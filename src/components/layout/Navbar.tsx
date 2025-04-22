@@ -2,17 +2,13 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { Menu, X, ChevronDown, Home, FileText, HelpCircle, Phone, User, CreditCard, LogOut, Settings, PieChart } from 'lucide-react';
+import { Menu, X, ChevronDown, Home, CreditCard, User, LogOut, Settings } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/lib/auth';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { dataService } from '@/services/dataService';
 
-interface NavbarProps {
-  applyHandler?: () => void;
-}
-
-const Navbar = ({ applyHandler }: NavbarProps) => {
+const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const location = useLocation();
@@ -68,26 +64,22 @@ const Navbar = ({ applyHandler }: NavbarProps) => {
   };
   
   const handleApplyClick = () => {
-    if (applyHandler) {
-      applyHandler();
+    if (!user) {
+      navigate('/login');
     } else {
-      // Always direct to login if not logged in
-      if (!user) {
-        navigate('/login');
-      } else {
-        navigate('/apply');
-      }
+      navigate('/apply');
     }
   };
 
   const publicNavLinks = [
     { name: 'Home', path: '/', icon: <Home className="w-4 h-4 mr-1" /> },
-    { name: 'About Us', path: '/about', icon: <HelpCircle className="w-4 h-4 mr-1" /> },
-    { name: 'Contact', path: '/contact', icon: <Phone className="w-4 h-4 mr-1" /> },
+    { name: 'About', path: '/about', icon: null },
+    { name: 'Contact', path: '/contact', icon: null },
   ];
 
   const authenticatedNavLinks = [
-    { name: 'Dashboard', path: '/dashboard', icon: <PieChart className="w-4 h-4 mr-1" /> },
+    { name: 'Dashboard', path: '/dashboard', icon: null },
+    { name: 'My Loans', path: '/dashboard', icon: null },
   ];
 
   const navLinks = user ? authenticatedNavLinks : publicNavLinks;
@@ -98,14 +90,7 @@ const Navbar = ({ applyHandler }: NavbarProps) => {
         <div className="flex items-center justify-between h-16">
           <div className="flex items-center">
             <Link to="/" className="flex items-center">
-              <div className="bg-emerald-600 rounded-lg p-1 mr-2">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-banknote">
-                  <rect width="20" height="12" x="2" y="6" rx="2"/>
-                  <circle cx="12" cy="12" r="2"/>
-                  <path d="M6 12h.01M18 12h.01"/>
-                </svg>
-              </div>
-              <span className="text-xl font-bold text-emerald-900">MicroLoan Oasis</span>
+              <span className="text-xl font-bold text-black">MicroLoan</span>
             </Link>
           </div>
           
@@ -118,7 +103,7 @@ const Navbar = ({ applyHandler }: NavbarProps) => {
                 className={cn(
                   "flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors",
                   isActive(link.path)
-                    ? "bg-emerald-600 text-white"
+                    ? "bg-black text-white"
                     : "text-gray-600 hover:bg-gray-100"
                 )}
               >
@@ -132,7 +117,7 @@ const Navbar = ({ applyHandler }: NavbarProps) => {
                 <>
                   <Button 
                     onClick={handleApplyClick}
-                    className="mr-2 bg-emerald-600 hover:bg-emerald-700 text-white"
+                    className="mr-2"
                   >
                     Apply for Loan
                   </Button>
@@ -142,11 +127,11 @@ const Navbar = ({ applyHandler }: NavbarProps) => {
                       onClick={toggleUserMenu}
                       className="flex items-center space-x-2 focus:outline-none"
                     >
-                      <Avatar className="h-8 w-8 border border-emerald-200">
+                      <Avatar className="h-8 w-8 border border-gray-200">
                         {avatarUrl ? (
                           <AvatarImage src={avatarUrl} alt={userName} />
                         ) : (
-                          <AvatarFallback className="bg-emerald-600 text-white">
+                          <AvatarFallback className="bg-black text-white">
                             {getInitials()}
                           </AvatarFallback>
                         )}
@@ -201,19 +186,13 @@ const Navbar = ({ applyHandler }: NavbarProps) => {
                 </>
               ) : (
                 <>
-                  <Button 
-                    onClick={handleApplyClick}
-                    className="mr-2 bg-emerald-600 hover:bg-emerald-700 text-white"
-                  >
-                    Apply for Loan
-                  </Button>
                   <Link to="/login">
-                    <Button variant="outline" size="sm" className="mr-2 border-emerald-600 text-emerald-700 hover:bg-emerald-50">
+                    <Button variant="outline" size="sm" className="mr-2">
                       Login
                     </Button>
                   </Link>
                   <Link to="/register">
-                    <Button size="sm" className="bg-emerald-600 hover:bg-emerald-700 text-white">
+                    <Button size="sm">
                       Register
                     </Button>
                   </Link>
@@ -226,7 +205,7 @@ const Navbar = ({ applyHandler }: NavbarProps) => {
           <div className="flex md:hidden">
             <button
               onClick={toggleMenu}
-              className="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-emerald-600 hover:bg-gray-100 focus:outline-none"
+              className="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-black hover:bg-gray-100 focus:outline-none"
             >
               {isOpen ? (
                 <X className="block h-6 w-6" />
@@ -248,7 +227,7 @@ const Navbar = ({ applyHandler }: NavbarProps) => {
               className={cn(
                 "flex items-center px-3 py-2 text-base font-medium rounded-md transition-colors",
                 isActive(link.path)
-                  ? "bg-emerald-600 text-white"
+                  ? "bg-black text-white"
                   : "text-gray-600 hover:bg-gray-100"
               )}
               onClick={toggleMenu}
@@ -266,7 +245,7 @@ const Navbar = ({ applyHandler }: NavbarProps) => {
                     {avatarUrl ? (
                       <AvatarImage src={avatarUrl} alt={userName} />
                     ) : (
-                      <AvatarFallback className="bg-emerald-600 text-white">
+                      <AvatarFallback className="bg-black text-white">
                         {getInitials()}
                       </AvatarFallback>
                     )}
@@ -316,7 +295,7 @@ const Navbar = ({ applyHandler }: NavbarProps) => {
                     handleApplyClick();
                     toggleMenu();
                   }}
-                  className="w-full mt-2 bg-emerald-600 hover:bg-emerald-700 text-white"
+                  className="w-full mt-2"
                 >
                   Apply for Loan
                 </Button>
@@ -325,24 +304,15 @@ const Navbar = ({ applyHandler }: NavbarProps) => {
           ) : (
             <div className="flex flex-col pt-2 space-y-2">
               <Link to="/login" onClick={toggleMenu}>
-                <Button variant="outline" className="w-full border-emerald-600 text-emerald-700 hover:bg-emerald-50">
+                <Button variant="outline" className="w-full">
                   Login
                 </Button>
               </Link>
               <Link to="/register" onClick={toggleMenu}>
-                <Button className="w-full bg-emerald-600 hover:bg-emerald-700 text-white">
+                <Button className="w-full">
                   Register
                 </Button>
               </Link>
-              <Button 
-                onClick={() => {
-                  handleApplyClick();
-                  toggleMenu();
-                }}
-                className="w-full bg-emerald-600 hover:bg-emerald-700 text-white"
-              >
-                Apply for Loan
-              </Button>
             </div>
           )}
         </div>

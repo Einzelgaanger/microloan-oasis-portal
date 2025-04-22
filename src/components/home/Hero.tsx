@@ -2,39 +2,25 @@
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { CheckCircle, ArrowRight } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
 import { motion } from 'framer-motion';
 import LoanCalculator from './LoanCalculator';
 import { useAuth } from '@/lib/auth';
-import { WavingFlag, KenyaFloatingElements } from '@/components/ui/floating-animations';
 
-interface HeroProps {
-  onApplyClick?: () => void;
-}
-
-const Hero = ({ onApplyClick }: HeroProps) => {
+const Hero = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
 
   const handleApplyClick = () => {
-    if (onApplyClick) {
-      onApplyClick();
+    if (!user) {
+      navigate('/login');
     } else {
-      if (!user) {
-        navigate('/login');
-      } else {
-        navigate('/apply');
-      }
+      navigate('/apply');
     }
   };
 
   return (
-    <section className="relative py-16 md:py-24 overflow-hidden bg-white">
-      {/* Add floating elements for visual interest */}
-      <div className="hidden md:block">
-        <KenyaFloatingElements count={4} />
-      </div>
-      
+    <section className="relative py-20 md:py-28 overflow-hidden bg-white">
       <div className="container mx-auto px-4 md:px-6">
         <div className="flex flex-col lg:flex-row items-center justify-between gap-12">
           <motion.div 
@@ -43,24 +29,19 @@ const Hero = ({ onApplyClick }: HeroProps) => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
           >
-            <div className="flex items-center mb-4">
-              <WavingFlag size={36} />
-              <h2 className="text-lg font-medium ml-2 text-black">Kenya's Trusted Microlender</h2>
-            </div>
-            
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight text-black mb-6">
-              Quick, Secure, and<br/>Accessible Micro Loans
+              Easy Access to<br/>Financial Freedom
             </h1>
-            <p className="text-xl text-gray-700 mb-8">
-              Get the financial support you need with our hassle-free lending solutions designed for Kenyan businesses and individuals.
+            <p className="text-xl text-gray-600 mb-8">
+              Get the financial support you need with our hassle-free lending solutions designed specifically for you.
             </p>
             
             <div className="space-y-4 mb-8">
               {[
-                'Fast approval within hours',
-                'Competitive interest rates from 15%',
-                'M-Pesa disbursement and repayment',
-                'No hidden fees or charges'
+                'Fast approval within 24 hours',
+                'Competitive interest rates',
+                'Simple repayment options',
+                'No hidden fees'
               ].map((feature, index) => (
                 <motion.div 
                   key={index}
@@ -69,27 +50,24 @@ const Hero = ({ onApplyClick }: HeroProps) => {
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ duration: 0.5, delay: (index + 1) * 0.1 }}
                 >
-                  <CheckCircle className="h-5 w-5 text-emerald-600 mr-2 flex-shrink-0" />
+                  <div className="h-5 w-5 rounded-full bg-black mr-2 flex items-center justify-center">
+                    <svg className="h-3 w-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7"></path>
+                    </svg>
+                  </div>
                   <span className="text-gray-800">{feature}</span>
                 </motion.div>
               ))}
             </div>
             
-            <div className="flex flex-col sm:flex-row gap-4">
-              <Button 
-                size="lg" 
-                className="bg-emerald-600 hover:bg-emerald-700 text-white"
-                onClick={handleApplyClick}
-              >
-                Apply for a Loan
-                <ArrowRight className="ml-2 h-5 w-5" />
-              </Button>
-              <Link to={user ? "/dashboard" : "/register"}>
-                <Button variant="outline" size="lg" className="border-emerald-600 text-emerald-700 hover:bg-emerald-50">
-                  {user ? "My Dashboard" : "Register Now"}
-                </Button>
-              </Link>
-            </div>
+            <Button 
+              size="lg" 
+              onClick={handleApplyClick}
+              className="group"
+            >
+              Apply for a Loan
+              <ArrowRight className="ml-2 h-5 w-5 transition-transform group-hover:translate-x-1" />
+            </Button>
           </motion.div>
           
           <div className="lg:w-1/2">
@@ -97,8 +75,6 @@ const Hero = ({ onApplyClick }: HeroProps) => {
           </div>
         </div>
       </div>
-      
-      <div className="absolute bottom-0 left-0 right-0 h-20 bg-gradient-to-t from-white to-transparent"></div>
     </section>
   );
 };
