@@ -10,7 +10,7 @@ interface MainLayoutProps {
 
 const MainLayout = ({ children, applyHandler }: MainLayoutProps) => {
   return (
-    <div className="flex flex-col min-h-screen bg-white">
+    <div className="flex flex-col min-h-screen bg-gradient-to-b from-white via-white to-gray-50">
       <Navbar applyHandler={applyHandler} />
       <main className="flex-grow">
         {children}

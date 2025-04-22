@@ -13,8 +13,16 @@ const Index = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
 
+  const handleApply = () => {
+    if (user) {
+      navigate('/apply');
+    } else {
+      navigate('/login');
+    }
+  };
+
   return (
-    <MainLayout>
+    <MainLayout applyHandler={handleApply}>
       <Hero />
       <Features />
       <HowItWorks />

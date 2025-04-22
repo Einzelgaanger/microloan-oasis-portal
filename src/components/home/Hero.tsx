@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { ArrowRight } from 'lucide-react';
 import { motion } from 'framer-motion';
@@ -50,7 +50,7 @@ const Hero = () => {
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ duration: 0.5, delay: (index + 1) * 0.1 }}
                 >
-                  <div className="h-5 w-5 rounded-full bg-black mr-2 flex items-center justify-center">
+                  <div className="h-5 w-5 rounded-full bg-gradient-to-r from-gold-600 to-gold-500 mr-2 flex items-center justify-center">
                     <svg className="h-3 w-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7"></path>
                     </svg>
@@ -61,9 +61,10 @@ const Hero = () => {
             </div>
             
             <Button 
-              size="lg" 
+              size="lg"
+              variant="secondary"
               onClick={handleApplyClick}
-              className="group"
+              className="group shadow-lg"
             >
               Apply for a Loan
               <ArrowRight className="ml-2 h-5 w-5 transition-transform group-hover:translate-x-1" />

@@ -22,25 +22,29 @@
     --primary-foreground: 0 0% 100%;
     
     /* Gold as secondary */
-    --secondary: 43 74% 66%;
+    --secondary: 43 70% 60%;
     --secondary-foreground: 0 0% 10%;
     
     /* Red for destructive actions */
-    --destructive: 0 84% 60%;
+    --destructive: 0 85% 60%;
     --destructive-foreground: 0 0% 100%;
+    
+    /* Green for success */
+    --success: 142 76% 36%;
+    --success-foreground: 0 0% 100%;
     
     /* Muted */
     --muted: 0 0% 96%;
     --muted-foreground: 0 0% 45%;
     
     /* Accent */
-    --accent: 43 74% 96%;
-    --accent-foreground: 43 74% 30%;
+    --accent: 43 70% 95%;
+    --accent-foreground: 43 70% 30%;
     
     /* Border */
     --border: 0 0% 90%;
     --input: 0 0% 90%;
-    --ring: 0 0% 80%;
+    --ring: 43 70% 60%;
     
     /* Border radius */
     --radius: 0.5rem;
@@ -59,7 +63,7 @@
     --primary: 0 0% 95%;
     --primary-foreground: 0 0% 10%;
     
-    --secondary: 43 74% 60%;
+    --secondary: 43 70% 60%;
     --secondary-foreground: 0 0% 10%;
     
     --muted: 0 0% 20%;
@@ -68,12 +72,15 @@
     --accent: 43 60% 30%;
     --accent-foreground: 0 0% 95%;
     
-    --destructive: 0 62% 35%;
+    --destructive: 0 70% 45%;
     --destructive-foreground: 0 0% 95%;
+    
+    --success: 142 70% 30%;
+    --success-foreground: 0 0% 95%;
     
     --border: 0 0% 20%;
     --input: 0 0% 20%;
-    --ring: 43 74% 60%;
+    --ring: 43 70% 60%;
   }
 }
 
@@ -146,10 +153,35 @@
   }
   
   .feature-icon-primary {
-    @apply bg-black text-white;
+    @apply bg-gradient-to-br from-black to-gray-800 text-white;
   }
   
   .feature-icon-secondary {
-    @apply bg-secondary text-black;
+    @apply bg-gradient-to-br from-gold-500 to-gold-600 text-black;
+  }
+  
+  /* Background patterns */
+  .bg-pattern {
+    background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+  }
+  
+  /* Enhanced forms */
+  input:focus, textarea:focus, select:focus {
+    @apply ring-1 ring-gold-500 border-gold-500;
+  }
+  
+  /* Enhanced buttons */
+  .btn-hover-effect {
+    @apply relative overflow-hidden;
+  }
+  
+  .btn-hover-effect:after {
+    content: '';
+    @apply absolute top-0 left-0 w-full h-full bg-white opacity-0 transition-opacity duration-300;
+  }
+  
+  .btn-hover-effect:hover:after {
+    @apply opacity-10;
   }
 }
+

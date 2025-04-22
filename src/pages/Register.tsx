@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { z } from 'zod';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -63,7 +63,7 @@ const Register = () => {
       mode="register"
     >
       <Card className="w-full max-w-md border shadow-md">
-        <CardHeader className="space-y-2 bg-black text-white">
+        <CardHeader className="space-y-2 bg-gradient-to-r from-black to-gray-800 text-white">
           <CardTitle className="text-2xl font-bold text-center">Sign Up</CardTitle>
           <CardDescription className="text-center text-gray-300">
             Create your account to get started
@@ -77,6 +77,7 @@ const Register = () => {
                 <Input
                   id="firstName"
                   placeholder="John"
+                  className="border-gray-300 focus:border-gold-600 focus:ring-gold-500"
                   {...register('firstName')}
                 />
                 {errors.firstName && (
@@ -89,6 +90,7 @@ const Register = () => {
                 <Input
                   id="lastName"
                   placeholder="Doe"
+                  className="border-gray-300 focus:border-gold-600 focus:ring-gold-500"
                   {...register('lastName')}
                 />
                 {errors.lastName && (
@@ -102,6 +104,7 @@ const Register = () => {
               <Input
                 id="username"
                 placeholder="johndoe"
+                className="border-gray-300 focus:border-gold-600 focus:ring-gold-500"
                 {...register('username')}
               />
               {errors.username && (
@@ -115,6 +118,7 @@ const Register = () => {
                 id="email"
                 type="email"
                 placeholder="you@example.com"
+                className="border-gray-300 focus:border-gold-600 focus:ring-gold-500"
                 {...register('email')}
               />
               {errors.email && (
@@ -128,6 +132,7 @@ const Register = () => {
                 id="password"
                 type="password"
                 placeholder="••••••••"
+                className="border-gray-300 focus:border-gold-600 focus:ring-gold-500"
                 {...register('password')}
               />
               {errors.password && (
@@ -141,6 +146,7 @@ const Register = () => {
                 id="confirmPassword"
                 type="password"
                 placeholder="••••••••"
+                className="border-gray-300 focus:border-gold-600 focus:ring-gold-500"
                 {...register('confirmPassword')}
               />
               {errors.confirmPassword && (
@@ -152,7 +158,7 @@ const Register = () => {
           <CardFooter className="flex flex-col gap-4">
             <Button 
               type="submit" 
-              className="w-full"
+              className="w-full bg-gradient-to-r from-gold-600 to-gold-500 hover:from-gold-700 hover:to-gold-600 text-black font-medium"
               disabled={isSubmitting}
             >
               {isSubmitting ? 'Creating Account...' : 'Create Account'}
@@ -160,7 +166,7 @@ const Register = () => {
             
             <p className="text-sm text-center text-gray-500">
               Already have an account?{' '}
-              <Link to="/login" className="text-black hover:underline font-medium">
+              <Link to="/login" className="text-black hover:text-gold-700 font-medium">
                 Sign in
               </Link>
             </p>

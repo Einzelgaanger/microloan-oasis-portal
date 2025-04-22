@@ -51,7 +51,7 @@ const Login = () => {
       mode="login"
     >
       <Card className="w-full max-w-md border shadow-md">
-        <CardHeader className="space-y-2 bg-black text-white">
+        <CardHeader className="space-y-2 bg-gradient-to-r from-black to-gray-800 text-white">
           <CardTitle className="text-2xl font-bold text-center">Sign In</CardTitle>
           <CardDescription className="text-center text-gray-300">
             Access your account to continue
@@ -71,6 +71,7 @@ const Login = () => {
                 id="email"
                 type="email"
                 placeholder="you@example.com"
+                className="border-gray-300 focus:border-gold-600 focus:ring-gold-500"
                 {...register('email')}
               />
               {errors.email && (
@@ -81,7 +82,7 @@ const Login = () => {
             <div className="space-y-2">
               <div className="flex justify-between">
                 <Label htmlFor="password">Password</Label>
-                <Link to="/forgot-password" className="text-sm text-black hover:underline">
+                <Link to="/forgot-password" className="text-sm text-black hover:text-gold-700">
                   Forgot password?
                 </Link>
               </div>
@@ -89,6 +90,7 @@ const Login = () => {
                 id="password"
                 type="password"
                 placeholder="••••••••"
+                className="border-gray-300 focus:border-gold-600 focus:ring-gold-500"
                 {...register('password')}
               />
               {errors.password && (
@@ -100,6 +102,7 @@ const Login = () => {
           <CardFooter className="flex flex-col gap-4">
             <Button 
               type="submit" 
+              variant="secondary"
               className="w-full"
               disabled={isSubmitting}
             >
@@ -108,7 +111,7 @@ const Login = () => {
             
             <p className="text-sm text-center text-gray-500">
               Don't have an account?{' '}
-              <Link to="/register" className="text-black hover:underline font-medium">
+              <Link to="/register" className="text-black hover:text-gold-700 font-medium">
                 Sign up
               </Link>
             </p>

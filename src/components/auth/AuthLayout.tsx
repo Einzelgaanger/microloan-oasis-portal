@@ -17,7 +17,7 @@ const AuthLayout = ({ children, title, description, mode }: AuthLayoutProps) => 
         <div className="w-full max-w-md">
           <div className="mb-8">
             <Link to="/" className="flex items-center">
-              <span className="text-2xl font-bold text-black">MicroLoan</span>
+              <span className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-black to-gray-800">MicroLoan</span>
             </Link>
           </div>
           
@@ -31,8 +31,8 @@ const AuthLayout = ({ children, title, description, mode }: AuthLayoutProps) => 
       </div>
       
       {/* Right side - Image/Info */}
-      <div className="hidden lg:flex lg:w-1/2 bg-black relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-black to-gray-800"></div>
+      <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-black to-gray-800 relative overflow-hidden">
+        <div className="absolute inset-0 bg-pattern opacity-10"></div>
         
         <div className="relative z-10 flex flex-col justify-center items-center p-12 text-white">
           <div className="max-w-md text-center">
@@ -42,20 +42,20 @@ const AuthLayout = ({ children, title, description, mode }: AuthLayoutProps) => 
             </p>
             
             <div className="grid grid-cols-2 gap-4">
-              <div className="bg-white/10 backdrop-blur-sm p-4 rounded-lg">
-                <div className="font-bold text-2xl mb-1">5 Min</div>
+              <div className="bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-sm p-4 rounded-lg border border-white/10">
+                <div className="font-bold text-2xl mb-1 text-gold-400">5 Min</div>
                 <div className="text-sm opacity-80">Application Time</div>
               </div>
-              <div className="bg-white/10 backdrop-blur-sm p-4 rounded-lg">
-                <div className="font-bold text-2xl mb-1">24 Hr</div>
+              <div className="bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-sm p-4 rounded-lg border border-white/10">
+                <div className="font-bold text-2xl mb-1 text-gold-400">24 Hr</div>
                 <div className="text-sm opacity-80">Fast Approval</div>
               </div>
-              <div className="bg-white/10 backdrop-blur-sm p-4 rounded-lg">
-                <div className="font-bold text-2xl mb-1">100%</div>
+              <div className="bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-sm p-4 rounded-lg border border-white/10">
+                <div className="font-bold text-2xl mb-1 text-gold-400">100%</div>
                 <div className="text-sm opacity-80">Secure Process</div>
               </div>
-              <div className="bg-white/10 backdrop-blur-sm p-4 rounded-lg">
-                <div className="font-bold text-2xl mb-1">24/7</div>
+              <div className="bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-sm p-4 rounded-lg border border-white/10">
+                <div className="font-bold text-2xl mb-1 text-gold-400">24/7</div>
                 <div className="text-sm opacity-80">Customer Support</div>
               </div>
             </div>
