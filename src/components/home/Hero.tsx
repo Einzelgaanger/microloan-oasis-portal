@@ -11,7 +11,7 @@ interface HeroProps {
 
 const Hero = ({ onApply }: HeroProps) => {
   return (
-    <section className="relative py-20 md:py-28 overflow-hidden bg-white">
+    <section className="relative py-20 md:py-28 overflow-hidden bg-white hero-gradient-overlay">
       <div className="container mx-auto px-4 md:px-6">
         <div className="flex flex-col lg:flex-row items-center justify-between gap-12">
           <motion.div 
@@ -29,9 +29,9 @@ const Hero = ({ onApply }: HeroProps) => {
             
             <div className="space-y-4 mb-8">
               {[
-                'Personalized financial solutions',
-                'Competitive interest rates',
-                'Transparent terms and conditions',
+                'Loans from KES 50,000 to 500,000',
+                'Quick approval and disbursement',
+                'Flexible repayment periods up to 6 months',
                 'Dedicated customer support'
               ].map((feature, index) => (
                 <motion.div 

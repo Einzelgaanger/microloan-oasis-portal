@@ -45,6 +45,7 @@ export interface Profile {
   selfie_url?: string;
   payslip_url?: string;
   statement_url?: string;
+  email?: string;
 }
 
 // This hook helps share data between LoanApplication and UserProfile

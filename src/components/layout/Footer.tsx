@@ -11,7 +11,7 @@ const Footer = () => {
           <div className="animate-fade-in" style={{ animationDelay: '100ms' }}>
             <h3 className="text-xl font-semibold mb-4">Elara Capital</h3>
             <p className="text-gray-300 mb-4">
-              Providing innovative financial solutions to individuals and businesses, helping them achieve their goals and secure their future.
+              Providing innovative financial solutions to individuals, helping them achieve their goals and secure their future.
             </p>
             <div className="flex space-x-4">
               <a href="#" className="hover:text-blue-400 transition-colors">
@@ -74,13 +74,13 @@ const Footer = () => {
               </li>
               <li className="flex items-start">
                 <Phone size={18} className="mr-2 mt-1 flex-shrink-0" />
-                <span className="text-gray-300">+1 (555) 123-4567</span>
+                <span className="text-gray-300">+254 700 000 000</span>
               </li>
               <li>
                 <address className="text-gray-300 not-italic">
-                  123 Financial District,<br />
+                  123 Business District,<br />
                   Suite 456,<br />
-                  New York, NY 10001
+                  Nairobi, Kenya
                 </address>
               </li>
             </ul>

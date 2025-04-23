@@ -9,27 +9,41 @@ import { ArrowRight, Calculator, ChevronDown, ChevronUp } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
-export const LoanCalculator = () => {
+const LoanCalculator = () => {
   const [isOpen, setIsOpen] = useState(true);
-  const [amount, setAmount] = useState(10000);
+  const [amount, setAmount] = useState(100000);
   const [term, setTerm] = useState(3);
-  const [interestRate] = useState(15); // Annual interest rate (%)
+  const [interestRate, setInterestRate] = useState(30);
   const [monthlyPayment, setMonthlyPayment] = useState(0);
   const [totalPayment, setTotalPayment] = useState(0);
+  const [processingFee, setProcessingFee] = useState(5000);
 
   useEffect(() => {
-    // Calculate the monthly payment
-    const interest = interestRate / 100 / 12; // Monthly interest rate
-    const payments = term; // Total number of payments (in months)
+    // Update interest rate based on amount
+    let rate = 30; // Default rate
+    if (amount > 100000 && amount <= 200000) {
+      rate = 25;
+    } else if (amount > 200000) {
+      rate = 20;
+    }
+    setInterestRate(rate);
+
+    // Update processing fee
+    const fee = amount > 100000 ? amount * 0.05 : 5000;
+    setProcessingFee(fee);
+
+    // Calculate monthly payment
+    const monthlyInterestRate = rate / 100 / 12;
+    const totalPayments = term;
     const principal = amount;
 
     // Monthly payment formula
-    const monthly = (principal * interest) / (1 - Math.pow(1 + interest, -payments));
-    const total = monthly * payments;
+    const monthly = (principal * monthlyInterestRate) / (1 - Math.pow(1 + monthlyInterestRate, -totalPayments));
+    const total = monthly * totalPayments;
 
     setMonthlyPayment(isNaN(monthly) ? 0 : Math.round(monthly));
     setTotalPayment(isNaN(total) ? 0 : Math.round(total));
-  }, [amount, term, interestRate]);
+  }, [amount, term]);
 
   return (
     <motion.div
@@ -56,14 +70,14 @@ export const LoanCalculator = () => {
             <div className="space-y-6">
               <div className="space-y-2">
                 <div className="flex justify-between">
-                  <Label>Loan Amount: KSh {amount.toLocaleString()}</Label>
-                  <span className="text-xs text-gray-500">Min: 5,000 - Max: 50,000</span>
+                  <Label>Loan Amount: KES {amount.toLocaleString()}</Label>
+                  <span className="text-xs text-gray-500">Min: 50,000 - Max: 500,000</span>
                 </div>
                 <Slider
                   value={[amount]}
-                  min={5000}
-                  max={50000}
-                  step={1000}
+                  min={50000}
+                  max={500000}
+                  step={10000}
                   onValueChange={values => setAmount(values[0])}
                   className="py-4"
                 />
@@ -79,8 +93,9 @@ export const LoanCalculator = () => {
                     <SelectItem value="1">1 Month</SelectItem>
                     <SelectItem value="2">2 Months</SelectItem>
                     <SelectItem value="3">3 Months</SelectItem>
+                    <SelectItem value="4">4 Months</SelectItem>
+                    <SelectItem value="5">5 Months</SelectItem>
                     <SelectItem value="6">6 Months</SelectItem>
-                    <SelectItem value="12">12 Months</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -94,15 +109,15 @@ export const LoanCalculator = () => {
                   </div>
                   <div>
                     <p className="text-xs text-gray-500">Monthly Payment</p>
-                    <p className="font-semibold text-blue-700">KSh {monthlyPayment.toLocaleString()}</p>
+                    <p className="font-semibold text-blue-700">KES {monthlyPayment.toLocaleString()}</p>
                   </div>
                   <div>
-                    <p className="text-xs text-gray-500">Total Term</p>
-                    <p className="font-semibold">{term} {term === 1 ? 'Month' : 'Months'}</p>
+                    <p className="text-xs text-gray-500">Processing Fee</p>
+                    <p className="font-semibold">KES {processingFee.toLocaleString()}</p>
                   </div>
                   <div>
                     <p className="text-xs text-gray-500">Total Payment</p>
-                    <p className="font-semibold">KSh {totalPayment.toLocaleString()}</p>
+                    <p className="font-semibold">KES {totalPayment.toLocaleString()}</p>
                   </div>
                 </div>
               </div>
@@ -114,7 +129,7 @@ export const LoanCalculator = () => {
               </Link>
               
               <p className="text-xs text-center text-gray-500 mt-2">
-                Your loan application processed in minutes!
+                Loan applications processed within 24 hours!
               </p>
             </div>
           </CardContent>
