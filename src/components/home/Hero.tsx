@@ -21,18 +21,18 @@ const Hero = ({ onApply }: HeroProps) => {
             transition={{ duration: 0.5 }}
           >
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight text-black mb-6">
-              Easy Access to<br/>Financial Freedom
+              Empowering Your<br/>Financial Journey
             </h1>
             <p className="text-xl text-gray-600 mb-8">
-              Get the financial support you need with our hassle-free lending solutions designed specifically for you.
+              Elara Capital provides tailored financial solutions to help you achieve your goals with confidence and clarity.
             </p>
             
             <div className="space-y-4 mb-8">
               {[
-                'Fast approval within 24 hours',
+                'Personalized financial solutions',
                 'Competitive interest rates',
-                'Simple repayment options',
-                'No hidden fees'
+                'Transparent terms and conditions',
+                'Dedicated customer support'
               ].map((feature, index) => (
                 <motion.div 
                   key={index}
@@ -41,7 +41,7 @@ const Hero = ({ onApply }: HeroProps) => {
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ duration: 0.5, delay: (index + 1) * 0.1 }}
                 >
-                  <div className="h-5 w-5 rounded-full bg-gradient-to-r from-gold-600 to-gold-500 mr-2 flex items-center justify-center">
+                  <div className="h-5 w-5 rounded-full bg-gradient-to-r from-blue-600 to-blue-500 mr-2 flex items-center justify-center">
                     <svg className="h-3 w-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7"></path>
                     </svg>
@@ -53,9 +53,8 @@ const Hero = ({ onApply }: HeroProps) => {
             
             <Button 
               size="lg"
-              variant="secondary"
               onClick={onApply}
-              className="group shadow-lg"
+              className="bg-blue-600 hover:bg-blue-700 text-white group shadow-lg"
             >
               Apply for a Loan
               <ArrowRight className="ml-2 h-5 w-5 transition-transform group-hover:translate-x-1" />

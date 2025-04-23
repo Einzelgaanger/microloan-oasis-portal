@@ -21,9 +21,9 @@
     --primary: 0 0% 0%;
     --primary-foreground: 0 0% 100%;
     
-    /* Gold as secondary */
-    --secondary: 43 70% 60%;
-    --secondary-foreground: 0 0% 10%;
+    /* Blue as secondary */
+    --secondary: 210 85% 50%;
+    --secondary-foreground: 0 0% 100%;
     
     /* Red for destructive actions */
     --destructive: 0 85% 60%;
@@ -44,7 +44,7 @@
     /* Border */
     --border: 0 0% 90%;
     --input: 0 0% 90%;
-    --ring: 43 70% 60%;
+    --ring: 210 85% 50%;
     
     /* Border radius */
     --radius: 0.5rem;
@@ -63,8 +63,8 @@
     --primary: 0 0% 95%;
     --primary-foreground: 0 0% 10%;
     
-    --secondary: 43 70% 60%;
-    --secondary-foreground: 0 0% 10%;
+    --secondary: 210 85% 50%;
+    --secondary-foreground: 0 0% 100%;
     
     --muted: 0 0% 20%;
     --muted-foreground: 0 0% 65%;
@@ -80,7 +80,7 @@
     
     --border: 0 0% 20%;
     --input: 0 0% 20%;
-    --ring: 43 70% 60%;
+    --ring: 210 85% 50%;
   }
 }
 
@@ -157,7 +157,7 @@
   }
   
   .feature-icon-secondary {
-    @apply bg-gradient-to-br from-gold-500 to-gold-600 text-black;
+    @apply bg-gradient-to-br from-blue-500 to-blue-600 text-white;
   }
   
   /* Background patterns */
@@ -167,7 +167,7 @@
   
   /* Enhanced forms */
   input:focus, textarea:focus, select:focus {
-    @apply ring-1 ring-gold-500 border-gold-500;
+    @apply ring-1 ring-blue-500 border-blue-500;
   }
   
   /* Enhanced buttons */
@@ -184,4 +184,3 @@
     @apply opacity-10;
   }
 }
-

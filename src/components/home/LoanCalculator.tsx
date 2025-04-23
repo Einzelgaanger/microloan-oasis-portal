@@ -38,12 +38,12 @@ export const LoanCalculator = () => {
       transition={{ duration: 0.5, delay: 0.3 }}
       className="w-full max-w-md mx-auto lg:mx-0"
     >
-      <Card className="border-2 border-lending-primary/20 shadow-xl overflow-hidden">
-        <CardHeader className="bg-gradient-to-r from-lending-primary/10 to-blue-500/10 py-4 cursor-pointer flex flex-row items-center justify-between" onClick={() => setIsOpen(!isOpen)}>
-          <CardTitle className="text-xl flex items-center">
+      <Card className="border-2 border-blue-200 shadow-xl overflow-hidden">
+        <CardHeader className="bg-gradient-to-r from-blue-50 to-blue-100 py-4 cursor-pointer flex flex-row items-center justify-between" onClick={() => setIsOpen(!isOpen)}>
+          <CardTitle className="text-xl flex items-center text-blue-800">
             <Calculator className="mr-2 h-5 w-5" /> Loan Calculator
           </CardTitle>
-          {isOpen ? <ChevronUp className="h-5 w-5" /> : <ChevronDown className="h-5 w-5" />}
+          {isOpen ? <ChevronUp className="h-5 w-5 text-blue-800" /> : <ChevronDown className="h-5 w-5 text-blue-800" />}
         </CardHeader>
         
         <motion.div
@@ -85,8 +85,8 @@ export const LoanCalculator = () => {
                 </Select>
               </div>
               
-              <div className="rounded-lg bg-gray-50 p-4 mt-4 space-y-2">
-                <h4 className="text-sm font-medium text-gray-600">Payment Summary</h4>
+              <div className="rounded-lg bg-blue-50 p-4 mt-4 space-y-2">
+                <h4 className="text-sm font-medium text-blue-800">Payment Summary</h4>
                 <div className="grid grid-cols-2 gap-2">
                   <div>
                     <p className="text-xs text-gray-500">Interest Rate</p>
@@ -94,7 +94,7 @@ export const LoanCalculator = () => {
                   </div>
                   <div>
                     <p className="text-xs text-gray-500">Monthly Payment</p>
-                    <p className="font-semibold text-lending-primary">KSh {monthlyPayment.toLocaleString()}</p>
+                    <p className="font-semibold text-blue-700">KSh {monthlyPayment.toLocaleString()}</p>
                   </div>
                   <div>
                     <p className="text-xs text-gray-500">Total Term</p>
@@ -108,7 +108,7 @@ export const LoanCalculator = () => {
               </div>
               
               <Link to="/apply" className="block w-full">
-                <Button className="w-full bg-lending-primary hover:bg-lending-primary/90 btn-pulse">
+                <Button className="w-full bg-blue-600 hover:bg-blue-700 text-white">
                   Apply Now <ArrowRight className="ml-2 h-4 w-4" />
                 </Button>
               </Link>

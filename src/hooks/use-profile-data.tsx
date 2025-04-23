@@ -2,7 +2,50 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/lib/auth';
 import { dataService } from '@/services/dataService';
-import { Profile } from '@/services/mockDataService';
+
+// Updated Profile interface with all necessary fields
+export interface Profile {
+  id: string;
+  first_name: string;
+  last_name: string;
+  username?: string;
+  created_at: string;
+  updated_at?: string;
+  id_number?: string;
+  date_of_birth?: string;
+  gender?: string;
+  marital_status?: string;
+  nationality?: string;
+  phone_number?: string;
+  alternative_phone?: string;
+  address?: string;
+  county?: string;
+  sub_county?: string;
+  village?: string;
+  landmark?: string;
+  residence_duration?: string;
+  employment_status?: string;
+  occupation?: string;
+  employer_name?: string;
+  employer_contact?: string;
+  monthly_income?: number;
+  secondary_income?: number;
+  pay_frequency?: string;
+  work_location?: string;
+  bank_name?: string;
+  bank_branch?: string;
+  account_number?: string;
+  mpesa_number?: string;
+  kin_name?: string;
+  kin_relationship?: string;
+  kin_phone?: string;
+  kin_id_number?: string;
+  kin_address?: string;
+  id_document_url?: string;
+  selfie_url?: string;
+  payslip_url?: string;
+  statement_url?: string;
+}
 
 // This hook helps share data between LoanApplication and UserProfile
 export const useProfileData = () => {
@@ -72,7 +115,7 @@ export const useProfileData = () => {
     try {
       // Ensure monthly_income is a number if provided
       if (profileData.monthly_income !== undefined && typeof profileData.monthly_income === 'string') {
-        profileData.monthly_income = parseFloat(profileData.monthly_income);
+        profileData.monthly_income = parseFloat(profileData.monthly_income as unknown as string);
       }
       
       const updatedProfile = await dataService.profiles.updateProfile(user.id, profileData);
@@ -82,14 +125,14 @@ export const useProfileData = () => {
         const safeUpdatedProfile = {
           ...updatedProfile,
           created_at: updatedProfile.created_at || new Date().toISOString()
-        };
+        } as Profile;
         
         // Update the profile state with all fields merged
-        setProfile(prev => (prev ? { ...prev, ...safeUpdatedProfile } : safeUpdatedProfile as Profile));
+        setProfile(prev => (prev ? { ...prev, ...safeUpdatedProfile } : safeUpdatedProfile));
         
         // Re-check if profile is complete after update
         const isComplete = requiredFields.every(field => 
-          safeUpdatedProfile[field as keyof typeof safeUpdatedProfile]
+          safeUpdatedProfile[field as keyof Profile]
         );
         setProfileComplete(isComplete);
       }
