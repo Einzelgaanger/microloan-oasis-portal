@@ -1,19 +1,20 @@
 import React, { useEffect, useState } from 'react';
-import MainLayout from '@/components/layout/MainLayout';
-import { useAuth } from '@/lib/auth';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Link } from 'react-router-dom';
-import { AlertTriangle, CheckCircle, Clock, FileText, CreditCard, CalendarRange, ChevronRight } from 'lucide-react';
-import { ProtectedRoute } from '@/lib/auth';
+import { Badge } from '@/components/ui/badge';
+import { Plus, FileText, DollarSign, Clock, CheckCircle } from 'lucide-react';
+import { useAuth } from '@/lib/auth';
+import { useNavigate } from 'react-router-dom';
 import { dataService } from '@/services/dataService';
-import { Loan, Profile } from '@/services/mockDataService';
+import { Loan, Profile } from '@/types/loan';
+import { toast } from 'sonner';
 
 const Dashboard = () => {
   const { user } = useAuth();
   const [loans, setLoans] = useState<Loan[]>([]);
   const [loading, setLoading] = useState(true);
   const [profile, setProfile] = useState<Profile | null>(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchData = async () => {

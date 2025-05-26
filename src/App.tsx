@@ -5,6 +5,7 @@ import './App.css';
 import Index from '@/pages/Index';
 import Login from '@/pages/Login';
 import Register from '@/pages/Register';
+import ForgotPassword from '@/pages/ForgotPassword';
 import Dashboard from '@/pages/Dashboard';
 import UserProfile from '@/pages/UserProfile';
 import NotFound from '@/pages/NotFound';
@@ -24,6 +25,7 @@ function App() {
           <Route path="/" element={<Index />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/dashboard" element={
             <ProtectedRoute>
               <Dashboard />

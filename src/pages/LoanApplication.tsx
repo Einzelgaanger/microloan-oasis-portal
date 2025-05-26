@@ -1,20 +1,19 @@
 import React, { useState, useEffect } from 'react';
-import MainLayout from '@/components/layout/MainLayout';
-import { useAuth } from '@/lib/auth';
+import { useNavigate } from 'react-router-dom';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Slider } from '@/components/ui/slider';
+import { FileUpload } from '@/components/ui/file-upload';
+import { useAuth } from '@/lib/auth';
+import { dataService } from '@/services/dataService';
+import { Loan, Profile } from '@/types/loan';
 import { toast } from 'sonner';
 import { ProtectedRoute } from '@/lib/auth';
-import { useNavigate } from 'react-router-dom';
-import { dataService } from '@/services/dataService';
-import { Loan, Profile } from '@/services/mockDataService';
-import { CheckCircle, Download, Upload } from 'lucide-react';
 import { FadeIn, StaggeredItems } from '@/components/ui/animations';
-import { FileUpload } from '@/components/ui/file-upload';
 
 const LoanApplication = () => {
   const { user } = useAuth();

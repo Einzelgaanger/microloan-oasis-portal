@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { z } from 'zod';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -11,63 +11,78 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { useAuth } from '@/lib/auth';
 
-// Define the login form schema with Zod
-const loginSchema = z.object({
+const forgotPasswordSchema = z.object({
   email: z.string().email({ message: "Please enter a valid email address" }),
-  password: z.string().min(1, { message: "Password is required" }),
 });
 
-type LoginFormValues = z.infer<typeof loginSchema>;
+type ForgotPasswordFormValues = z.infer<typeof forgotPasswordSchema>;
 
-const Login = () => {
-  const form = useForm<LoginFormValues>({
-    resolver: zodResolver(loginSchema),
+const ForgotPassword = () => {
+  const form = useForm<ForgotPasswordFormValues>({
+    resolver: zodResolver(forgotPasswordSchema),
     defaultValues: {
       email: '',
-      password: '',
     },
   });
   
-  const { signIn } = useAuth();
-  const navigate = useNavigate();
-  const [loginError, setLoginError] = useState<string | null>(null);
+  const { resetPassword } = useAuth();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [emailSent, setEmailSent] = useState(false);
 
-  const onSubmit = async (data: LoginFormValues) => {
+  const onSubmit = async (data: ForgotPasswordFormValues) => {
     try {
       setIsSubmitting(true);
-      setLoginError(null);
-      
-      const { email, password } = data;
-      await signIn(email, password);
-      
-      // Navigation is handled in the auth context
-      
+      await resetPassword(data.email);
+      setEmailSent(true);
     } catch (error: any) {
-      setLoginError(error.message || 'Sign in failed. Please check your credentials.');
+      // Error is already handled in the auth context with toast
       setIsSubmitting(false);
     }
   };
 
+  if (emailSent) {
+    return (
+      <AuthLayout title="Check Your Email" mode="login">
+        <Card className="w-full max-w-md border shadow-md">
+          <CardHeader className="space-y-2 bg-gradient-to-r from-blue-600 to-blue-500 text-white">
+            <CardTitle className="text-2xl font-bold text-center">Email Sent</CardTitle>
+            <CardDescription className="text-center text-white/80">
+              Check your inbox for reset instructions
+            </CardDescription>
+          </CardHeader>
+          
+          <CardContent className="space-y-4 pt-6">
+            <p className="text-center text-gray-600">
+              We've sent a password reset link to your email address. 
+              Please check your inbox and follow the instructions to reset your password.
+            </p>
+          </CardContent>
+          
+          <CardFooter className="flex flex-col gap-4">
+            <Link to="/login" className="w-full">
+              <Button variant="outline" className="w-full">
+                Back to Sign In
+              </Button>
+            </Link>
+          </CardFooter>
+        </Card>
+      </AuthLayout>
+    );
+  }
+
   return (
-    <AuthLayout title="Welcome Back" mode="login">
+    <AuthLayout title="Reset Password" mode="login">
       <Card className="w-full max-w-md border shadow-md">
         <CardHeader className="space-y-2 bg-gradient-to-r from-blue-600 to-blue-500 text-white">
-          <CardTitle className="text-2xl font-bold text-center">Sign In</CardTitle>
+          <CardTitle className="text-2xl font-bold text-center">Reset Password</CardTitle>
           <CardDescription className="text-center text-white/80">
-            Access your account to continue
+            Enter your email to receive reset instructions
           </CardDescription>
         </CardHeader>
         
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)}>
             <CardContent className="space-y-4 pt-6">
-              {loginError && (
-                <div className="p-3 rounded-md bg-red-50 text-red-500 text-sm">
-                  {loginError}
-                </div>
-              )}
-              
               <FormField
                 control={form.control}
                 name="email"
@@ -81,25 +96,6 @@ const Login = () => {
                   </FormItem>
                 )}
               />
-              
-              <FormField
-                control={form.control}
-                name="password"
-                render={({ field }) => (
-                  <FormItem>
-                    <div className="flex items-center justify-between">
-                      <FormLabel>Password</FormLabel>
-                      <Link to="/forgot-password" className="text-sm text-blue-600 hover:text-blue-700">
-                        Forgot password?
-                      </Link>
-                    </div>
-                    <FormControl>
-                      <Input type="password" placeholder="••••••••" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
             </CardContent>
             
             <CardFooter className="flex flex-col gap-4">
@@ -108,13 +104,13 @@ const Login = () => {
                 className="w-full bg-gradient-to-r from-blue-600 to-blue-500 text-white hover:from-blue-700 hover:to-blue-600"
                 disabled={isSubmitting}
               >
-                {isSubmitting ? 'Signing In...' : 'Sign In'}
+                {isSubmitting ? 'Sending...' : 'Send Reset Email'}
               </Button>
               
               <p className="text-sm text-center text-gray-500">
-                Don't have an account?{' '}
-                <Link to="/register" className="text-blue-600 hover:text-blue-700 font-medium">
-                  Sign up
+                Remember your password?{' '}
+                <Link to="/login" className="text-blue-600 hover:text-blue-700 font-medium">
+                  Sign in
                 </Link>
               </p>
             </CardFooter>
@@ -125,4 +121,4 @@ const Login = () => {
   );
 };
 
-export default Login;
+export default ForgotPassword;

@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import MainLayout from '@/components/layout/MainLayout';
 import { useAuth } from '@/lib/auth';
@@ -7,10 +6,14 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { Badge } from '@/components/ui/badge';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { AlertTriangle, CheckCircle, Clock, Download, Eye, FileText, Search, ThumbsDown, ThumbsUp, X } from 'lucide-react';
 import { toast } from 'sonner';
 import { dataService } from '@/services/dataService';
-import { Loan } from '@/services/mockDataService';
+import { Loan } from '@/types/loan';
 
 const AdminDashboard = () => {
   const [loans, setLoans] = useState<Loan[]>([]);

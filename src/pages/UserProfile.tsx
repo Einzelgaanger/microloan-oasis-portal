@@ -1,81 +1,66 @@
-
 import React, { useState, useEffect } from 'react';
-import MainLayout from '@/components/layout/MainLayout';
-import { useAuth } from '@/lib/auth';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { toast } from 'sonner';
-import { ProtectedRoute } from '@/lib/auth';
+import { Textarea } from '@/components/ui/textarea';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { dataService } from '@/services/dataService';
-import { Profile } from '@/services/mockDataService';
-import { CheckCircle, Upload, User } from 'lucide-react';
-import { useProfileData } from '@/hooks/use-profile-data';
-import { useNavigate } from 'react-router-dom';
-import { FadeIn, StaggeredItems } from '@/components/ui/animations';
 import { FileUpload } from '@/components/ui/file-upload';
+import { Badge } from '@/components/ui/badge';
+import { Separator } from '@/components/ui/separator';
+import { useAuth } from '@/lib/auth';
+import { dataService } from '@/services/dataService';
+import { Profile } from '@/types/loan';
+import { toast } from 'sonner';
 
 const UserProfile = () => {
   const { user } = useAuth();
-  const navigate = useNavigate();
-  const { profile, loading: profileLoading, updateProfile } = useProfileData();
+  const [profile, setProfile] = useState<Profile | null>(null);
+  const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [activeTab, setActiveTab] = useState('personal');
-  const [isProfileComplete, setIsProfileComplete] = useState(false);
 
-  // Personal Information
+  // Form states
   const [personalInfo, setPersonalInfo] = useState({
     first_name: '',
     last_name: '',
+    email: '',
+    phone_number: '',
     id_number: '',
     date_of_birth: '',
     gender: '',
     marital_status: '',
-    nationality: 'Kenyan',
-    id_document: null as File | null,
-    selfie: null as File | null,
+    nationality: '',
   });
 
-  // Contact Information
   const [contactInfo, setContactInfo] = useState({
-    phone_number: '',
-    alternative_phone: '',
-    email: '',
     address: '',
     county: '',
-    subcounty: '',
+    sub_county: '',
     village: '',
     landmark: '',
     residence_duration: '',
+    alternative_phone: '',
   });
 
-  // Employment Information
   const [employmentInfo, setEmploymentInfo] = useState({
     employment_status: '',
     occupation: '',
     employer_name: '',
     employer_contact: '',
-    monthly_income: 0,
+    monthly_income: '',
     secondary_income: '',
     pay_frequency: '',
     work_location: '',
-    payslip_document: null as File | null,
   });
 
-  // Banking Information
   const [bankingInfo, setBankingInfo] = useState({
     bank_name: '',
     bank_branch: '',
     account_number: '',
     mpesa_number: '',
-    statement_document: null as File | null,
   });
 
-  // Next of Kin Information
   const [kinInfo, setKinInfo] = useState({
     kin_name: '',
     kin_relationship: '',
@@ -84,883 +69,432 @@ const UserProfile = () => {
     kin_address: '',
   });
 
-  // Check if profile is complete
   useEffect(() => {
-    if (profile) {
-      // Update form state with profile data
-      setPersonalInfo({
-        first_name: profile.first_name || '',
-        last_name: profile.last_name || '',
-        id_number: profile.id_number || '',
-        date_of_birth: profile.date_of_birth || '',
-        gender: profile.gender || '',
-        marital_status: profile.marital_status || '',
-        nationality: profile.nationality || 'Kenyan',
-        id_document: null,
-        selfie: null,
-      });
-      
-      setContactInfo({
-        phone_number: profile.phone_number || '',
-        alternative_phone: profile.alternative_phone || '',
-        email: profile.email || user?.email || '',
-        address: profile.address || '',
-        county: profile.county || '',
-        subcounty: profile.sub_county || '',  // Fixed property name
-        village: profile.village || '',
-        landmark: profile.landmark || '',
-        residence_duration: profile.residence_duration || '',  // This now exists in the Profile type
-      });
-      
-      setEmploymentInfo({
-        employment_status: profile.employment_status || '',
-        occupation: profile.occupation || '',
-        employer_name: profile.employer_name || '',
-        employer_contact: profile.employer_contact || '',
-        monthly_income: profile.monthly_income || 0,
-        secondary_income: profile.secondary_income || '',
-        pay_frequency: profile.pay_frequency || '',
-        work_location: profile.work_location || '',
-        payslip_document: null,
-      });
-      
-      setBankingInfo({
-        bank_name: profile.bank_name || '',
-        bank_branch: profile.bank_branch || '',
-        account_number: profile.account_number || '',
-        mpesa_number: profile.mpesa_number || '',
-        statement_document: null,
-      });
-      
-      setKinInfo({
-        kin_name: profile.kin_name || '',
-        kin_relationship: profile.kin_relationship || '',
-        kin_phone: profile.kin_phone || '',
-        kin_id_number: profile.kin_id_number || '',
-        kin_address: profile.kin_address || '',
-      });
-      
-      // Check if required fields are filled
-      const requiredFields = [
-        'first_name', 'last_name', 'id_number', 'phone_number',
-        'address', 'county', 'employment_status', 'monthly_income',
-        'mpesa_number', 'kin_name', 'kin_phone', 'kin_relationship'
-      ];
-      
-      const isComplete = requiredFields.every(field => 
-        profile && profile[field as keyof Profile]
-      );
-      
-      setIsProfileComplete(isComplete);
-    }
-  }, [profile, user]);
-
-  const handlePersonalInfoChange = (field: string, value: string) => {
-    setPersonalInfo(prev => ({ ...prev, [field]: value }));
-  };
-
-  const handleContactInfoChange = (field: string, value: string) => {
-    setContactInfo(prev => ({ ...prev, [field]: value }));
-  };
-
-  const handleEmploymentInfoChange = (field: string, value: string | number) => {
-    setEmploymentInfo(prev => ({ ...prev, [field]: value }));
-  };
-
-  const handleBankingInfoChange = (field: string, value: string) => {
-    setBankingInfo(prev => ({ ...prev, [field]: value }));
-  };
-
-  const handleKinInfoChange = (field: string, value: string) => {
-    setKinInfo(prev => ({ ...prev, [field]: value }));
-  };
-
-  const handleSavePersonal = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setSaving(true);
-    
-    try {
-      await updateProfile({
-        ...profile,
-        first_name: personalInfo.first_name,
-        last_name: personalInfo.last_name,
-        id_number: personalInfo.id_number,
-        date_of_birth: personalInfo.date_of_birth,
-        gender: personalInfo.gender,
-        marital_status: personalInfo.marital_status,
-        nationality: personalInfo.nationality,
-        // Handle file upload for ID document and selfie here in a real app
-        id_document_url: personalInfo.id_document ? URL.createObjectURL(personalInfo.id_document) : profile?.id_document_url,
-        selfie_url: personalInfo.selfie ? URL.createObjectURL(personalInfo.selfie) : profile?.selfie_url,
-      });
-      
-      toast.success('Personal information saved successfully');
-      setActiveTab('contact');
-    } catch (error) {
-      console.error('Error saving personal information:', error);
-      toast.error('Failed to save personal information');
-    } finally {
-      setSaving(false);
-    }
-  };
-
-  const handleSaveContact = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setSaving(true);
-    
-    try {
-      await updateProfile({
-        ...profile,
-        phone_number: contactInfo.phone_number,
-        alternative_phone: contactInfo.alternative_phone,
-        email: contactInfo.email,
-        address: contactInfo.address,
-        county: contactInfo.county,
-        sub_county: contactInfo.subcounty,  // Fixed property name
-        village: contactInfo.village,
-        landmark: contactInfo.landmark,
-        residence_duration: contactInfo.residence_duration,
-      });
-      
-      toast.success('Contact information saved successfully');
-      setActiveTab('employment');
-    } catch (error) {
-      console.error('Error saving contact information:', error);
-      toast.error('Failed to save contact information');
-    } finally {
-      setSaving(false);
-    }
-  };
-
-  const handleSaveEmployment = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setSaving(true);
-    
-    try {
-      await updateProfile({
-        ...profile,
-        employment_status: employmentInfo.employment_status,
-        occupation: employmentInfo.occupation,
-        employer_name: employmentInfo.employer_name,
-        employer_contact: employmentInfo.employer_contact,
-        monthly_income: Number(employmentInfo.monthly_income),
-        secondary_income: employmentInfo.secondary_income,
-        pay_frequency: employmentInfo.pay_frequency,
-        work_location: employmentInfo.work_location,
-        // Handle file upload for payslip here in a real app
-        payslip_url: employmentInfo.payslip_document ? URL.createObjectURL(employmentInfo.payslip_document) : profile?.payslip_url,
-      });
-      
-      toast.success('Employment information saved successfully');
-      setActiveTab('banking');
-    } catch (error) {
-      console.error('Error saving employment information:', error);
-      toast.error('Failed to save employment information');
-    } finally {
-      setSaving(false);
-    }
-  };
-
-  const handleSaveBanking = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setSaving(true);
-    
-    try {
-      await updateProfile({
-        ...profile,
-        bank_name: bankingInfo.bank_name,
-        bank_branch: bankingInfo.bank_branch,
-        account_number: bankingInfo.account_number,
-        mpesa_number: bankingInfo.mpesa_number,
-        // Handle file upload for statement here in a real app
-        statement_url: bankingInfo.statement_document ? URL.createObjectURL(bankingInfo.statement_document) : profile?.statement_url,
-      });
-      
-      toast.success('Banking information saved successfully');
-      setActiveTab('kin');
-    } catch (error) {
-      console.error('Error saving banking information:', error);
-      toast.error('Failed to save banking information');
-    } finally {
-      setSaving(false);
-    }
-  };
-
-  const handleSaveKin = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setSaving(true);
-    
-    try {
-      await updateProfile({
-        ...profile,
-        kin_name: kinInfo.kin_name,
-        kin_relationship: kinInfo.kin_relationship,
-        kin_phone: kinInfo.kin_phone,
-        kin_id_number: kinInfo.kin_id_number,
-        kin_address: kinInfo.kin_address,
-      });
-      
-      toast.success('Next of kin information saved successfully');
-      
-      // Check if profile is now complete and offer to navigate to loan application
-      const completeProfile = await dataService.profiles.getProfile(user?.id || '');
-      const requiredFields = [
-        'first_name', 'last_name', 'id_number', 'phone_number',
-        'address', 'county', 'employment_status', 'monthly_income',
-        'mpesa_number', 'kin_name', 'kin_phone', 'kin_relationship'
-      ];
-      
-      const isComplete = requiredFields.every(field => 
-        completeProfile && completeProfile[field as keyof Profile]
-      );
-      
-      setIsProfileComplete(isComplete);
-      
-      if (isComplete) {
-        toast.success('Your profile is now complete! You can now apply for a loan.');
-        setTimeout(() => {
-          const confirmApply = window.confirm('Your profile is complete. Would you like to apply for a loan now?');
-          if (confirmApply) {
-            navigate('/apply');
-          }
-        }, 1500);
+    const fetchProfile = async () => {
+      if (!user) {
+        setLoading(false);
+        return;
       }
-    } catch (error) {
-      console.error('Error saving next of kin information:', error);
-      toast.error('Failed to save next of kin information');
+
+      try {
+        const fetchedProfile = await dataService.profiles.getProfile(user.id);
+        setProfile(fetchedProfile);
+
+        // Initialize form states with profile data
+        setPersonalInfo({
+          first_name: fetchedProfile?.first_name || '',
+          last_name: fetchedProfile?.last_name || '',
+          email: fetchedProfile?.email || '',
+          phone_number: fetchedProfile?.phone_number || '',
+          id_number: fetchedProfile?.id_number || '',
+          date_of_birth: fetchedProfile?.date_of_birth || '',
+          gender: fetchedProfile?.gender || '',
+          marital_status: fetchedProfile?.marital_status || '',
+          nationality: fetchedProfile?.nationality || '',
+        });
+
+        setContactInfo({
+          address: fetchedProfile?.address || '',
+          county: fetchedProfile?.county || '',
+          sub_county: fetchedProfile?.sub_county || '',
+          village: fetchedProfile?.village || '',
+          landmark: fetchedProfile?.landmark || '',
+          residence_duration: fetchedProfile?.residence_duration || '',
+          alternative_phone: fetchedProfile?.alternative_phone || '',
+        });
+
+        setEmploymentInfo({
+          employment_status: fetchedProfile?.employment_status || '',
+          occupation: fetchedProfile?.occupation || '',
+          employer_name: fetchedProfile?.employer_name || '',
+          employer_contact: fetchedProfile?.employer_contact || '',
+          monthly_income: fetchedProfile?.monthly_income?.toString() || '',
+          secondary_income: fetchedProfile?.secondary_income?.toString() || '',
+          pay_frequency: fetchedProfile?.pay_frequency || '',
+          work_location: fetchedProfile?.work_location || '',
+        });
+
+        setBankingInfo({
+          bank_name: fetchedProfile?.bank_name || '',
+          bank_branch: fetchedProfile?.bank_branch || '',
+          account_number: fetchedProfile?.account_number || '',
+          mpesa_number: fetchedProfile?.mpesa_number || '',
+        });
+
+        setKinInfo({
+          kin_name: fetchedProfile?.kin_name || '',
+          kin_relationship: fetchedProfile?.kin_relationship || '',
+          kin_phone: fetchedProfile?.kin_phone || '',
+          kin_id_number: fetchedProfile?.kin_id_number || '',
+          kin_address: fetchedProfile?.kin_address || '',
+        });
+
+      } catch (error) {
+        console.error('Failed to fetch profile:', error);
+        toast.error('Failed to fetch profile. Please try again.');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProfile();
+  }, [user]);
+
+  const handlePersonalInfoChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target;
+    setPersonalInfo(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleContactInfoChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target;
+    setContactInfo(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleEmploymentInfoChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target;
+    setEmploymentInfo(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleBankingInfoChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target;
+    setBankingInfo(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleKinInfoChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target;
+    setKinInfo(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handlePersonalInfoSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSaving(true);
+    try {
+      if (!user) return;
+      
+      await dataService.profiles.updateProfile(user.id, {
+        ...personalInfo,
+        monthly_income: personalInfo.monthly_income ? Number(personalInfo.monthly_income) : undefined,
+      });
+      
+      toast.success('Personal information updated successfully');
+    } catch (error: any) {
+      toast.error(error.message || 'Failed to update personal information');
     } finally {
       setSaving(false);
     }
   };
 
-  if (profileLoading) {
-    return (
-      <MainLayout>
-        <div className="container mx-auto px-4 py-8">
-          <div className="flex items-center justify-center h-64">
-            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-lending-primary"></div>
-          </div>
-        </div>
-      </MainLayout>
-    );
-  }
+  const handleContactInfoSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSaving(true);
+    try {
+      if (!user) return;
+      
+      await dataService.profiles.updateProfile(user.id, contactInfo);
+      toast.success('Contact information updated successfully');
+    } catch (error: any) {
+      toast.error(error.message || 'Failed to update contact information');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleEmploymentInfoSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSaving(true);
+    try {
+      if (!user) return;
+      
+      await dataService.profiles.updateProfile(user.id, {
+        ...employmentInfo,
+        monthly_income: employmentInfo.monthly_income ? Number(employmentInfo.monthly_income) : undefined,
+        secondary_income: employmentInfo.secondary_income ? Number(employmentInfo.secondary_income) : undefined,
+      });
+      
+      toast.success('Employment information updated successfully');
+    } catch (error: any) {
+      toast.error(error.message || 'Failed to update employment information');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleBankingInfoSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSaving(true);
+    try {
+      if (!user) return;
+      
+      await dataService.profiles.updateProfile(user.id, bankingInfo);
+      toast.success('Banking information updated successfully');
+    } catch (error: any) {
+      toast.error(error.message || 'Failed to update banking information');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleKinInfoSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSaving(true);
+    try {
+      if (!user) return;
+      
+      await dataService.profiles.updateProfile(user.id, kinInfo);
+      toast.success('Next of Kin information updated successfully');
+    } catch (error: any) {
+      toast.error(error.message || 'Failed to update Next of Kin information');
+    } finally {
+      setSaving(false);
+    }
+  };
 
   return (
-    <ProtectedRoute>
-      <MainLayout>
-        <div className="container mx-auto px-4 py-8">
-          <FadeIn>
-            <div className="mb-6 flex flex-col md:flex-row justify-between items-start md:items-center">
-              <div>
-                <h1 className="text-3xl font-bold mb-2">Your Profile</h1>
-                <p className="text-gray-600">Complete your profile to apply for loans</p>
-              </div>
-              <div className="mt-4 md:mt-0 flex items-center">
-                <div className={`flex items-center ${isProfileComplete ? 'text-green-500' : 'text-amber-500'}`}>
-                  {isProfileComplete ? <CheckCircle className="h-5 w-5 mr-2" /> : <User className="h-5 w-5 mr-2" />}
-                  <span className="text-sm font-medium">
-                    {isProfileComplete ? 'Profile Complete' : 'Profile Incomplete'}
-                  </span>
-                </div>
-                {isProfileComplete && (
-                  <Button className="ml-4 bg-lending-primary hover:bg-lending-primary/90" onClick={() => navigate('/apply')}>
-                    Apply for a Loan
+    <div className="min-h-screen bg-gray-50 py-8">
+      <div className="container mx-auto px-4 max-w-4xl">
+        <Card>
+          <CardHeader>
+            <CardTitle>Profile Management</CardTitle>
+            <CardDescription>
+              Complete your profile to access all features
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Tabs defaultValue="personal" className="space-y-4">
+              <TabsList>
+                <TabsTrigger value="personal">Personal Info</TabsTrigger>
+                <TabsTrigger value="contact">Contact Info</TabsTrigger>
+                <TabsTrigger value="employment">Employment Info</TabsTrigger>
+                <TabsTrigger value="banking">Banking Info</TabsTrigger>
+                <TabsTrigger value="kin">Next of Kin Info</TabsTrigger>
+                <TabsTrigger value="documents">Documents</TabsTrigger>
+              </TabsList>
+              <TabsContent value="personal" className="space-y-2">
+                <form onSubmit={handlePersonalInfoSubmit}>
+                  <div className="grid gap-4 py-4">
+                    <div>
+                      <Label htmlFor="first_name">First Name</Label>
+                      <Input id="first_name" name="first_name" value={personalInfo.first_name} onChange={handlePersonalInfoChange} />
+                    </div>
+                    <div>
+                      <Label htmlFor="last_name">Last Name</Label>
+                      <Input id="last_name" name="last_name" value={personalInfo.last_name} onChange={handlePersonalInfoChange} />
+                    </div>
+                    <div>
+                      <Label htmlFor="email">Email</Label>
+                      <Input id="email" name="email" type="email" value={personalInfo.email} onChange={handlePersonalInfoChange} />
+                    </div>
+                    <div>
+                      <Label htmlFor="phone_number">Phone Number</Label>
+                      <Input id="phone_number" name="phone_number" value={personalInfo.phone_number} onChange={handlePersonalInfoChange} />
+                    </div>
+                    <div>
+                      <Label htmlFor="id_number">ID Number</Label>
+                      <Input id="id_number" name="id_number" value={personalInfo.id_number} onChange={handlePersonalInfoChange} />
+                    </div>
+                    <div>
+                      <Label htmlFor="date_of_birth">Date of Birth</Label>
+                      <Input id="date_of_birth" name="date_of_birth" type="date" value={personalInfo.date_of_birth} onChange={handlePersonalInfoChange} />
+                    </div>
+                    <div>
+                      <Label htmlFor="gender">Gender</Label>
+                      <Select onValueChange={(value) => handlePersonalInfoChange({ target: { name: 'gender', value } } as any)}>
+                        <SelectTrigger className="w-full">
+                          <SelectValue placeholder="Select gender" defaultValue={personalInfo.gender} />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="male">Male</SelectItem>
+                          <SelectItem value="female">Female</SelectItem>
+                          <SelectItem value="other">Other</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div>
+                      <Label htmlFor="marital_status">Marital Status</Label>
+                      <Select onValueChange={(value) => handlePersonalInfoChange({ target: { name: 'marital_status', value } } as any)}>
+                        <SelectTrigger className="w-full">
+                          <SelectValue placeholder="Select marital status" defaultValue={personalInfo.marital_status} />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="single">Single</SelectItem>
+                          <SelectItem value="married">Married</SelectItem>
+                          <SelectItem value="divorced">Divorced</SelectItem>
+                          <SelectItem value="widowed">Widowed</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div>
+                      <Label htmlFor="nationality">Nationality</Label>
+                      <Input id="nationality" name="nationality" value={personalInfo.nationality} onChange={handlePersonalInfoChange} />
+                    </div>
+                  </div>
+                  <Button type="submit" disabled={saving}>
+                    {saving ? 'Saving...' : 'Save Personal Info'}
                   </Button>
-                )}
-              </div>
-            </div>
-            
-            <Card className="border-2 border-lending-primary/20">
-              <CardHeader className="border-b bg-gradient-to-r from-lending-primary/10 to-blue-500/10">
-                <CardTitle>Complete Your Profile</CardTitle>
-                <CardDescription>
-                  Please provide accurate information for loan eligibility
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="pt-6">
-                <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-                  <TabsList className="grid grid-cols-5 mb-8">
-                    <TabsTrigger value="personal" className="text-xs md:text-sm">Personal</TabsTrigger>
-                    <TabsTrigger value="contact" className="text-xs md:text-sm">Contact</TabsTrigger>
-                    <TabsTrigger value="employment" className="text-xs md:text-sm">Employment</TabsTrigger>
-                    <TabsTrigger value="banking" className="text-xs md:text-sm">Banking</TabsTrigger>
-                    <TabsTrigger value="kin" className="text-xs md:text-sm">Next of Kin</TabsTrigger>
-                  </TabsList>
-                  
-                  <StaggeredItems className="space-y-4">
-                    {/* Personal Information */}
-                    <TabsContent value="personal" className="space-y-4">
-                      <form onSubmit={handleSavePersonal} className="space-y-4">
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                          <div>
-                            <Label htmlFor="first_name">First Name *</Label>
-                            <Input
-                              id="first_name"
-                              value={personalInfo.first_name}
-                              onChange={(e) => handlePersonalInfoChange('first_name', e.target.value)}
-                              required
-                            />
-                          </div>
-                          <div>
-                            <Label htmlFor="last_name">Last Name *</Label>
-                            <Input
-                              id="last_name"
-                              value={personalInfo.last_name}
-                              onChange={(e) => handlePersonalInfoChange('last_name', e.target.value)}
-                              required
-                            />
-                          </div>
-                          <div>
-                            <Label htmlFor="id_number">National ID/Passport Number *</Label>
-                            <Input
-                              id="id_number"
-                              value={personalInfo.id_number}
-                              onChange={(e) => handlePersonalInfoChange('id_number', e.target.value)}
-                              required
-                            />
-                          </div>
-                          <div>
-                            <Label htmlFor="date_of_birth">Date of Birth *</Label>
-                            <Input
-                              id="date_of_birth"
-                              type="date"
-                              value={personalInfo.date_of_birth}
-                              onChange={(e) => handlePersonalInfoChange('date_of_birth', e.target.value)}
-                              required
-                            />
-                          </div>
-                          <div>
-                            <Label htmlFor="gender">Gender *</Label>
-                            <Select 
-                              value={personalInfo.gender} 
-                              onValueChange={(value) => handlePersonalInfoChange('gender', value)}
-                            >
-                              <SelectTrigger>
-                                <SelectValue placeholder="Select Gender" />
-                              </SelectTrigger>
-                              <SelectContent>
-                                <SelectItem value="male">Male</SelectItem>
-                                <SelectItem value="female">Female</SelectItem>
-                                <SelectItem value="other">Other</SelectItem>
-                              </SelectContent>
-                            </Select>
-                          </div>
-                          <div>
-                            <Label htmlFor="marital_status">Marital Status *</Label>
-                            <Select 
-                              value={personalInfo.marital_status} 
-                              onValueChange={(value) => handlePersonalInfoChange('marital_status', value)}
-                            >
-                              <SelectTrigger>
-                                <SelectValue placeholder="Select Marital Status" />
-                              </SelectTrigger>
-                              <SelectContent>
-                                <SelectItem value="single">Single</SelectItem>
-                                <SelectItem value="married">Married</SelectItem>
-                                <SelectItem value="divorced">Divorced</SelectItem>
-                                <SelectItem value="widowed">Widowed</SelectItem>
-                              </SelectContent>
-                            </Select>
-                          </div>
-                          <div>
-                            <Label htmlFor="nationality">Nationality *</Label>
-                            <Input
-                              id="nationality"
-                              value={personalInfo.nationality}
-                              onChange={(e) => handlePersonalInfoChange('nationality', e.target.value)}
-                              required
-                            />
-                          </div>
-                        </div>
-                        
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
-                          <div>
-                            <Label htmlFor="id_document" className="mb-2 block">
-                              ID/Passport Document Scan *
-                            </Label>
-                            <FileUpload
-                              accept=".jpg,.jpeg,.png,.pdf"
-                              maxSize={5 * 1024 * 1024} // 5MB
-                              onFileSelected={(file) => setPersonalInfo(prev => ({ ...prev, id_document: file }))}
-                              currentFile={personalInfo.id_document}
-                              helperText="Upload a clear scan of your ID (both sides)"
-                            />
-                            {profile?.id_document_url && !personalInfo.id_document && (
-                              <p className="text-xs text-green-600 mt-1">ID document already uploaded</p>
-                            )}
-                          </div>
-                          <div>
-                            <Label htmlFor="selfie" className="mb-2 block">
-                              Selfie with ID *
-                            </Label>
-                            <FileUpload
-                              accept=".jpg,.jpeg,.png"
-                              maxSize={5 * 1024 * 1024} // 5MB
-                              onFileSelected={(file) => setPersonalInfo(prev => ({ ...prev, selfie: file }))}
-                              currentFile={personalInfo.selfie}
-                              helperText="Take a clear selfie holding your ID"
-                            />
-                            {profile?.selfie_url && !personalInfo.selfie && (
-                              <p className="text-xs text-green-600 mt-1">Selfie already uploaded</p>
-                            )}
-                          </div>
-                        </div>
-                        
-                        <div className="pt-4 flex justify-end">
-                          <Button 
-                            type="submit" 
-                            className="bg-lending-primary hover:bg-lending-primary/90"
-                            disabled={saving}
-                          >
-                            {saving ? 'Saving...' : 'Save & Continue'}
-                          </Button>
-                        </div>
-                      </form>
-                    </TabsContent>
-                    
-                    {/* Contact Information */}
-                    <TabsContent value="contact" className="space-y-4">
-                      <form onSubmit={handleSaveContact} className="space-y-4">
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                          <div>
-                            <Label htmlFor="phone_number">Phone Number *</Label>
-                            <Input
-                              id="phone_number"
-                              value={contactInfo.phone_number}
-                              onChange={(e) => handleContactInfoChange('phone_number', e.target.value)}
-                              placeholder="+254 7XX XXX XXX"
-                              required
-                            />
-                          </div>
-                          <div>
-                            <Label htmlFor="alternative_phone">Alternative Phone Number</Label>
-                            <Input
-                              id="alternative_phone"
-                              value={contactInfo.alternative_phone}
-                              onChange={(e) => handleContactInfoChange('alternative_phone', e.target.value)}
-                              placeholder="+254 7XX XXX XXX"
-                            />
-                          </div>
-                          <div>
-                            <Label htmlFor="email">Email Address</Label>
-                            <Input
-                              id="email"
-                              type="email"
-                              value={contactInfo.email}
-                              onChange={(e) => handleContactInfoChange('email', e.target.value)}
-                              placeholder="your@email.com"
-                            />
-                          </div>
-                          <div>
-                            <Label htmlFor="address">Physical Address *</Label>
-                            <Input
-                              id="address"
-                              value={contactInfo.address}
-                              onChange={(e) => handleContactInfoChange('address', e.target.value)}
-                              placeholder="Your current address"
-                              required
-                            />
-                          </div>
-                          <div>
-                            <Label htmlFor="county">County *</Label>
-                            <Select 
-                              value={contactInfo.county} 
-                              onValueChange={(value) => handleContactInfoChange('county', value)}
-                            >
-                              <SelectTrigger>
-                                <SelectValue placeholder="Select County" />
-                              </SelectTrigger>
-                              <SelectContent>
-                                {[
-                                  'Nairobi', 'Mombasa', 'Kisumu', 'Nakuru', 'Eldoret', 'Kiambu', 
-                                  'Thika', 'Machakos', 'Kisii', 'Kakamega', 'Nyeri', 'Meru', 
-                                  'Garissa', 'Malindi', 'Kitale', 'Bungoma', 'Kericho', 'Naivasha'
-                                ].map(county => (
-                                  <SelectItem key={county} value={county.toLowerCase()}>{county}</SelectItem>
-                                ))}
-                              </SelectContent>
-                            </Select>
-                          </div>
-                          <div>
-                            <Label htmlFor="subcounty">Sub-County</Label>
-                            <Input
-                              id="subcounty"
-                              value={contactInfo.subcounty}
-                              onChange={(e) => handleContactInfoChange('subcounty', e.target.value)}
-                            />
-                          </div>
-                          <div>
-                            <Label htmlFor="village">Village/Estate</Label>
-                            <Input
-                              id="village"
-                              value={contactInfo.village}
-                              onChange={(e) => handleContactInfoChange('village', e.target.value)}
-                            />
-                          </div>
-                          <div>
-                            <Label htmlFor="landmark">Landmark Near Home</Label>
-                            <Input
-                              id="landmark"
-                              value={contactInfo.landmark}
-                              onChange={(e) => handleContactInfoChange('landmark', e.target.value)}
-                              placeholder="E.g. Near Tuskys Supermarket"
-                            />
-                          </div>
-                          <div>
-                            <Label htmlFor="residence_duration">How Long at Current Address?</Label>
-                            <Select 
-                              value={contactInfo.residence_duration} 
-                              onValueChange={(value) => handleContactInfoChange('residence_duration', value)}
-                            >
-                              <SelectTrigger>
-                                <SelectValue placeholder="Select Duration" />
-                              </SelectTrigger>
-                              <SelectContent>
-                                <SelectItem value="less_than_6_months">Less than 6 months</SelectItem>
-                                <SelectItem value="6_months_to_1_year">6 months to 1 year</SelectItem>
-                                <SelectItem value="1_to_3_years">1 to 3 years</SelectItem>
-                                <SelectItem value="3_to_5_years">3 to 5 years</SelectItem>
-                                <SelectItem value="more_than_5_years">More than 5 years</SelectItem>
-                              </SelectContent>
-                            </Select>
-                          </div>
-                        </div>
-                        
-                        <div className="pt-4 flex justify-between">
-                          <Button 
-                            type="button" 
-                            variant="outline"
-                            onClick={() => setActiveTab('personal')}
-                          >
-                            Previous
-                          </Button>
-                          <Button 
-                            type="submit" 
-                            className="bg-lending-primary hover:bg-lending-primary/90"
-                            disabled={saving}
-                          >
-                            {saving ? 'Saving...' : 'Save & Continue'}
-                          </Button>
-                        </div>
-                      </form>
-                    </TabsContent>
-                    
-                    {/* Employment Information */}
-                    <TabsContent value="employment" className="space-y-4">
-                      <form onSubmit={handleSaveEmployment} className="space-y-4">
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                          <div>
-                            <Label htmlFor="employment_status">Employment Status *</Label>
-                            <Select 
-                              value={employmentInfo.employment_status} 
-                              onValueChange={(value) => handleEmploymentInfoChange('employment_status', value)}
-                            >
-                              <SelectTrigger>
-                                <SelectValue placeholder="Select Status" />
-                              </SelectTrigger>
-                              <SelectContent>
-                                <SelectItem value="employed">Formally Employed</SelectItem>
-                                <SelectItem value="self-employed">Self-Employed</SelectItem>
-                                <SelectItem value="business-owner">Business Owner</SelectItem>
-                                <SelectItem value="farmer">Farmer</SelectItem>
-                                <SelectItem value="student">Student</SelectItem>
-                                <SelectItem value="unemployed">Unemployed</SelectItem>
-                                <SelectItem value="retired">Retired</SelectItem>
-                              </SelectContent>
-                            </Select>
-                          </div>
-                          <div>
-                            <Label htmlFor="occupation">Occupation/Business Type</Label>
-                            <Input
-                              id="occupation"
-                              value={employmentInfo.occupation}
-                              onChange={(e) => handleEmploymentInfoChange('occupation', e.target.value)}
-                              placeholder="Your job title or business type"
-                            />
-                          </div>
-                          <div>
-                            <Label htmlFor="employer_name">Employer Name/Business Name</Label>
-                            <Input
-                              id="employer_name"
-                              value={employmentInfo.employer_name}
-                              onChange={(e) => handleEmploymentInfoChange('employer_name', e.target.value)}
-                              placeholder="Your employer or business name"
-                            />
-                          </div>
-                          <div>
-                            <Label htmlFor="employer_contact">Employer Contact Details</Label>
-                            <Input
-                              id="employer_contact"
-                              value={employmentInfo.employer_contact}
-                              onChange={(e) => handleEmploymentInfoChange('employer_contact', e.target.value)}
-                              placeholder="Employer phone number or email"
-                            />
-                          </div>
-                          <div>
-                            <Label htmlFor="monthly_income">Monthly Income (KSh) *</Label>
-                            <Input
-                              id="monthly_income"
-                              type="number"
-                              value={employmentInfo.monthly_income.toString()}
-                              onChange={(e) => handleEmploymentInfoChange('monthly_income', e.target.value)}
-                              placeholder="Your net monthly income"
-                              required
-                            />
-                          </div>
-                          <div>
-                            <Label htmlFor="secondary_income">Secondary Sources of Income</Label>
-                            <Input
-                              id="secondary_income"
-                              value={employmentInfo.secondary_income}
-                              onChange={(e) => handleEmploymentInfoChange('secondary_income', e.target.value)}
-                              placeholder="Additional income sources"
-                            />
-                          </div>
-                          <div>
-                            <Label htmlFor="pay_frequency">Pay Frequency</Label>
-                            <Select 
-                              value={employmentInfo.pay_frequency} 
-                              onValueChange={(value) => handleEmploymentInfoChange('pay_frequency', value)}
-                            >
-                              <SelectTrigger>
-                                <SelectValue placeholder="Select Frequency" />
-                              </SelectTrigger>
-                              <SelectContent>
-                                <SelectItem value="daily">Daily</SelectItem>
-                                <SelectItem value="weekly">Weekly</SelectItem>
-                                <SelectItem value="bi-weekly">Bi-Weekly</SelectItem>
-                                <SelectItem value="monthly">Monthly</SelectItem>
-                                <SelectItem value="quarterly">Quarterly</SelectItem>
-                              </SelectContent>
-                            </Select>
-                          </div>
-                          <div>
-                            <Label htmlFor="work_location">Work Location</Label>
-                            <Input
-                              id="work_location"
-                              value={employmentInfo.work_location}
-                              onChange={(e) => handleEmploymentInfoChange('work_location', e.target.value)}
-                              placeholder="Where you work from"
-                            />
-                          </div>
-                        </div>
-                        
-                        <div className="mt-4">
-                          <Label htmlFor="payslip_document" className="mb-2 block">
-                            Payslip/Proof of Income
-                          </Label>
-                          <FileUpload
-                            accept=".jpg,.jpeg,.png,.pdf"
-                            maxSize={5 * 1024 * 1024} // 5MB
-                            onFileSelected={(file) => setEmploymentInfo(prev => ({ ...prev, payslip_document: file }))}
-                            currentFile={employmentInfo.payslip_document}
-                            helperText="Upload your latest payslip or proof of income"
-                          />
-                          {profile?.payslip_url && !employmentInfo.payslip_document && (
-                            <p className="text-xs text-green-600 mt-1">Proof of income already uploaded</p>
-                          )}
-                        </div>
-                        
-                        <div className="pt-4 flex justify-between">
-                          <Button 
-                            type="button" 
-                            variant="outline"
-                            onClick={() => setActiveTab('contact')}
-                          >
-                            Previous
-                          </Button>
-                          <Button 
-                            type="submit" 
-                            className="bg-lending-primary hover:bg-lending-primary/90"
-                            disabled={saving}
-                          >
-                            {saving ? 'Saving...' : 'Save & Continue'}
-                          </Button>
-                        </div>
-                      </form>
-                    </TabsContent>
-                    
-                    {/* Banking Information */}
-                    <TabsContent value="banking" className="space-y-4">
-                      <form onSubmit={handleSaveBanking} className="space-y-4">
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                          <div>
-                            <Label htmlFor="bank_name">Bank Name</Label>
-                            <Select 
-                              value={bankingInfo.bank_name} 
-                              onValueChange={(value) => handleBankingInfoChange('bank_name', value)}
-                            >
-                              <SelectTrigger>
-                                <SelectValue placeholder="Select Bank" />
-                              </SelectTrigger>
-                              <SelectContent>
-                                <SelectItem value="kcb">KCB Bank</SelectItem>
-                                <SelectItem value="equity">Equity Bank</SelectItem>
-                                <SelectItem value="cooperative">Co-operative Bank</SelectItem>
-                                <SelectItem value="standard_chartered">Standard Chartered</SelectItem>
-                                <SelectItem value="barclays">ABSA (Barclays)</SelectItem>
-                                <SelectItem value="family">Family Bank</SelectItem>
-                                <SelectItem value="dtb">Diamond Trust Bank</SelectItem>
-                                <SelectItem value="ncba">NCBA Bank</SelectItem>
-                              </SelectContent>
-                            </Select>
-                          </div>
-                          <div>
-                            <Label htmlFor="bank_branch">Bank Branch</Label>
-                            <Input
-                              id="bank_branch"
-                              value={bankingInfo.bank_branch}
-                              onChange={(e) => handleBankingInfoChange('bank_branch', e.target.value)}
-                              placeholder="Branch name"
-                            />
-                          </div>
-                          <div>
-                            <Label htmlFor="account_number">Bank Account Number</Label>
-                            <Input
-                              id="account_number"
-                              value={bankingInfo.account_number}
-                              onChange={(e) => handleBankingInfoChange('account_number', e.target.value)}
-                              placeholder="Your account number"
-                            />
-                          </div>
-                          <div>
-                            <Label htmlFor="mpesa_number">M-Pesa Number *</Label>
-                            <Input
-                              id="mpesa_number"
-                              value={bankingInfo.mpesa_number}
-                              onChange={(e) => handleBankingInfoChange('mpesa_number', e.target.value)}
-                              placeholder="+254 7XX XXX XXX"
-                              required
-                            />
-                            <p className="text-xs text-gray-500 mt-1">Will be used for loan disbursement</p>
-                          </div>
-                        </div>
-                        
-                        <div className="mt-4">
-                          <Label htmlFor="statement_document" className="mb-2 block">
-                            Bank/M-Pesa Statement
-                          </Label>
-                          <FileUpload
-                            accept=".jpg,.jpeg,.png,.pdf"
-                            maxSize={5 * 1024 * 1024} // 5MB
-                            onFileSelected={(file) => setBankingInfo(prev => ({ ...prev, statement_document: file }))}
-                            currentFile={bankingInfo.statement_document}
-                            helperText="Upload your last 3 months bank or M-Pesa statement"
-                          />
-                          {profile?.statement_url && !bankingInfo.statement_document && (
-                            <p className="text-xs text-green-600 mt-1">Statement already uploaded</p>
-                          )}
-                        </div>
-                        
-                        <div className="pt-4 flex justify-between">
-                          <Button 
-                            type="button" 
-                            variant="outline"
-                            onClick={() => setActiveTab('employment')}
-                          >
-                            Previous
-                          </Button>
-                          <Button 
-                            type="submit" 
-                            className="bg-lending-primary hover:bg-lending-primary/90"
-                            disabled={saving}
-                          >
-                            {saving ? 'Saving...' : 'Save & Continue'}
-                          </Button>
-                        </div>
-                      </form>
-                    </TabsContent>
-                    
-                    {/* Next of Kin Information */}
-                    <TabsContent value="kin" className="space-y-4">
-                      <form onSubmit={handleSaveKin} className="space-y-4">
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                          <div>
-                            <Label htmlFor="kin_name">Next of Kin Full Name *</Label>
-                            <Input
-                              id="kin_name"
-                              value={kinInfo.kin_name}
-                              onChange={(e) => handleKinInfoChange('kin_name', e.target.value)}
-                              placeholder="Full name of your next of kin"
-                              required
-                            />
-                          </div>
-                          <div>
-                            <Label htmlFor="kin_relationship">Relationship *</Label>
-                            <Select 
-                              value={kinInfo.kin_relationship} 
-                              onValueChange={(value) => handleKinInfoChange('kin_relationship', value)}
-                              required
-                            >
-                              <SelectTrigger>
-                                <SelectValue placeholder="Select Relationship" />
-                              </SelectTrigger>
-                              <SelectContent>
-                                <SelectItem value="spouse">Spouse</SelectItem>
-                                <SelectItem value="parent">Parent</SelectItem>
-                                <SelectItem value="child">Child</SelectItem>
-                                <SelectItem value="sibling">Sibling</SelectItem>
-                                <SelectItem value="relative">Other Relative</SelectItem>
-                                <SelectItem value="friend">Friend</SelectItem>
-                              </SelectContent>
-                            </Select>
-                          </div>
-                          <div>
-                            <Label htmlFor="kin_phone">Phone Number *</Label>
-                            <Input
-                              id="kin_phone"
-                              value={kinInfo.kin_phone}
-                              onChange={(e) => handleKinInfoChange('kin_phone', e.target.value)}
-                              placeholder="+254 7XX XXX XXX"
-                              required
-                            />
-                          </div>
-                          <div>
-                            <Label htmlFor="kin_id_number">ID/Passport Number</Label>
-                            <Input
-                              id="kin_id_number"
-                              value={kinInfo.kin_id_number}
-                              onChange={(e) => handleKinInfoChange('kin_id_number', e.target.value)}
-                              placeholder="National ID or Passport number"
-                            />
-                          </div>
-                          <div className="col-span-1 md:col-span-2">
-                            <Label htmlFor="kin_address">Physical Address</Label>
-                            <Input
-                              id="kin_address"
-                              value={kinInfo.kin_address}
-                              onChange={(e) => handleKinInfoChange('kin_address', e.target.value)}
-                              placeholder="Next of kin's physical address"
-                            />
-                          </div>
-                        </div>
-                        
-                        <div className="pt-4 flex justify-between">
-                          <Button 
-                            type="button" 
-                            variant="outline"
-                            onClick={() => setActiveTab('banking')}
-                          >
-                            Previous
-                          </Button>
-                          <Button 
-                            type="submit" 
-                            className="bg-lending-primary hover:bg-lending-primary/90"
-                            disabled={saving}
-                          >
-                            {saving ? 'Saving...' : 'Complete Profile'}
-                          </Button>
-                        </div>
-                      </form>
-                    </TabsContent>
-                  </StaggeredItems>
-                </Tabs>
-              </CardContent>
-            </Card>
-          </FadeIn>
-        </div>
-      </MainLayout>
-    </ProtectedRoute>
+                </form>
+              </TabsContent>
+              <TabsContent value="contact" className="space-y-2">
+                <form onSubmit={handleContactInfoSubmit}>
+                  <div className="grid gap-4 py-4">
+                    <div>
+                      <Label htmlFor="address">Address</Label>
+                      <Input id="address" name="address" value={contactInfo.address} onChange={handleContactInfoChange} />
+                    </div>
+                    <div>
+                      <Label htmlFor="county">County</Label>
+                      <Input id="county" name="county" value={contactInfo.county} onChange={handleContactInfoChange} />
+                    </div>
+                    <div>
+                      <Label htmlFor="sub_county">Sub County</Label>
+                      <Input id="sub_county" name="sub_county" value={contactInfo.sub_county} onChange={handleContactInfoChange} />
+                    </div>
+                    <div>
+                      <Label htmlFor="village">Village</Label>
+                      <Input id="village" name="village" value={contactInfo.village} onChange={handleContactInfoChange} />
+                    </div>
+                    <div>
+                      <Label htmlFor="landmark">Landmark</Label>
+                      <Input id="landmark" name="landmark" value={contactInfo.landmark} onChange={handleContactInfoChange} />
+                    </div>
+                    <div>
+                      <Label htmlFor="residence_duration">Residence Duration</Label>
+                      <Input id="residence_duration" name="residence_duration" value={contactInfo.residence_duration} onChange={handleContactInfoChange} />
+                    </div>
+                    <div>
+                      <Label htmlFor="alternative_phone">Alternative Phone</Label>
+                      <Input id="alternative_phone" name="alternative_phone" value={contactInfo.alternative_phone} onChange={handleContactInfoChange} />
+                    </div>
+                  </div>
+                  <Button type="submit" disabled={saving}>
+                    {saving ? 'Saving...' : 'Save Contact Info'}
+                  </Button>
+                </form>
+              </TabsContent>
+              <TabsContent value="employment" className="space-y-2">
+                <form onSubmit={handleEmploymentInfoSubmit}>
+                  <div className="grid gap-4 py-4">
+                    <div>
+                      <Label htmlFor="employment_status">Employment Status</Label>
+                      <Select onValueChange={(value) => handleEmploymentInfoChange({ target: { name: 'employment_status', value } } as any)}>
+                        <SelectTrigger className="w-full">
+                          <SelectValue placeholder="Select employment status" defaultValue={employmentInfo.employment_status} />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="employed">Employed</SelectItem>
+                          <SelectItem value="self-employed">Self-Employed</SelectItem>
+                          <SelectItem value="unemployed">Unemployed</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div>
+                      <Label htmlFor="occupation">Occupation</Label>
+                      <Input id="occupation" name="occupation" value={employmentInfo.occupation} onChange={handleEmploymentInfoChange} />
+                    </div>
+                    <div>
+                      <Label htmlFor="employer_name">Employer Name</Label>
+                      <Input id="employer_name" name="employer_name" value={employmentInfo.employer_name} onChange={handleEmploymentInfoChange} />
+                    </div>
+                    <div>
+                      <Label htmlFor="employer_contact">Employer Contact</Label>
+                      <Input id="employer_contact" name="employer_contact" value={employmentInfo.employer_contact} onChange={handleEmploymentInfoChange} />
+                    </div>
+                    <div>
+                      <Label htmlFor="monthly_income">Monthly Income</Label>
+                      <Input id="monthly_income" name="monthly_income" value={employmentInfo.monthly_income} onChange={handleEmploymentInfoChange} />
+                    </div>
+                    <div>
+                      <Label htmlFor="secondary_income">Secondary Income</Label>
+                      <Input id="secondary_income" name="secondary_income" value={employmentInfo.secondary_income} onChange={handleEmploymentInfoChange} />
+                    </div>
+                    <div>
+                      <Label htmlFor="pay_frequency">Pay Frequency</Label>
+                      <Input id="pay_frequency" name="pay_frequency" value={employmentInfo.pay_frequency} onChange={handleEmploymentInfoChange} />
+                    </div>
+                    <div>
+                      <Label htmlFor="work_location">Work Location</Label>
+                      <Input id="work_location" name="work_location" value={employmentInfo.work_location} onChange={handleEmploymentInfoChange} />
+                    </div>
+                  </div>
+                  <Button type="submit" disabled={saving}>
+                    {saving ? 'Saving...' : 'Save Employment Info'}
+                  </Button>
+                </form>
+              </TabsContent>
+              <TabsContent value="banking" className="space-y-2">
+                <form onSubmit={handleBankingInfoSubmit}>
+                  <div className="grid gap-4 py-4">
+                    <div>
+                      <Label htmlFor="bank_name">Bank Name</Label>
+                      <Input id="bank_name" name="bank_name" value={bankingInfo.bank_name} onChange={handleBankingInfoChange} />
+                    </div>
+                    <div>
+                      <Label htmlFor="bank_branch">Bank Branch</Label>
+                      <Input id="bank_branch" name="bank_branch" value={bankingInfo.bank_branch} onChange={handleBankingInfoChange} />
+                    </div>
+                    <div>
+                      <Label htmlFor="account_number">Account Number</Label>
+                      <Input id="account_number" name="account_number" value={bankingInfo.account_number} onChange={handleBankingInfoChange} />
+                    </div>
+                    <div>
+                      <Label htmlFor="mpesa_number">M-Pesa Number</Label>
+                      <Input id="mpesa_number" name="mpesa_number" value={bankingInfo.mpesa_number} onChange={handleBankingInfoChange} />
+                    </div>
+                  </div>
+                  <Button type="submit" disabled={saving}>
+                    {saving ? 'Saving...' : 'Save Banking Info'}
+                  </Button>
+                </form>
+              </TabsContent>
+              <TabsContent value="kin" className="space-y-2">
+                <form onSubmit={handleKinInfoSubmit}>
+                  <div className="grid gap-4 py-4">
+                    <div>
+                      <Label htmlFor="kin_name">Kin Name</Label>
+                      <Input id="kin_name" name="kin_name" value={kinInfo.kin_name} onChange={handleKinInfoChange} />
+                    </div>
+                    <div>
+                      <Label htmlFor="kin_relationship">Kin Relationship</Label>
+                      <Input id="kin_relationship" name="kin_relationship" value={kinInfo.kin_relationship} onChange={handleKinInfoChange} />
+                    </div>
+                    <div>
+                      <Label htmlFor="kin_phone">Kin Phone</Label>
+                      <Input id="kin_phone" name="kin_phone" value={kinInfo.kin_phone} onChange={handleKinInfoChange} />
+                    </div>
+                    <div>
+                      <Label htmlFor="kin_id_number">Kin ID Number</Label>
+                      <Input id="kin_id_number" name="kin_id_number" value={kinInfo.kin_id_number} onChange={handleKinInfoChange} />
+                    </div>
+                    <div>
+                      <Label htmlFor="kin_address">Kin Address</Label>
+                      <Input id="kin_address" name="kin_address" value={kinInfo.kin_address} onChange={handleKinInfoChange} />
+                    </div>
+                  </div>
+                  <Button type="submit" disabled={saving}>
+                    {saving ? 'Saving...' : 'Save Kin Info'}
+                  </Button>
+                </form>
+              </TabsContent>
+              <TabsContent value="documents" className="space-y-2">
+                <div className="grid gap-4 py-4">
+                  <div>
+                    <Label>ID Document</Label>
+                    <FileUpload />
+                  </div>
+                  <div>
+                    <Label>Proof of Income</Label>
+                    <FileUpload />
+                  </div>
+                  <div>
+                    <Label>Selfie</Label>
+                    <FileUpload />
+                  </div>
+                </div>
+              </TabsContent>
+            </Tabs>
+          </CardContent>
+        </Card>
+      </div>
+    </div>
   );
 };
 

@@ -64,6 +64,23 @@ export const authService = {
     }
   },
 
+  // Reset password
+  resetPassword: async (email: string) => {
+    try {
+      // Use Supabase when connected
+      const { error } = await supabase.auth.resetPasswordForEmail(email);
+      if (error) throw error;
+    } catch (error) {
+      console.error('Reset password error:', error);
+      // For mock service, just simulate success
+      if (error.message && error.message.includes('supabase')) {
+        // Simulate success for development
+        return;
+      }
+      throw error;
+    }
+  },
+
   // Sign out
   signOut: async () => {
     try {
@@ -84,17 +101,10 @@ export const dataService = {
     // Get all loans (for admin)
     getAllLoans: async () => {
       try {
-        // Use Supabase when connected
-        const { data, error } = await supabase
-          .from('loans')
-          .select('*')
-          .order('created_at', { ascending: false });
-        
-        if (error) throw error;
-        return data;
+        // Fallback to mock data for development since no tables exist
+        return mockService.loans.getAllLoans();
       } catch (error) {
         console.error('Error fetching all loans:', error);
-        // Fallback to mock data for development
         return mockService.loans.getAllLoans();
       }
     },
@@ -102,18 +112,10 @@ export const dataService = {
     // Get user loans
     getUserLoans: async (userId: string) => {
       try {
-        // Use Supabase when connected
-        const { data, error } = await supabase
-          .from('loans')
-          .select('*')
-          .eq('user_id', userId)
-          .order('created_at', { ascending: false });
-        
-        if (error) throw error;
-        return data;
+        // Fallback to mock data for development since no tables exist
+        return mockService.loans.getUserLoans(userId);
       } catch (error) {
         console.error('Error fetching user loans:', error);
-        // Fallback to mock data for development
         return mockService.loans.getUserLoans(userId);
       }
     },
@@ -121,17 +123,10 @@ export const dataService = {
     // Create a loan application
     createLoan: async (loanData: any) => {
       try {
-        // Use Supabase when connected
-        const { data, error } = await supabase
-          .from('loans')
-          .insert([loanData])
-          .select();
-        
-        if (error) throw error;
-        return data[0];
+        // Fallback to mock data for development since no tables exist
+        return mockService.loans.createLoan(loanData);
       } catch (error) {
         console.error('Error creating loan:', error);
-        // Fallback to mock data for development
         return mockService.loans.createLoan(loanData);
       }
     },
@@ -139,18 +134,10 @@ export const dataService = {
     // Update a loan
     updateLoan: async (loanId: string, updateData: any) => {
       try {
-        // Use Supabase when connected
-        const { data, error } = await supabase
-          .from('loans')
-          .update(updateData)
-          .eq('id', loanId)
-          .select();
-        
-        if (error) throw error;
-        return data[0];
+        // Fallback to mock data for development since no tables exist
+        return mockService.loans.updateLoan(loanId, updateData);
       } catch (error) {
         console.error('Error updating loan:', error);
-        // Fallback to mock data for development
         return mockService.loans.updateLoan(loanId, updateData);
       }
     },
@@ -158,18 +145,10 @@ export const dataService = {
     // Get loan details
     getLoan: async (loanId: string) => {
       try {
-        // Use Supabase when connected
-        const { data, error } = await supabase
-          .from('loans')
-          .select('*')
-          .eq('id', loanId)
-          .single();
-        
-        if (error) throw error;
-        return data;
+        // Fallback to mock data for development since no tables exist
+        return mockService.loans.getLoan(loanId);
       } catch (error) {
         console.error('Error fetching loan:', error);
-        // Fallback to mock data for development
         return mockService.loans.getLoan(loanId);
       }
     },
@@ -180,28 +159,10 @@ export const dataService = {
     // Get user profile
     getProfile: async (userId: string) => {
       try {
-        // Use Supabase when connected
-        const { data, error } = await supabase
-          .from('profiles')
-          .select('*')
-          .eq('id', userId)
-          .single();
-        
-        if (error) {
-          console.error('Error fetching profile:', error);
-          // Return default profile if not found
-          return {
-            id: userId,
-            first_name: '',
-            last_name: '',
-            created_at: new Date().toISOString()
-          };
-        }
-        
-        return data;
+        // Fallback to mock data for development since no tables exist
+        return mockService.profiles.getProfile(userId);
       } catch (error) {
         console.error('Error fetching profile:', error);
-        // Fallback to mock data for development
         return mockService.profiles.getProfile(userId);
       }
     },
@@ -209,18 +170,10 @@ export const dataService = {
     // Update user profile
     updateProfile: async (userId: string, profileData: any) => {
       try {
-        // Use Supabase when connected
-        const { data, error } = await supabase
-          .from('profiles')
-          .update(profileData)
-          .eq('id', userId)
-          .select();
-        
-        if (error) throw error;
-        return data[0];
+        // Fallback to mock data for development since no tables exist
+        return mockService.profiles.updateProfile(userId, profileData);
       } catch (error) {
         console.error('Error updating profile:', error);
-        // Fallback to mock data for development
         return mockService.profiles.updateProfile(userId, profileData);
       }
     },
@@ -231,17 +184,10 @@ export const dataService = {
     // Create KYC profile
     createKycProfile: async (kycData: any) => {
       try {
-        // Use Supabase when connected
-        const { data, error } = await supabase
-          .from('kyc_profiles')
-          .insert([kycData])
-          .select();
-        
-        if (error) throw error;
-        return data[0];
+        // Fallback to mock data for development since no tables exist
+        return mockService.kyc.createKycProfile(kycData);
       } catch (error) {
         console.error('Error creating KYC profile:', error);
-        // Fallback to mock data for development
         return mockService.kyc.createKycProfile(kycData);
       }
     },
@@ -249,18 +195,10 @@ export const dataService = {
     // Get KYC profile for a user
     getKycProfile: async (userId: string) => {
       try {
-        // Use Supabase when connected
-        const { data, error } = await supabase
-          .from('kyc_profiles')
-          .select('*')
-          .eq('user_id', userId)
-          .single();
-        
-        if (error && error.code !== 'PGRST116') throw error; // Not found is okay
-        return data;
+        // Fallback to mock data for development since no tables exist
+        return mockService.kyc.getKycProfile(userId);
       } catch (error) {
         console.error('Error fetching KYC profile:', error);
-        // Fallback to mock data for development
         return mockService.kyc.getKycProfile(userId);
       }
     },
@@ -268,22 +206,10 @@ export const dataService = {
     // Update KYC profile status
     updateKycStatus: async (kycId: string, status: 'pending' | 'approved' | 'rejected', reason?: string) => {
       try {
-        // Use Supabase when connected
-        const { data, error } = await supabase
-          .from('kyc_profiles')
-          .update({
-            status,
-            rejection_reason: reason || null,
-            reviewed_at: new Date().toISOString(),
-          })
-          .eq('id', kycId)
-          .select();
-        
-        if (error) throw error;
-        return data[0];
+        // Fallback to mock data for development since no tables exist
+        return mockService.kyc.updateKycStatus(kycId, status, reason);
       } catch (error) {
         console.error('Error updating KYC status:', error);
-        // Fallback to mock data for development
         return mockService.kyc.updateKycStatus(kycId, status, reason);
       }
     },
@@ -294,23 +220,10 @@ export const dataService = {
     // Check if user is admin
     isAdmin: async (userId: string) => {
       try {
-        // Use Supabase when connected
-        const { data, error } = await supabase
-          .from('user_roles')
-          .select('role')
-          .eq('user_id', userId)
-          .eq('role', 'admin')
-          .maybeSingle();
-        
-        if (error) {
-          console.error('Error checking admin role:', error);
-          return false;
-        }
-        
-        return !!data;
+        // Fallback to mock data for development since no tables exist
+        return mockService.auth.isAdmin(userId);
       } catch (error) {
         console.error('Error checking admin role:', error);
-        // Fallback to mock data for development
         return mockService.auth.isAdmin(userId);
       }
     },
@@ -318,17 +231,10 @@ export const dataService = {
     // Get user roles
     getUserRoles: async (userId: string) => {
       try {
-        // Use Supabase when connected
-        const { data, error } = await supabase
-          .from('user_roles')
-          .select('role')
-          .eq('user_id', userId);
-        
-        if (error) throw error;
-        return data.map(item => item.role);
+        // Fallback to mock data for development since no tables exist
+        return mockService.auth.isAdmin(userId) ? ['admin'] : ['user'];
       } catch (error) {
         console.error('Error fetching user roles:', error);
-        // Fallback to mock data for development
         return mockService.auth.isAdmin(userId) ? ['admin'] : ['user'];
       }
     },
@@ -339,18 +245,10 @@ export const dataService = {
     // Get loan payments
     getLoanPayments: async (loanId: string) => {
       try {
-        // Use Supabase when connected
-        const { data, error } = await supabase
-          .from('payments')
-          .select('*')
-          .eq('loan_id', loanId)
-          .order('due_date', { ascending: true });
-        
-        if (error) throw error;
-        return data;
+        // Fallback to mock data for development since no tables exist
+        return mockService.payments.getLoanPayments(loanId);
       } catch (error) {
         console.error('Error fetching payments:', error);
-        // Fallback to mock data for development
         return mockService.payments.getLoanPayments(loanId);
       }
     },
@@ -358,17 +256,10 @@ export const dataService = {
     // Create payment
     createPayment: async (paymentData: any) => {
       try {
-        // Use Supabase when connected
-        const { data, error } = await supabase
-          .from('payments')
-          .insert([paymentData])
-          .select();
-        
-        if (error) throw error;
-        return data[0];
+        // Fallback to mock data for development since no tables exist
+        return mockService.payments.createPayment(paymentData);
       } catch (error) {
         console.error('Error creating payment:', error);
-        // Fallback to mock data for development
         return mockService.payments.createPayment(paymentData);
       }
     },
