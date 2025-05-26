@@ -63,22 +63,16 @@ const KYC = () => {
     try {
       setIsSubmitting(true);
       
-      // Create KYC profile
-      await dataService.kyc.createKycProfile({
-        user_id: user.id,
-        national_id_number: data.nationalIdNumber,
+      // Update user profile with KYC information
+      await dataService.profiles.updateProfile(user.id, {
+        id_number: data.nationalIdNumber,
         date_of_birth: data.dateOfBirth,
-        address: data.address,
-        city: data.city,
-        state: data.state,
-        zip_code: data.zipCode,
         phone_number: data.phoneNumber,
         employment_status: data.employmentStatus,
-        employer_name: data.employerName || null,
-        monthly_income: parseFloat(data.monthlyIncome),
-        purpose_of_loan: data.purposeOfLoan,
-        status: 'pending',
-        submitted_at: new Date().toISOString(),
+        employer_name: data.employerName || '',
+        monthly_income: data.monthlyIncome,
+        county: data.city,
+        nationality: data.state,
       });
       
       toast.success('KYC information submitted successfully');
