@@ -179,42 +179,6 @@ export const dataService = {
     },
   },
 
-  // KYC related operations
-  kyc: {
-    // Create KYC profile
-    createKycProfile: async (kycData: any) => {
-      try {
-        // Fallback to mock data for development since no tables exist
-        return mockService.kyc.createKycProfile(kycData);
-      } catch (error) {
-        console.error('Error creating KYC profile:', error);
-        return mockService.kyc.createKycProfile(kycData);
-      }
-    },
-
-    // Get KYC profile for a user
-    getKycProfile: async (userId: string) => {
-      try {
-        // Fallback to mock data for development since no tables exist
-        return mockService.kyc.getKycProfile(userId);
-      } catch (error) {
-        console.error('Error fetching KYC profile:', error);
-        return mockService.kyc.getKycProfile(userId);
-      }
-    },
-
-    // Update KYC profile status
-    updateKycStatus: async (kycId: string, status: 'pending' | 'approved' | 'rejected', reason?: string) => {
-      try {
-        // Fallback to mock data for development since no tables exist
-        return mockService.kyc.updateKycStatus(kycId, status, reason);
-      } catch (error) {
-        console.error('Error updating KYC status:', error);
-        return mockService.kyc.updateKycStatus(kycId, status, reason);
-      }
-    },
-  },
-
   // Role related operations
   roles: {
     // Check if user is admin

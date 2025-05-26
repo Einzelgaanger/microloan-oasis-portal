@@ -88,14 +88,14 @@ const UserProfile = () => {
           const formData = {
             ...profileData,
             monthly_income: profileData.monthly_income?.toString() || '',
-            email: profileData.email || user.email,
+            email: profileData.email || user.email || '',
             gender: (profileData.gender || 'male') as 'male' | 'female' | 'other',
             marital_status: (profileData.marital_status || 'single') as 'single' | 'married' | 'divorced' | 'widowed'
           };
           form.reset(formData);
         } else {
           // Set default email if no profile exists
-          form.setValue('email', user.email);
+          form.setValue('email', user.email || '');
         }
       } catch (error) {
         console.error('Error fetching profile:', error);
@@ -469,21 +469,21 @@ const UserProfile = () => {
                   <h4 className="font-medium mb-2">National ID</h4>
                   <FileUpload 
                     onFileSelected={(file) => handleFileSelected(file, 'id_document')}
-                    currentFile={profile?.id_document_url || undefined}
+                    currentFile={null}
                   />
                 </div>
                 <div>
                   <h4 className="font-medium mb-2">Income Proof</h4>
                   <FileUpload 
                     onFileSelected={(file) => handleFileSelected(file, 'income_proof')}
-                    currentFile={profile?.income_proof_url || undefined}
+                    currentFile={null}
                   />
                 </div>
                 <div>
                   <h4 className="font-medium mb-2">Selfie with ID</h4>
                   <FileUpload 
                     onFileSelected={(file) => handleFileSelected(file, 'selfie')}
-                    currentFile={profile?.selfie_url || undefined}
+                    currentFile={null}
                   />
                 </div>
               </CardContent>
