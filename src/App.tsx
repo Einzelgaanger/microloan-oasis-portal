@@ -19,42 +19,44 @@ import { Toaster } from 'sonner';
 function App() {
   return (
     <Router>
-      <AuthProvider>
-        <Toaster position="top-right" />
-        <Routes>
-          <Route path="/" element={<Index />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />
-          <Route path="/forgot-password" element={<ForgotPassword />} />
-          <Route path="/dashboard" element={
-            <ProtectedRoute>
-              <Dashboard />
-            </ProtectedRoute>
-          } />
-          <Route path="/profile" element={
-            <ProtectedRoute>
-              <UserProfile />
-            </ProtectedRoute>
-          } />
-          <Route path="/apply" element={
-            <ProtectedRoute>
-              <LoanApplication />
-            </ProtectedRoute>
-          } />
-          <Route path="/kyc" element={
-            <ProtectedRoute>
-              <KYC />
-            </ProtectedRoute>
-          } />
-          <Route path="/admin/login" element={<AdminLogin />} />
-          <Route path="/admin/dashboard" element={
-            <AdminRoute>
-              <AdminDashboard />
-            </AdminRoute>
-          } />
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </AuthProvider>
+      <div className="w-full">
+        <AuthProvider>
+          <Toaster position="top-right" />
+          <Routes>
+            <Route path="/" element={<Index />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/register" element={<Register />} />
+            <Route path="/forgot-password" element={<ForgotPassword />} />
+            <Route path="/dashboard" element={
+              <ProtectedRoute>
+                <Dashboard />
+              </ProtectedRoute>
+            } />
+            <Route path="/profile" element={
+              <ProtectedRoute>
+                <UserProfile />
+              </ProtectedRoute>
+            } />
+            <Route path="/apply" element={
+              <ProtectedRoute>
+                <LoanApplication />
+              </ProtectedRoute>
+            } />
+            <Route path="/kyc" element={
+              <ProtectedRoute>
+                <KYC />
+              </ProtectedRoute>
+            } />
+            <Route path="/admin/login" element={<AdminLogin />} />
+            <Route path="/admin/dashboard" element={
+              <AdminRoute>
+                <AdminDashboard />
+              </AdminRoute>
+            } />
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </AuthProvider>
+      </div>
     </Router>
   );
 }

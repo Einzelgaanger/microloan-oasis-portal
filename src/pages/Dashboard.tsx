@@ -1,13 +1,16 @@
+
 import React, { useEffect, useState } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Link } from 'react-router-dom';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Plus, FileText, DollarSign, Clock, CheckCircle } from 'lucide-react';
-import { useAuth } from '@/lib/auth';
+import { FileText, DollarSign, Clock, CheckCircle, AlertTriangle, CreditCard, CalendarRange, ChevronRight } from 'lucide-react';
+import { useAuth, ProtectedRoute } from '@/lib/auth';
 import { useNavigate } from 'react-router-dom';
 import { dataService } from '@/services/dataService';
 import { Loan, Profile } from '@/types/loan';
 import { toast } from 'sonner';
+import MainLayout from '@/components/layout/MainLayout';
 
 const Dashboard = () => {
   const { user } = useAuth();
@@ -64,7 +67,7 @@ const Dashboard = () => {
       <MainLayout>
         <div className="container mx-auto px-4 py-8">
           <div className="flex items-center justify-center h-64">
-            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-lending-primary"></div>
+            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-600"></div>
           </div>
         </div>
       </MainLayout>
@@ -84,7 +87,7 @@ const Dashboard = () => {
           {/* Action Button */}
           <div className="mb-8">
             <Link to="/apply">
-              <Button size="lg" className="bg-lending-primary hover:bg-lending-primary/90">
+              <Button size="lg" className="bg-blue-600 hover:bg-blue-700">
                 Apply for a New Loan
               </Button>
             </Link>
@@ -188,7 +191,7 @@ const Dashboard = () => {
                             : 'Application closed'
                         }
                       </p>
-                      <Button variant="ghost" size="sm" className="text-lending-primary hover:bg-lending-primary/10 hover:text-lending-primary">
+                      <Button variant="ghost" size="sm" className="text-blue-600 hover:bg-blue-100">
                         View Details <ChevronRight className="ml-1 h-4 w-4" />
                       </Button>
                     </CardFooter>
@@ -203,7 +206,7 @@ const Dashboard = () => {
                 <h3 className="text-xl font-semibold mb-2">No Loan Applications</h3>
                 <p className="text-gray-500 mb-4">You haven't applied for any loans yet.</p>
                 <Link to="/apply">
-                  <Button className="bg-lending-primary hover:bg-lending-primary/90">
+                  <Button className="bg-blue-600 hover:bg-blue-700">
                     Apply for a Loan
                   </Button>
                 </Link>

@@ -1,500 +1,493 @@
 import React, { useState, useEffect } from 'react';
+import { z } from 'zod';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Textarea } from '@/components/ui/textarea';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { FileUpload } from '@/components/ui/file-upload';
-import { Badge } from '@/components/ui/badge';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Separator } from '@/components/ui/separator';
-import { useAuth } from '@/lib/auth';
+import { useAuth, ProtectedRoute } from '@/lib/auth';
 import { dataService } from '@/services/dataService';
 import { Profile } from '@/types/loan';
 import { toast } from 'sonner';
+import MainLayout from '@/components/layout/MainLayout';
+import { FileUpload } from '@/components/ui/file-upload';
+
+const profileSchema = z.object({
+  first_name: z.string().min(1, { message: "First name is required" }),
+  last_name: z.string().min(1, { message: "Last name is required" }),
+  email: z.string().email({ message: "Please enter a valid email address" }),
+  phone_number: z.string().min(10, { message: "Phone number must be at least 10 digits" }),
+  id_number: z.string().min(7, { message: "ID number must be at least 7 digits" }),
+  date_of_birth: z.string(),
+  gender: z.enum(['male', 'female', 'other']),
+  marital_status: z.enum(['single', 'married', 'divorced', 'widowed']),
+  nationality: z.string(),
+  county: z.string(),
+  employment_status: z.string(),
+  employer_name: z.string(),
+  monthly_income: z.string(), // Allow string for easier form handling
+  mpesa_number: z.string().min(10, { message: "M-PESA number must be at least 10 digits" }),
+  kin_name: z.string().min(1, { message: "Next of kin name is required" }),
+  kin_phone: z.string().min(10, { message: "Next of kin phone number must be at least 10 digits" }),
+  kin_relationship: z.string().min(1, { message: "Next of kin relationship is required" }),
+});
+
+type ProfileFormValues = z.infer<typeof profileSchema>;
+
+const counties = [
+  "Mombasa", "Kwale", "Kilifi", "Tana River", "Lamu", "Taita Taveta", "Garissa", "Wajir", "Mandera",
+  "Marsabit", "Isiolo", "Meru", "Tharaka Nithi", "Embu", "Kitui", "Machakos", "Makueni", "Nyandarua",
+  "Nyeri", "Kirinyaga", "Murang'a", "Kiambu", "Turkana", "West Pokot", "Samburu", "Trans Nzoia",
+  "Uasin Gishu", "Elgeyo Marakwet", "Nandi", "Baringo", "Laikipia", "Nakuru", "Narok", "Kajiado",
+  "Kericho", "Bomet", "Kakamega", "Vihiga", "Bungoma", "Busia", "Siaya", "Kisumu", "Homa Bay",
+  "Migori", "Kisii", "Nyamira"
+];
 
 const UserProfile = () => {
   const { user } = useAuth();
-  const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [profile, setProfile] = useState<Profile | null>(null);
 
-  // Form states
-  const [personalInfo, setPersonalInfo] = useState({
-    first_name: '',
-    last_name: '',
-    email: '',
-    phone_number: '',
-    id_number: '',
-    date_of_birth: '',
-    gender: '',
-    marital_status: '',
-    nationality: '',
-  });
-
-  const [contactInfo, setContactInfo] = useState({
-    address: '',
-    county: '',
-    sub_county: '',
-    village: '',
-    landmark: '',
-    residence_duration: '',
-    alternative_phone: '',
-  });
-
-  const [employmentInfo, setEmploymentInfo] = useState({
-    employment_status: '',
-    occupation: '',
-    employer_name: '',
-    employer_contact: '',
-    monthly_income: '',
-    secondary_income: '',
-    pay_frequency: '',
-    work_location: '',
-  });
-
-  const [bankingInfo, setBankingInfo] = useState({
-    bank_name: '',
-    bank_branch: '',
-    account_number: '',
-    mpesa_number: '',
-  });
-
-  const [kinInfo, setKinInfo] = useState({
-    kin_name: '',
-    kin_relationship: '',
-    kin_phone: '',
-    kin_id_number: '',
-    kin_address: '',
+  const form = useForm<ProfileFormValues>({
+    resolver: zodResolver(profileSchema),
+    defaultValues: {
+      first_name: '',
+      last_name: '',
+      email: '',
+      phone_number: '',
+      id_number: '',
+      date_of_birth: '',
+      gender: '',
+      marital_status: '',
+      nationality: 'Kenyan',
+      county: '',
+      employment_status: '',
+      employer_name: '',
+      monthly_income: '', // Keep as string for form handling
+      mpesa_number: '',
+      kin_name: '',
+      kin_phone: '',
+      kin_relationship: ''
+    }
   });
 
   useEffect(() => {
     const fetchProfile = async () => {
-      if (!user) {
-        setLoading(false);
-        return;
-      }
-
+      if (!user) return;
+      
       try {
-        const fetchedProfile = await dataService.profiles.getProfile(user.id);
-        setProfile(fetchedProfile);
-
-        // Initialize form states with profile data
-        setPersonalInfo({
-          first_name: fetchedProfile?.first_name || '',
-          last_name: fetchedProfile?.last_name || '',
-          email: fetchedProfile?.email || '',
-          phone_number: fetchedProfile?.phone_number || '',
-          id_number: fetchedProfile?.id_number || '',
-          date_of_birth: fetchedProfile?.date_of_birth || '',
-          gender: fetchedProfile?.gender || '',
-          marital_status: fetchedProfile?.marital_status || '',
-          nationality: fetchedProfile?.nationality || '',
-        });
-
-        setContactInfo({
-          address: fetchedProfile?.address || '',
-          county: fetchedProfile?.county || '',
-          sub_county: fetchedProfile?.sub_county || '',
-          village: fetchedProfile?.village || '',
-          landmark: fetchedProfile?.landmark || '',
-          residence_duration: fetchedProfile?.residence_duration || '',
-          alternative_phone: fetchedProfile?.alternative_phone || '',
-        });
-
-        setEmploymentInfo({
-          employment_status: fetchedProfile?.employment_status || '',
-          occupation: fetchedProfile?.occupation || '',
-          employer_name: fetchedProfile?.employer_name || '',
-          employer_contact: fetchedProfile?.employer_contact || '',
-          monthly_income: fetchedProfile?.monthly_income?.toString() || '',
-          secondary_income: fetchedProfile?.secondary_income?.toString() || '',
-          pay_frequency: fetchedProfile?.pay_frequency || '',
-          work_location: fetchedProfile?.work_location || '',
-        });
-
-        setBankingInfo({
-          bank_name: fetchedProfile?.bank_name || '',
-          bank_branch: fetchedProfile?.bank_branch || '',
-          account_number: fetchedProfile?.account_number || '',
-          mpesa_number: fetchedProfile?.mpesa_number || '',
-        });
-
-        setKinInfo({
-          kin_name: fetchedProfile?.kin_name || '',
-          kin_relationship: fetchedProfile?.kin_relationship || '',
-          kin_phone: fetchedProfile?.kin_phone || '',
-          kin_id_number: fetchedProfile?.kin_id_number || '',
-          kin_address: fetchedProfile?.kin_address || '',
-        });
-
+        const profileData = await dataService.profiles.getProfile(user.id);
+        if (profileData) {
+          setProfile(profileData);
+          // Convert monthly_income to string for form
+          const formData = {
+            ...profileData,
+            monthly_income: profileData.monthly_income?.toString() || '',
+            email: profileData.email || user.email
+          };
+          form.reset(formData);
+        } else {
+          // Set default email if no profile exists
+          form.setValue('email', user.email);
+        }
       } catch (error) {
-        console.error('Failed to fetch profile:', error);
-        toast.error('Failed to fetch profile. Please try again.');
+        console.error('Error fetching profile:', error);
       } finally {
         setLoading(false);
       }
     };
 
     fetchProfile();
-  }, [user]);
+  }, [user, form]);
 
-  const handlePersonalInfoChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target;
-    setPersonalInfo(prev => ({ ...prev, [name]: value }));
-  };
+  const onSubmit = async (data: ProfileFormValues) => {
+    if (!user) return;
 
-  const handleContactInfoChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target;
-    setContactInfo(prev => ({ ...prev, [name]: value }));
-  };
-
-  const handleEmploymentInfoChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target;
-    setEmploymentInfo(prev => ({ ...prev, [name]: value }));
-  };
-
-  const handleBankingInfoChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target;
-    setBankingInfo(prev => ({ ...prev, [name]: value }));
-  };
-
-  const handleKinInfoChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target;
-    setKinInfo(prev => ({ ...prev, [name]: value }));
-  };
-
-  const handlePersonalInfoSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setSaving(true);
     try {
-      if (!user) return;
+      setIsSubmitting(true);
       
-      await dataService.profiles.updateProfile(user.id, {
-        ...personalInfo,
-        monthly_income: personalInfo.monthly_income ? Number(personalInfo.monthly_income) : undefined,
-      });
+      // Convert monthly_income back to number
+      const profileData = {
+        ...data,
+        monthly_income: parseFloat(data.monthly_income) || 0,
+        id: user.id
+      };
+
+      const updatedProfile = await dataService.profiles.updateProfile(profileData);
       
-      toast.success('Personal information updated successfully');
+      if (updatedProfile) {
+        setProfile(updatedProfile);
+        toast.success('Profile updated successfully');
+      }
     } catch (error: any) {
-      toast.error(error.message || 'Failed to update personal information');
+      toast.error(error.message || 'Failed to update profile');
     } finally {
-      setSaving(false);
+      setIsSubmitting(false);
     }
   };
 
-  const handleContactInfoSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setSaving(true);
-    try {
-      if (!user) return;
-      
-      await dataService.profiles.updateProfile(user.id, contactInfo);
-      toast.success('Contact information updated successfully');
-    } catch (error: any) {
-      toast.error(error.message || 'Failed to update contact information');
-    } finally {
-      setSaving(false);
+  const handleFileSelected = (file: File | null, fieldName: string) => {
+    if (file) {
+      console.log(`${fieldName} selected:`, file);
+      // Implement file upload logic here
     }
   };
 
-  const handleEmploymentInfoSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setSaving(true);
-    try {
-      if (!user) return;
-      
-      await dataService.profiles.updateProfile(user.id, {
-        ...employmentInfo,
-        monthly_income: employmentInfo.monthly_income ? Number(employmentInfo.monthly_income) : undefined,
-        secondary_income: employmentInfo.secondary_income ? Number(employmentInfo.secondary_income) : undefined,
-      });
-      
-      toast.success('Employment information updated successfully');
-    } catch (error: any) {
-      toast.error(error.message || 'Failed to update employment information');
-    } finally {
-      setSaving(false);
-    }
-  };
-
-  const handleBankingInfoSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setSaving(true);
-    try {
-      if (!user) return;
-      
-      await dataService.profiles.updateProfile(user.id, bankingInfo);
-      toast.success('Banking information updated successfully');
-    } catch (error: any) {
-      toast.error(error.message || 'Failed to update banking information');
-    } finally {
-      setSaving(false);
-    }
-  };
-
-  const handleKinInfoSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setSaving(true);
-    try {
-      if (!user) return;
-      
-      await dataService.profiles.updateProfile(user.id, kinInfo);
-      toast.success('Next of Kin information updated successfully');
-    } catch (error: any) {
-      toast.error(error.message || 'Failed to update Next of Kin information');
-    } finally {
-      setSaving(false);
-    }
-  };
+  if (loading) {
+    return (
+      <MainLayout>
+        <div className="container mx-auto px-4 py-8">
+          <div className="flex items-center justify-center h-64">
+            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-600"></div>
+          </div>
+        </div>
+      </MainLayout>
+    );
+  }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
-      <div className="container mx-auto px-4 max-w-4xl">
-        <Card>
-          <CardHeader>
-            <CardTitle>Profile Management</CardTitle>
-            <CardDescription>
-              Complete your profile to access all features
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Tabs defaultValue="personal" className="space-y-4">
-              <TabsList>
-                <TabsTrigger value="personal">Personal Info</TabsTrigger>
-                <TabsTrigger value="contact">Contact Info</TabsTrigger>
-                <TabsTrigger value="employment">Employment Info</TabsTrigger>
-                <TabsTrigger value="banking">Banking Info</TabsTrigger>
-                <TabsTrigger value="kin">Next of Kin Info</TabsTrigger>
-                <TabsTrigger value="documents">Documents</TabsTrigger>
-              </TabsList>
-              <TabsContent value="personal" className="space-y-2">
-                <form onSubmit={handlePersonalInfoSubmit}>
-                  <div className="grid gap-4 py-4">
-                    <div>
-                      <Label htmlFor="first_name">First Name</Label>
-                      <Input id="first_name" name="first_name" value={personalInfo.first_name} onChange={handlePersonalInfoChange} />
+    <ProtectedRoute>
+      <MainLayout>
+        <div className="container mx-auto px-4 py-8 max-w-4xl">
+          <div className="mb-8">
+            <h1 className="text-3xl font-bold mb-2">Profile</h1>
+            <p className="text-gray-600">Manage your personal information and documents</p>
+          </div>
+
+          <div className="grid gap-8">
+            {/* Personal Information */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Personal Information</CardTitle>
+                <CardDescription>Update your personal details</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <Form {...form}>
+                  <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+                    <FormField
+                      control={form.control}
+                      name="first_name"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>First Name</FormLabel>
+                          <FormControl>
+                            <Input placeholder="John" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    
+                    <FormField
+                      control={form.control}
+                      name="last_name"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Last Name</FormLabel>
+                          <FormControl>
+                            <Input placeholder="Doe" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    
+                    <FormField
+                      control={form.control}
+                      name="email"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Email</FormLabel>
+                          <FormControl>
+                            <Input type="email" placeholder="you@example.com" {...field} disabled />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    
+                    <FormField
+                      control={form.control}
+                      name="phone_number"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Phone Number</FormLabel>
+                          <FormControl>
+                            <Input placeholder="254712345678" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    
+                    <FormField
+                      control={form.control}
+                      name="id_number"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>ID Number</FormLabel>
+                          <FormControl>
+                            <Input placeholder="12345678" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    
+                    <FormField
+                      control={form.control}
+                      name="date_of_birth"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Date of Birth</FormLabel>
+                          <FormControl>
+                            <Input type="date" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    
+                    <FormField
+                      control={form.control}
+                      name="gender"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Gender</FormLabel>
+                          <Select onValueChange={field.onChange} defaultValue={field.value}>
+                            <FormControl>
+                              <SelectTrigger>
+                                <SelectValue placeholder="Select a gender" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              <SelectItem value="male">Male</SelectItem>
+                              <SelectItem value="female">Female</SelectItem>
+                              <SelectItem value="other">Other</SelectItem>
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    
+                    <FormField
+                      control={form.control}
+                      name="marital_status"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Marital Status</FormLabel>
+                          <Select onValueChange={field.onChange} defaultValue={field.value}>
+                            <FormControl>
+                              <SelectTrigger>
+                                <SelectValue placeholder="Select marital status" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              <SelectItem value="single">Single</SelectItem>
+                              <SelectItem value="married">Married</SelectItem>
+                              <SelectItem value="divorced">Divorced</SelectItem>
+                              <SelectItem value="widowed">Widowed</SelectItem>
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    
+                    <FormField
+                      control={form.control}
+                      name="nationality"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Nationality</FormLabel>
+                          <FormControl>
+                            <Input placeholder="Kenyan" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    
+                    <FormField
+                      control={form.control}
+                      name="county"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>County</FormLabel>
+                          <Select onValueChange={field.onChange} defaultValue={field.value}>
+                            <FormControl>
+                              <SelectTrigger>
+                                <SelectValue placeholder="Select a county" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              {counties.map(county => (
+                                <SelectItem key={county} value={county}>{county}</SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    
+                    <Separator />
+                    
+                    <FormField
+                      control={form.control}
+                      name="employment_status"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Employment Status</FormLabel>
+                          <FormControl>
+                            <Input placeholder="Employed" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    
+                    <FormField
+                      control={form.control}
+                      name="employer_name"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Employer Name</FormLabel>
+                          <FormControl>
+                            <Input placeholder="Acme Corp" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    
+                    <FormField
+                      control={form.control}
+                      name="monthly_income"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Monthly Income</FormLabel>
+                          <FormControl>
+                            <Input placeholder="50000" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    
+                    <Separator />
+                    
+                    <FormField
+                      control={form.control}
+                      name="mpesa_number"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>M-PESA Number</FormLabel>
+                          <FormControl>
+                            <Input placeholder="254712345678" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    
+                    <Separator />
+                    
+                    <FormField
+                      control={form.control}
+                      name="kin_name"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Next of Kin Name</FormLabel>
+                          <FormControl>
+                            <Input placeholder="Jane Doe" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    
+                    <FormField
+                      control={form.control}
+                      name="kin_phone"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Next of Kin Phone</FormLabel>
+                          <FormControl>
+                            <Input placeholder="254798765432" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    
+                    <FormField
+                      control={form.control}
+                      name="kin_relationship"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Next of Kin Relationship</FormLabel>
+                          <FormControl>
+                            <Input placeholder="Sister" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    
+                    <div className="flex justify-end">
+                      <Button 
+                        type="submit" 
+                        disabled={isSubmitting}
+                        className="bg-blue-600 hover:bg-blue-700"
+                      >
+                        {isSubmitting ? 'Saving...' : 'Save Changes'}
+                      </Button>
                     </div>
-                    <div>
-                      <Label htmlFor="last_name">Last Name</Label>
-                      <Input id="last_name" name="last_name" value={personalInfo.last_name} onChange={handlePersonalInfoChange} />
-                    </div>
-                    <div>
-                      <Label htmlFor="email">Email</Label>
-                      <Input id="email" name="email" type="email" value={personalInfo.email} onChange={handlePersonalInfoChange} />
-                    </div>
-                    <div>
-                      <Label htmlFor="phone_number">Phone Number</Label>
-                      <Input id="phone_number" name="phone_number" value={personalInfo.phone_number} onChange={handlePersonalInfoChange} />
-                    </div>
-                    <div>
-                      <Label htmlFor="id_number">ID Number</Label>
-                      <Input id="id_number" name="id_number" value={personalInfo.id_number} onChange={handlePersonalInfoChange} />
-                    </div>
-                    <div>
-                      <Label htmlFor="date_of_birth">Date of Birth</Label>
-                      <Input id="date_of_birth" name="date_of_birth" type="date" value={personalInfo.date_of_birth} onChange={handlePersonalInfoChange} />
-                    </div>
-                    <div>
-                      <Label htmlFor="gender">Gender</Label>
-                      <Select onValueChange={(value) => handlePersonalInfoChange({ target: { name: 'gender', value } } as any)}>
-                        <SelectTrigger className="w-full">
-                          <SelectValue placeholder="Select gender" defaultValue={personalInfo.gender} />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="male">Male</SelectItem>
-                          <SelectItem value="female">Female</SelectItem>
-                          <SelectItem value="other">Other</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <div>
-                      <Label htmlFor="marital_status">Marital Status</Label>
-                      <Select onValueChange={(value) => handlePersonalInfoChange({ target: { name: 'marital_status', value } } as any)}>
-                        <SelectTrigger className="w-full">
-                          <SelectValue placeholder="Select marital status" defaultValue={personalInfo.marital_status} />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="single">Single</SelectItem>
-                          <SelectItem value="married">Married</SelectItem>
-                          <SelectItem value="divorced">Divorced</SelectItem>
-                          <SelectItem value="widowed">Widowed</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <div>
-                      <Label htmlFor="nationality">Nationality</Label>
-                      <Input id="nationality" name="nationality" value={personalInfo.nationality} onChange={handlePersonalInfoChange} />
-                    </div>
-                  </div>
-                  <Button type="submit" disabled={saving}>
-                    {saving ? 'Saving...' : 'Save Personal Info'}
-                  </Button>
-                </form>
-              </TabsContent>
-              <TabsContent value="contact" className="space-y-2">
-                <form onSubmit={handleContactInfoSubmit}>
-                  <div className="grid gap-4 py-4">
-                    <div>
-                      <Label htmlFor="address">Address</Label>
-                      <Input id="address" name="address" value={contactInfo.address} onChange={handleContactInfoChange} />
-                    </div>
-                    <div>
-                      <Label htmlFor="county">County</Label>
-                      <Input id="county" name="county" value={contactInfo.county} onChange={handleContactInfoChange} />
-                    </div>
-                    <div>
-                      <Label htmlFor="sub_county">Sub County</Label>
-                      <Input id="sub_county" name="sub_county" value={contactInfo.sub_county} onChange={handleContactInfoChange} />
-                    </div>
-                    <div>
-                      <Label htmlFor="village">Village</Label>
-                      <Input id="village" name="village" value={contactInfo.village} onChange={handleContactInfoChange} />
-                    </div>
-                    <div>
-                      <Label htmlFor="landmark">Landmark</Label>
-                      <Input id="landmark" name="landmark" value={contactInfo.landmark} onChange={handleContactInfoChange} />
-                    </div>
-                    <div>
-                      <Label htmlFor="residence_duration">Residence Duration</Label>
-                      <Input id="residence_duration" name="residence_duration" value={contactInfo.residence_duration} onChange={handleContactInfoChange} />
-                    </div>
-                    <div>
-                      <Label htmlFor="alternative_phone">Alternative Phone</Label>
-                      <Input id="alternative_phone" name="alternative_phone" value={contactInfo.alternative_phone} onChange={handleContactInfoChange} />
-                    </div>
-                  </div>
-                  <Button type="submit" disabled={saving}>
-                    {saving ? 'Saving...' : 'Save Contact Info'}
-                  </Button>
-                </form>
-              </TabsContent>
-              <TabsContent value="employment" className="space-y-2">
-                <form onSubmit={handleEmploymentInfoSubmit}>
-                  <div className="grid gap-4 py-4">
-                    <div>
-                      <Label htmlFor="employment_status">Employment Status</Label>
-                      <Select onValueChange={(value) => handleEmploymentInfoChange({ target: { name: 'employment_status', value } } as any)}>
-                        <SelectTrigger className="w-full">
-                          <SelectValue placeholder="Select employment status" defaultValue={employmentInfo.employment_status} />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="employed">Employed</SelectItem>
-                          <SelectItem value="self-employed">Self-Employed</SelectItem>
-                          <SelectItem value="unemployed">Unemployed</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <div>
-                      <Label htmlFor="occupation">Occupation</Label>
-                      <Input id="occupation" name="occupation" value={employmentInfo.occupation} onChange={handleEmploymentInfoChange} />
-                    </div>
-                    <div>
-                      <Label htmlFor="employer_name">Employer Name</Label>
-                      <Input id="employer_name" name="employer_name" value={employmentInfo.employer_name} onChange={handleEmploymentInfoChange} />
-                    </div>
-                    <div>
-                      <Label htmlFor="employer_contact">Employer Contact</Label>
-                      <Input id="employer_contact" name="employer_contact" value={employmentInfo.employer_contact} onChange={handleEmploymentInfoChange} />
-                    </div>
-                    <div>
-                      <Label htmlFor="monthly_income">Monthly Income</Label>
-                      <Input id="monthly_income" name="monthly_income" value={employmentInfo.monthly_income} onChange={handleEmploymentInfoChange} />
-                    </div>
-                    <div>
-                      <Label htmlFor="secondary_income">Secondary Income</Label>
-                      <Input id="secondary_income" name="secondary_income" value={employmentInfo.secondary_income} onChange={handleEmploymentInfoChange} />
-                    </div>
-                    <div>
-                      <Label htmlFor="pay_frequency">Pay Frequency</Label>
-                      <Input id="pay_frequency" name="pay_frequency" value={employmentInfo.pay_frequency} onChange={handleEmploymentInfoChange} />
-                    </div>
-                    <div>
-                      <Label htmlFor="work_location">Work Location</Label>
-                      <Input id="work_location" name="work_location" value={employmentInfo.work_location} onChange={handleEmploymentInfoChange} />
-                    </div>
-                  </div>
-                  <Button type="submit" disabled={saving}>
-                    {saving ? 'Saving...' : 'Save Employment Info'}
-                  </Button>
-                </form>
-              </TabsContent>
-              <TabsContent value="banking" className="space-y-2">
-                <form onSubmit={handleBankingInfoSubmit}>
-                  <div className="grid gap-4 py-4">
-                    <div>
-                      <Label htmlFor="bank_name">Bank Name</Label>
-                      <Input id="bank_name" name="bank_name" value={bankingInfo.bank_name} onChange={handleBankingInfoChange} />
-                    </div>
-                    <div>
-                      <Label htmlFor="bank_branch">Bank Branch</Label>
-                      <Input id="bank_branch" name="bank_branch" value={bankingInfo.bank_branch} onChange={handleBankingInfoChange} />
-                    </div>
-                    <div>
-                      <Label htmlFor="account_number">Account Number</Label>
-                      <Input id="account_number" name="account_number" value={bankingInfo.account_number} onChange={handleBankingInfoChange} />
-                    </div>
-                    <div>
-                      <Label htmlFor="mpesa_number">M-Pesa Number</Label>
-                      <Input id="mpesa_number" name="mpesa_number" value={bankingInfo.mpesa_number} onChange={handleBankingInfoChange} />
-                    </div>
-                  </div>
-                  <Button type="submit" disabled={saving}>
-                    {saving ? 'Saving...' : 'Save Banking Info'}
-                  </Button>
-                </form>
-              </TabsContent>
-              <TabsContent value="kin" className="space-y-2">
-                <form onSubmit={handleKinInfoSubmit}>
-                  <div className="grid gap-4 py-4">
-                    <div>
-                      <Label htmlFor="kin_name">Kin Name</Label>
-                      <Input id="kin_name" name="kin_name" value={kinInfo.kin_name} onChange={handleKinInfoChange} />
-                    </div>
-                    <div>
-                      <Label htmlFor="kin_relationship">Kin Relationship</Label>
-                      <Input id="kin_relationship" name="kin_relationship" value={kinInfo.kin_relationship} onChange={handleKinInfoChange} />
-                    </div>
-                    <div>
-                      <Label htmlFor="kin_phone">Kin Phone</Label>
-                      <Input id="kin_phone" name="kin_phone" value={kinInfo.kin_phone} onChange={handleKinInfoChange} />
-                    </div>
-                    <div>
-                      <Label htmlFor="kin_id_number">Kin ID Number</Label>
-                      <Input id="kin_id_number" name="kin_id_number" value={kinInfo.kin_id_number} onChange={handleKinInfoChange} />
-                    </div>
-                    <div>
-                      <Label htmlFor="kin_address">Kin Address</Label>
-                      <Input id="kin_address" name="kin_address" value={kinInfo.kin_address} onChange={handleKinInfoChange} />
-                    </div>
-                  </div>
-                  <Button type="submit" disabled={saving}>
-                    {saving ? 'Saving...' : 'Save Kin Info'}
-                  </Button>
-                </form>
-              </TabsContent>
-              <TabsContent value="documents" className="space-y-2">
-                <div className="grid gap-4 py-4">
-                  <div>
-                    <Label>ID Document</Label>
-                    <FileUpload />
-                  </div>
-                  <div>
-                    <Label>Proof of Income</Label>
-                    <FileUpload />
-                  </div>
-                  <div>
-                    <Label>Selfie</Label>
-                    <FileUpload />
-                  </div>
+                  </form>
+                </Form>
+              </CardContent>
+            </Card>
+
+            {/* Document Upload */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Document Upload</CardTitle>
+                <CardDescription>Upload required documents for verification</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <div>
+                  <h4 className="font-medium mb-2">National ID</h4>
+                  <FileUpload 
+                    onFileSelected={(file) => handleFileSelected(file, 'id_document')}
+                    currentFile={profile?.id_document_url}
+                  />
                 </div>
-              </TabsContent>
-            </Tabs>
-          </CardContent>
-        </Card>
-      </div>
-    </div>
+                <div>
+                  <h4 className="font-medium mb-2">Income Proof</h4>
+                  <FileUpload 
+                    onFileSelected={(file) => handleFileSelected(file, 'income_proof')}
+                    currentFile={profile?.income_proof_url}
+                  />
+                </div>
+                <div>
+                  <h4 className="font-medium mb-2">Selfie with ID</h4>
+                  <FileUpload 
+                    onFileSelected={(file) => handleFileSelected(file, 'selfie')}
+                    currentFile={profile?.selfie_url}
+                  />
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      </MainLayout>
+    </ProtectedRoute>
   );
 };
 
