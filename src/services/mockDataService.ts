@@ -2,7 +2,7 @@
 // Mock data service for development and testing
 // This would be replaced by actual API calls to Supabase in production
 
-import { Loan, Payment, Profile, KYCProfile } from '@/types/loan';
+import { Loan, Payment, Profile } from '@/types/loan';
 
 // Mock users
 const mockUsers = [
@@ -27,10 +27,13 @@ const mockProfiles: Profile[] = [
     id: '1',
     first_name: 'John',
     last_name: 'Doe',
-    created_at: new Date().toISOString(),
+    email: 'user@example.com',
     phone_number: '+254712345678',
     id_number: '12345678',
-    address: '123 Main St',
+    date_of_birth: '1990-01-01',
+    gender: 'male',
+    marital_status: 'single',
+    nationality: 'Kenyan',
     county: 'Nairobi',
     employment_status: 'employed',
     employer_name: 'ABC Company',
@@ -41,6 +44,8 @@ const mockProfiles: Profile[] = [
     kin_relationship: 'spouse',
     id_document_url: '/mock-images/id-sample.jpg',
     selfie_url: '/mock-images/selfie-sample.jpg',
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
   },
 ];
 
@@ -51,24 +56,25 @@ const mockLoans: Loan[] = [
     user_id: '1',
     amount: 100000,
     purpose: 'Business expansion',
-    status: 'pending',
+    duration: 3,
     term_days: 90,
     interest_rate: 25,
     monthly_payment: 36667,
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
+    processing_fee: 5000,
+    total_amount: 130000,
     employment_status: 'employed',
     employer_name: 'ABC Company',
     monthly_income: 50000,
     county: 'Nairobi',
     mpesa_number: '+254712345678',
-    next_of_kin_name: 'Jane Doe',
-    next_of_kin_phone: '+254712345679',
-    next_of_kin_relation: 'spouse',
-    id_document_url: '/mock-images/id-sample.jpg',
-    proof_of_income_url: '/mock-images/payslip-sample.pdf',
-    selfie_url: '/mock-images/selfie-sample.jpg',
-    other_documents_url: ['/mock-images/other-doc.pdf'],
+    phone_number: '+254712345678',
+    kin_name: 'Jane Doe',
+    kin_phone: '+254712345679',
+    kin_relationship: 'spouse',
+    status: 'pending',
+    is_repaid: false,
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
   },
 ];
 
@@ -77,35 +83,12 @@ const mockPayments: Payment[] = [
   {
     id: '1',
     loan_id: '1',
-    amount: 36667,
-    status: 'completed',
-    due_date: new Date(new Date().setDate(new Date().getDate() - 30)).toISOString(),
-    payment_date: new Date(new Date().setDate(new Date().getDate() - 29)).toISOString(),
-    payment_method: 'mpesa',
-    transaction_id: 'MPESA123456',
-  },
-];
-
-// Mock KYC profiles
-const mockKycProfiles: KYCProfile[] = [
-  {
-    id: '1',
     user_id: '1',
-    status: 'approved',
-    submitted_at: new Date(new Date().setDate(new Date().getDate() - 35)).toISOString(),
-    reviewed_at: new Date(new Date().setDate(new Date().getDate() - 34)).toISOString(),
-    reviewed_by: '2',
-    national_id_number: '12345678',
-    date_of_birth: '1990-01-01',
-    address: '123 Main St',
-    city: 'Nairobi',
-    state: 'Nairobi',
-    zip_code: '00100',
-    phone_number: '+254712345678',
-    employment_status: 'employed',
-    employer_name: 'ABC Company',
-    monthly_income: 50000,
-    purpose_of_loan: 'Business expansion',
+    amount: 36667,
+    payment_method: 'mpesa',
+    status: 'completed',
+    created_at: new Date(new Date().setDate(new Date().getDate() - 30)).toISOString(),
+    updated_at: new Date(new Date().setDate(new Date().getDate() - 29)).toISOString(),
   },
 ];
 
@@ -142,12 +125,27 @@ export const mockService = {
     updateProfile: (userId: string, data: Partial<Profile>) => {
       const index = mockProfiles.findIndex(p => p.id === userId);
       if (index === -1) {
-        const newProfile = {
+        const newProfile: Profile = {
           id: userId,
           first_name: data.first_name || '',
           last_name: data.last_name || '',
-          created_at: new Date().toISOString(),
-          ...data,
+          email: data.email || '',
+          phone_number: data.phone_number || '',
+          id_number: data.id_number || '',
+          date_of_birth: data.date_of_birth || '',
+          gender: data.gender || 'male',
+          marital_status: data.marital_status || 'single',
+          nationality: data.nationality || '',
+          county: data.county || '',
+          employment_status: data.employment_status || '',
+          employer_name: data.employer_name || '',
+          monthly_income: data.monthly_income || 0,
+          mpesa_number: data.mpesa_number || '',
+          kin_name: data.kin_name || '',
+          kin_phone: data.kin_phone || '',
+          kin_relationship: data.kin_relationship || '',
+          created_at: data.created_at || new Date().toISOString(),
+          updated_at: data.updated_at || new Date().toISOString(),
         };
         mockProfiles.push(newProfile);
         return newProfile;
@@ -199,34 +197,6 @@ export const mockService = {
       };
       mockPayments.push(newPayment);
       return newPayment;
-    },
-  },
-
-  // KYC
-  kyc: {
-    getKycProfile: (userId: string) => {
-      return mockKycProfiles.find(profile => profile.user_id === userId) || null;
-    },
-    createKycProfile: (kycData: Omit<KYCProfile, 'id'>) => {
-      const newProfile: KYCProfile = {
-        id: generateId(),
-        ...kycData,
-      };
-      mockKycProfiles.push(newProfile);
-      return newProfile;
-    },
-    updateKycStatus: (kycId: string, status: 'pending' | 'approved' | 'rejected', reason?: string) => {
-      const index = mockKycProfiles.findIndex(profile => profile.id === kycId);
-      if (index !== -1) {
-        mockKycProfiles[index] = {
-          ...mockKycProfiles[index],
-          status,
-          rejection_reason: reason,
-          reviewed_at: new Date().toISOString(),
-        };
-        return mockKycProfiles[index];
-      }
-      return null;
     },
   },
 };

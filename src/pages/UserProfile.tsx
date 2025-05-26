@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { z } from 'zod';
 import { useForm } from 'react-hook-form';
@@ -61,8 +62,8 @@ const UserProfile = () => {
       phone_number: '',
       id_number: '',
       date_of_birth: '',
-      gender: '',
-      marital_status: '',
+      gender: 'male' as const,
+      marital_status: 'single' as const,
       nationality: 'Kenyan',
       county: '',
       employment_status: '',
@@ -83,11 +84,13 @@ const UserProfile = () => {
         const profileData = await dataService.profiles.getProfile(user.id);
         if (profileData) {
           setProfile(profileData);
-          // Convert monthly_income to string for form
+          // Convert monthly_income to string for form and ensure proper type casting
           const formData = {
             ...profileData,
             monthly_income: profileData.monthly_income?.toString() || '',
-            email: profileData.email || user.email
+            email: profileData.email || user.email,
+            gender: (profileData.gender || 'male') as 'male' | 'female' | 'other',
+            marital_status: (profileData.marital_status || 'single') as 'single' | 'married' | 'divorced' | 'widowed'
           };
           form.reset(formData);
         } else {
@@ -114,13 +117,14 @@ const UserProfile = () => {
       const profileData = {
         ...data,
         monthly_income: parseFloat(data.monthly_income) || 0,
-        id: user.id
+        created_at: profile?.created_at || new Date().toISOString(),
+        updated_at: new Date().toISOString()
       };
 
-      const updatedProfile = await dataService.profiles.updateProfile(profileData);
+      const updatedProfile = await dataService.profiles.updateProfile(user.id, profileData);
       
       if (updatedProfile) {
-        setProfile(updatedProfile);
+        setProfile(updatedProfile as Profile);
         toast.success('Profile updated successfully');
       }
     } catch (error: any) {
@@ -465,21 +469,21 @@ const UserProfile = () => {
                   <h4 className="font-medium mb-2">National ID</h4>
                   <FileUpload 
                     onFileSelected={(file) => handleFileSelected(file, 'id_document')}
-                    currentFile={profile?.id_document_url}
+                    currentFile={profile?.id_document_url || undefined}
                   />
                 </div>
                 <div>
                   <h4 className="font-medium mb-2">Income Proof</h4>
                   <FileUpload 
                     onFileSelected={(file) => handleFileSelected(file, 'income_proof')}
-                    currentFile={profile?.income_proof_url}
+                    currentFile={profile?.income_proof_url || undefined}
                   />
                 </div>
                 <div>
                   <h4 className="font-medium mb-2">Selfie with ID</h4>
                   <FileUpload 
                     onFileSelected={(file) => handleFileSelected(file, 'selfie')}
-                    currentFile={profile?.selfie_url}
+                    currentFile={profile?.selfie_url || undefined}
                   />
                 </div>
               </CardContent>

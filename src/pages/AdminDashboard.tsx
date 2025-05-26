@@ -42,7 +42,8 @@ const AdminDashboard = () => {
       try {
         setLoading(true);
         const loansData = await dataService.loans.getAllLoans();
-        const usersData = await dataService.profiles.getAllProfiles();
+        // For now, we'll use empty array for users since getAllProfiles doesn't exist
+        const usersData: Profile[] = [];
 
         setLoans(loansData || []);
         setUsers(usersData || []);
@@ -79,10 +80,11 @@ const AdminDashboard = () => {
         updateData.approved_at = new Date().toISOString();
       } else if (newStatus === 'rejected' && rejectedReason) {
         updateData.rejected_at = new Date().toISOString();
-        updateData.rejected_reason = rejectedReason; // Keep as string, not array
+        updateData.rejected_reason = rejectedReason;
       }
 
-      const updatedLoan = await dataService.loans.updateLoanStatus(loanId, updateData);
+      // Use updateLoan instead of updateLoanStatus
+      const updatedLoan = await dataService.loans.updateLoan(loanId, updateData);
       
       if (updatedLoan) {
         setLoans(prev => prev.map(loan => 
