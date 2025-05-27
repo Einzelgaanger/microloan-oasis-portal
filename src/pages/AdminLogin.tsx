@@ -6,7 +6,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
-import { Lock, Shield } from 'lucide-react';
+import { Lock, Shield, Info } from 'lucide-react';
 import { FadeIn } from '@/components/ui/animations';
 
 const AdminLogin = () => {
@@ -49,6 +49,17 @@ const AdminLogin = () => {
             </CardHeader>
             <form onSubmit={handleLogin}>
               <CardContent className="space-y-4 pt-6">
+                {/* Demo credentials info */}
+                <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-4">
+                  <div className="flex items-start space-x-2">
+                    <Info className="h-4 w-4 text-blue-600 mt-0.5" />
+                    <div className="text-sm">
+                      <p className="font-medium text-blue-800">Demo Credentials</p>
+                      <p className="text-blue-600">Password: <code className="bg-blue-100 px-1 rounded">admin123</code></p>
+                    </div>
+                  </div>
+                </div>
+                
                 <div className="space-y-2">
                   <div className="relative">
                     <Lock className="absolute left-3 top-3 h-4 w-4 text-gray-500" />

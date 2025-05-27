@@ -10,6 +10,8 @@ import { Input } from '@/components/ui/input';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { useAuth } from '@/lib/auth';
+import { toast } from 'sonner';
+import { CheckCircle, Mail } from 'lucide-react';
 
 // Define the registration form schema with Zod
 const registerSchema = z.object({
@@ -43,6 +45,8 @@ const Register = () => {
   const navigate = useNavigate();
   const [registrationError, setRegistrationError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showEmailConfirmation, setShowEmailConfirmation] = useState(false);
+  const [userEmail, setUserEmail] = useState('');
 
   const onSubmit = async (data: RegisterFormValues) => {
     try {
@@ -57,13 +61,70 @@ const Register = () => {
       };
       
       await signUp(data.email, data.password, userData);
-      // Success is handled in the auth context by redirecting to profile completion
+      
+      // Show email confirmation message instead of redirecting
+      setUserEmail(data.email);
+      setShowEmailConfirmation(true);
+      toast.success('Account created successfully! Please check your email to confirm your account.');
       
     } catch (error: any) {
       setRegistrationError(error.message || 'Registration failed. Please try again.');
       setIsSubmitting(false);
     }
   };
+
+  if (showEmailConfirmation) {
+    return (
+      <AuthLayout title="Check Your Email" mode="register">
+        <Card className="w-full max-w-md border shadow-md">
+          <CardHeader className="space-y-2 bg-gradient-to-r from-gold-600 to-gold-500 text-black text-center">
+            <div className="flex justify-center mb-2">
+              <CheckCircle className="h-12 w-12 text-green-600" />
+            </div>
+            <CardTitle className="text-2xl font-bold">Account Created!</CardTitle>
+            <CardDescription className="text-black/80">
+              Please verify your email to continue
+            </CardDescription>
+          </CardHeader>
+          
+          <CardContent className="space-y-4 pt-6 text-center">
+            <div className="flex justify-center mb-4">
+              <Mail className="h-16 w-16 text-blue-500" />
+            </div>
+            <h3 className="text-lg font-semibold">Check your email</h3>
+            <p className="text-gray-600">
+              We've sent a confirmation email to:
+            </p>
+            <p className="font-medium text-blue-600">{userEmail}</p>
+            <p className="text-sm text-gray-500">
+              Click the link in the email to verify your account, then you can proceed to complete your KYC verification.
+            </p>
+          </CardContent>
+          
+          <CardFooter className="flex flex-col gap-4">
+            <Button 
+              onClick={() => {
+                setShowEmailConfirmation(false);
+                form.reset();
+                setUserEmail('');
+              }}
+              variant="outline"
+              className="w-full"
+            >
+              Register Another Account
+            </Button>
+            
+            <p className="text-sm text-center text-gray-500">
+              Already verified?{' '}
+              <Link to="/login" className="text-gold-600 hover:text-gold-700 font-medium">
+                Sign in here
+              </Link>
+            </p>
+          </CardFooter>
+        </Card>
+      </AuthLayout>
+    );
+  }
 
   return (
     <AuthLayout title="Create Your Account" mode="register">

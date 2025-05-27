@@ -95,18 +95,11 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       const authUser = await authService.signUp(email, password, userData);
       if (authUser) {
         const supabaseUser = authUser as User;
-        setUser({
-          id: supabaseUser.id,
-          email: supabaseUser.email || email,
-          username: userData.username,
-          first_name: userData.first_name,
-          last_name: userData.last_name
-        });
-        toast.success('Account created successfully');
-        navigate('/kyc'); // Redirect to KYC form for verification
+        // Don't set user state immediately for email confirmation flow
+        console.log('User registered, awaiting email confirmation');
+        // Don't navigate automatically - let the Register component handle the flow
       }
     } catch (error: any) {
-      toast.error(error.message || 'Error creating account');
       throw error;
     } finally {
       setLoading(false);

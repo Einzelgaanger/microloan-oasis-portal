@@ -11,25 +11,25 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 
 const LoanCalculator = () => {
   const [isOpen, setIsOpen] = useState(true);
-  const [amount, setAmount] = useState(100000);
+  const [amount, setAmount] = useState(50000);
   const [term, setTerm] = useState(3);
-  const [interestRate, setInterestRate] = useState(30);
+  const [interestRate, setInterestRate] = useState(15);
   const [monthlyPayment, setMonthlyPayment] = useState(0);
   const [totalPayment, setTotalPayment] = useState(0);
-  const [processingFee, setProcessingFee] = useState(5000);
+  const [processingFee, setProcessingFee] = useState(2500);
 
   useEffect(() => {
-    // Update interest rate based on amount
-    let rate = 30; // Default rate
-    if (amount > 100000 && amount <= 200000) {
-      rate = 25;
-    } else if (amount > 200000) {
-      rate = 20;
+    // Update interest rate based on amount (Kenyan rates)
+    let rate = 15; // Default rate
+    if (amount > 50000 && amount <= 100000) {
+      rate = 12;
+    } else if (amount > 100000) {
+      rate = 10;
     }
     setInterestRate(rate);
 
-    // Update processing fee
-    const fee = amount > 100000 ? amount * 0.05 : 5000;
+    // Update processing fee (5% of loan amount)
+    const fee = amount * 0.05;
     setProcessingFee(fee);
 
     // Calculate monthly payment
@@ -71,13 +71,13 @@ const LoanCalculator = () => {
               <div className="space-y-2">
                 <div className="flex justify-between">
                   <Label>Loan Amount: KES {amount.toLocaleString()}</Label>
-                  <span className="text-xs text-gray-500">Min: 50,000 - Max: 500,000</span>
+                  <span className="text-xs text-gray-500">Min: 10,000 - Max: 500,000</span>
                 </div>
                 <Slider
                   value={[amount]}
-                  min={50000}
+                  min={10000}
                   max={500000}
-                  step={10000}
+                  step={5000}
                   onValueChange={values => setAmount(values[0])}
                   className="py-4"
                 />
@@ -93,9 +93,9 @@ const LoanCalculator = () => {
                     <SelectItem value="1">1 Month</SelectItem>
                     <SelectItem value="2">2 Months</SelectItem>
                     <SelectItem value="3">3 Months</SelectItem>
-                    <SelectItem value="4">4 Months</SelectItem>
-                    <SelectItem value="5">5 Months</SelectItem>
                     <SelectItem value="6">6 Months</SelectItem>
+                    <SelectItem value="9">9 Months</SelectItem>
+                    <SelectItem value="12">12 Months</SelectItem>
                   </SelectContent>
                 </Select>
               </div>

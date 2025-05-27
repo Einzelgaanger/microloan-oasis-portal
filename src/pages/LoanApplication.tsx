@@ -73,15 +73,7 @@ const LoanApplication = () => {
       setIsSubmitting(true);
 
       // Check if user has complete profile
-      if (!profile.id_document_url || !profile.selfie_url) {
-        toast.error('Please complete your KYC verification first');
-        navigate('/kyc');
-        return;
-      }
-
-      if (!profile.employment_status || !profile.employer_name || !profile.monthly_income || 
-          !profile.county || !profile.mpesa_number || !profile.phone_number ||
-          !profile.kin_name || !profile.kin_phone || !profile.kin_relationship) {
+      if (!profile.phone_number || !profile.employment_status || !profile.monthly_income) {
         toast.error('Please complete your profile first');
         navigate('/profile');
         return;
@@ -105,14 +97,14 @@ const LoanApplication = () => {
         interest_rate: interestRate,
         monthly_payment: monthlyPayment,
         employment_status: profile.employment_status,
-        employer_name: profile.employer_name,
+        employer_name: profile.employer_name || '',
         monthly_income: profile.monthly_income,
-        county: profile.county,
-        mpesa_number: profile.mpesa_number,
+        county: profile.county || '',
+        mpesa_number: profile.mpesa_number || '',
         phone_number: profile.phone_number,
-        kin_name: profile.kin_name,
-        kin_phone: profile.kin_phone,
-        kin_relationship: profile.kin_relationship,
+        kin_name: profile.kin_name || '',
+        kin_phone: profile.kin_phone || '',
+        kin_relationship: profile.kin_relationship || '',
         status: 'pending',
         processing_fee: processingFee,
         total_amount: amount + (amount * interestRate / 100) + processingFee,
@@ -133,13 +125,13 @@ const LoanApplication = () => {
   };
 
   const calculateInterestRate = (amount: number): number => {
-    if (amount <= 500) return 5;
-    if (amount <= 1000) return 4;
-    return 3;
+    if (amount <= 50000) return 15; // 15% for amounts up to KES 50,000
+    if (amount <= 100000) return 12; // 12% for amounts up to KES 100,000
+    return 10; // 10% for higher amounts
   };
 
   const calculateProcessingFee = (amount: number): number => {
-    return amount * 0.02; // 2% processing fee
+    return amount * 0.05; // 5% processing fee
   };
 
   const calculateMonthlyPayment = (amount: number, interestRate: number, duration: number): number => {
@@ -226,10 +218,17 @@ const LoanApplication = () => {
                     name="amount"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Loan Amount (USD)</FormLabel>
+                        <FormLabel>Loan Amount (KES)</FormLabel>
                         <FormControl>
-                          <Input type="number" placeholder="Enter amount" {...field} />
+                          <Input 
+                            type="number" 
+                            placeholder="Enter amount (e.g., 50000)" 
+                            {...field} 
+                          />
                         </FormControl>
+                        <p className="text-sm text-gray-500">
+                          Minimum: KES 10,000 | Maximum: KES 500,000
+                        </p>
                         <FormMessage />
                       </FormItem>
                     )}
@@ -255,22 +254,55 @@ const LoanApplication = () => {
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Loan Duration (Months)</FormLabel>
-                        <FormControl>
-                          <Select>
+                        <Select onValueChange={field.onChange} value={field.value}>
+                          <FormControl>
                             <SelectTrigger className="w-full">
-                              <SelectValue placeholder="Select duration" {...field} />
+                              <SelectValue placeholder="Select duration" />
                             </SelectTrigger>
-                            <SelectContent>
-                              {[3, 6, 9, 12, 18, 24].map(month => (
-                                <SelectItem key={month} value={month.toString()}>{month} Months</SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                        </FormControl>
+                          </FormControl>
+                          <SelectContent>
+                            {[1, 2, 3, 6, 9, 12, 18, 24].map(month => (
+                              <SelectItem key={month} value={month.toString()}>
+                                {month} {month === 1 ? 'Month' : 'Months'}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
                         <FormMessage />
                       </FormItem>
                     )}
                   />
+
+                  {/* Loan Preview */}
+                  {form.watch('amount') && form.watch('duration') && (
+                    <div className="bg-blue-50 p-4 rounded-lg border">
+                      <h4 className="font-semibold text-blue-800 mb-2">Loan Preview</h4>
+                      <div className="grid grid-cols-2 gap-2 text-sm">
+                        <div>
+                          <span className="text-gray-600">Interest Rate:</span>
+                          <span className="float-right font-medium">
+                            {calculateInterestRate(parseFloat(form.watch('amount') || '0'))}% p.a.
+                          </span>
+                        </div>
+                        <div>
+                          <span className="text-gray-600">Processing Fee:</span>
+                          <span className="float-right font-medium">
+                            KES {calculateProcessingFee(parseFloat(form.watch('amount') || '0')).toLocaleString()}
+                          </span>
+                        </div>
+                        <div>
+                          <span className="text-gray-600">Monthly Payment:</span>
+                          <span className="float-right font-medium text-blue-600">
+                            KES {calculateMonthlyPayment(
+                              parseFloat(form.watch('amount') || '0'),
+                              calculateInterestRate(parseFloat(form.watch('amount') || '0')),
+                              parseInt(form.watch('duration') || '1')
+                            ).toLocaleString()}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  )}
                 </CardContent>
 
                 <CardFooter className="flex justify-end p-6">
