@@ -14,7 +14,7 @@ const mockUsers = [
   },
   {
     id: '2',
-    email: 'admin@example.com',
+    email: 'admin@elaracapital.co.ke',
     first_name: 'Admin',
     last_name: 'User',
     is_admin: true,
@@ -103,8 +103,17 @@ export const mockService = {
   auth: {
     getUser: () => mockUsers[0],
     login: (email: string, password: string) => {
-      const user = mockUsers.find(u => u.email === email);
-      return user || null;
+      // Handle admin login
+      if (email === 'admin@elaracapital.co.ke' && password === 'admin123') {
+        return mockUsers[1];
+      }
+      
+      // Handle regular user login
+      if (email === 'user@example.com' && password === 'password123') {
+        return mockUsers[0];
+      }
+      
+      return null;
     },
     register: (userData: any) => {
       const newUser = { id: generateId(), ...userData };

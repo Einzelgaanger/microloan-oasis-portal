@@ -32,19 +32,42 @@ export const authService = {
         email,
         password,
       });
-      if (error) throw error;
+      
+      if (error) {
+        console.error('Supabase sign in error:', error);
+        
+        // Provide more specific error messages
+        if (error.message.includes('Invalid login credentials')) {
+          throw new Error('Invalid email or password. Please check your credentials or sign up if you haven\'t already.');
+        } else if (error.message.includes('Email not confirmed')) {
+          throw new Error('Please check your email and confirm your account before signing in.');
+        } else {
+          throw new Error(error.message);
+        }
+      }
+      
       return data.user;
-    } catch (error) {
+    } catch (error: any) {
       console.error('Sign in error:', error);
-      // Check if this is an admin login attempt
+      
+      // If it's already a formatted error, throw it as is
+      if (error.message && !error.message.includes('fetch')) {
+        throw error;
+      }
+      
+      // Check if this is an admin login attempt with demo credentials
       if (email === 'admin@elaracapital.co.ke' && password === 'admin123') {
         // Return a mock admin user for development
         return mockService.auth.login(email, password);
       }
-      // Fallback to mock data for development
-      const user = mockService.auth.login(email, password);
-      if (!user) throw new Error('Invalid email or password');
-      return user;
+      
+      // For demo purposes, allow some test credentials
+      if (email === 'user@example.com' && password === 'password123') {
+        return mockService.auth.login(email, password);
+      }
+      
+      // Otherwise throw a user-friendly error
+      throw new Error('Unable to sign in. Please check your credentials or try again later.');
     }
   },
 
@@ -57,13 +80,24 @@ export const authService = {
         password,
         options: {
           data: userData,
-          emailRedirectTo: `${window.location.origin}/`
+          emailRedirectTo: `${window.location.origin}/dashboard`
         }
       });
-      if (error) throw error;
+      
+      if (error) {
+        console.error('Supabase sign up error:', error);
+        throw new Error(error.message);
+      }
+      
       return data.user;
-    } catch (error) {
+    } catch (error: any) {
       console.error('Sign up error:', error);
+      
+      // If it's already a formatted error, throw it as is
+      if (error.message && !error.message.includes('fetch')) {
+        throw error;
+      }
+      
       // Fallback to mock data for development
       return mockService.auth.register({ email, ...userData });
     }
@@ -73,9 +107,11 @@ export const authService = {
   resetPassword: async (email: string) => {
     try {
       // Use Supabase when connected
-      const { error } = await supabase.auth.resetPasswordForEmail(email);
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/reset-password`
+      });
       if (error) throw error;
-    } catch (error) {
+    } catch (error: any) {
       console.error('Reset password error:', error);
       // For mock service, just simulate success
       if (error.message && error.message.includes('supabase')) {
@@ -92,7 +128,7 @@ export const authService = {
       // Use Supabase when connected
       const { error } = await supabase.auth.signOut();
       if (error) throw error;
-    } catch (error) {
+    } catch (error: any) {
       console.error('Sign out error:', error);
       // No fallback needed for sign out
     }

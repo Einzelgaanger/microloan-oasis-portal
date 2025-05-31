@@ -10,6 +10,7 @@ import { Input } from '@/components/ui/input';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { useAuth } from '@/lib/auth';
+import { Info } from 'lucide-react';
 
 // Define the login form schema with Zod
 const loginSchema = z.object({
@@ -62,6 +63,19 @@ const Login = () => {
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)}>
             <CardContent className="space-y-4 pt-6">
+              {/* Demo credentials info */}
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-4">
+                <div className="flex items-start space-x-2">
+                  <Info className="h-4 w-4 text-blue-600 mt-0.5" />
+                  <div className="text-sm">
+                    <p className="font-medium text-blue-800">Demo Credentials</p>
+                    <p className="text-blue-600">Email: <code className="bg-blue-100 px-1 rounded">user@example.com</code></p>
+                    <p className="text-blue-600">Password: <code className="bg-blue-100 px-1 rounded">password123</code></p>
+                    <p className="text-xs text-blue-500 mt-1">Or sign up to create a new account</p>
+                  </div>
+                </div>
+              </div>
+              
               {loginError && (
                 <div className="p-3 rounded-md bg-red-50 text-red-500 text-sm">
                   {loginError}
