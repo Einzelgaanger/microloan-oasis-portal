@@ -65,7 +65,6 @@ const Register = () => {
       // Show email confirmation message instead of redirecting
       setUserEmail(data.email);
       setShowEmailConfirmation(true);
-      toast.success('Account created successfully! Please check your email to confirm your account.');
       
     } catch (error: any) {
       setRegistrationError(error.message || 'Registration failed. Please try again.');
@@ -91,13 +90,23 @@ const Register = () => {
             <div className="flex justify-center mb-4">
               <Mail className="h-16 w-16 text-blue-500" />
             </div>
-            <h3 className="text-lg font-semibold">Check your email</h3>
+            <h3 className="text-lg font-semibold">Check your email inbox</h3>
             <p className="text-gray-600">
               We've sent a confirmation email to:
             </p>
             <p className="font-medium text-blue-600">{userEmail}</p>
+            <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 text-left">
+              <h4 className="font-semibold text-amber-800 mb-2">Next Steps:</h4>
+              <ol className="text-sm text-amber-700 space-y-1 list-decimal list-inside">
+                <li>Check your email inbox (and spam folder)</li>
+                <li>Click the confirmation link in the email</li>
+                <li>You'll be redirected back to our website</li>
+                <li>Sign in with your credentials</li>
+                <li>Complete your KYC verification to apply for loans</li>
+              </ol>
+            </div>
             <p className="text-sm text-gray-500">
-              Click the link in the email to verify your account, then you can proceed to complete your KYC verification.
+              The confirmation link is valid for 24 hours. If you don't receive the email within a few minutes, please check your spam folder.
             </p>
           </CardContent>
           
@@ -115,7 +124,7 @@ const Register = () => {
             </Button>
             
             <p className="text-sm text-center text-gray-500">
-              Already verified?{' '}
+              Already verified your email?{' '}
               <Link to="/login" className="text-gold-600 hover:text-gold-700 font-medium">
                 Sign in here
               </Link>

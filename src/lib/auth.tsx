@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { useNavigate, Navigate } from 'react-router-dom';
 import { toast } from 'sonner';
@@ -95,9 +94,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       const authUser = await authService.signUp(email, password, userData);
       if (authUser) {
         const supabaseUser = authUser as User;
-        // Don't set user state immediately for email confirmation flow
         console.log('User registered, awaiting email confirmation');
-        // Don't navigate automatically - let the Register component handle the flow
+        toast.success('Account created! Please check your email to confirm your account before signing in.');
       }
     } catch (error: any) {
       throw error;

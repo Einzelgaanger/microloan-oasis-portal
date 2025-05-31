@@ -1,4 +1,3 @@
-
 // Data service for handling data operations
 // Currently using mock data, will be replaced with Supabase in production
 
@@ -37,6 +36,11 @@ export const authService = {
       return data.user;
     } catch (error) {
       console.error('Sign in error:', error);
+      // Check if this is an admin login attempt
+      if (email === 'admin@elaracapital.co.ke' && password === 'admin123') {
+        // Return a mock admin user for development
+        return mockService.auth.login(email, password);
+      }
       // Fallback to mock data for development
       const user = mockService.auth.login(email, password);
       if (!user) throw new Error('Invalid email or password');
@@ -52,7 +56,8 @@ export const authService = {
         email,
         password,
         options: {
-          data: userData
+          data: userData,
+          emailRedirectTo: `${window.location.origin}/`
         }
       });
       if (error) throw error;
