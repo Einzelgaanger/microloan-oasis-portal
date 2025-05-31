@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { useNavigate, Navigate } from 'react-router-dom';
 import { toast } from 'sonner';
@@ -58,29 +59,41 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const signIn = async (email: string, password: string) => {
     try {
       setLoading(true);
+      console.log('SignIn called with:', email);
+      
       const authUser = await authService.signIn(email, password);
+      console.log('Auth user returned:', authUser);
+      
       if (authUser) {
-        const supabaseUser = authUser as User;
+        // Handle both Supabase users and mock users
+        const userId = authUser.id || authUser.email;
+        const userEmail = authUser.email || email;
+        
         setUser({
-          id: supabaseUser.id,
-          email: supabaseUser.email || email, 
-          username: supabaseUser.user_metadata?.username,
-          first_name: supabaseUser.user_metadata?.first_name,
-          last_name: supabaseUser.user_metadata?.last_name
+          id: userId,
+          email: userEmail,
+          username: authUser.user_metadata?.username || authUser.username,
+          first_name: authUser.user_metadata?.first_name || authUser.first_name,
+          last_name: authUser.user_metadata?.last_name || authUser.last_name
         });
         
         // Check if user is admin and redirect accordingly
-        const isAdmin = await dataService.roles.isAdmin(supabaseUser.id);
+        const isAdmin = await dataService.roles.isAdmin(userId);
+        console.log('Is admin:', isAdmin);
+        
         toast.success('Signed in successfully');
         
         // Handle navigation based on admin status
         if (isAdmin) {
+          console.log('Redirecting to admin dashboard');
           navigate('/admin/dashboard');
         } else {
+          console.log('Redirecting to user dashboard');
           navigate('/dashboard');
         }
       }
     } catch (error: any) {
+      console.error('SignIn error:', error);
       toast.error(error.message || 'Error signing in');
       throw error;
     } finally {

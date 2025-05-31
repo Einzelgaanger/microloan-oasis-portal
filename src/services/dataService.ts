@@ -26,8 +26,22 @@ export const authService = {
 
   // Sign in with email and password
   signIn: async (email: string, password: string) => {
+    console.log('Attempting sign in with:', email);
+    
+    // First try demo credentials immediately
+    if (email === 'user@example.com' && password === 'password123') {
+      console.log('Using demo user credentials');
+      return mockService.auth.login(email, password);
+    }
+    
+    if (email === 'admin@elaracapital.co.ke' && password === 'admin123') {
+      console.log('Using demo admin credentials');
+      return mockService.auth.login(email, password);
+    }
+    
     try {
-      // Use Supabase when connected
+      // Try Supabase authentication
+      console.log('Trying Supabase authentication...');
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
@@ -35,39 +49,22 @@ export const authService = {
       
       if (error) {
         console.error('Supabase sign in error:', error);
-        
-        // Provide more specific error messages
-        if (error.message.includes('Invalid login credentials')) {
-          throw new Error('Invalid email or password. Please check your credentials or sign up if you haven\'t already.');
-        } else if (error.message.includes('Email not confirmed')) {
-          throw new Error('Please check your email and confirm your account before signing in.');
-        } else {
-          throw new Error(error.message);
-        }
+        throw new Error('Invalid email or password. Please check your credentials or use the demo credentials provided.');
       }
       
+      console.log('Supabase sign in successful');
       return data.user;
     } catch (error: any) {
-      console.error('Sign in error:', error);
+      console.error('Authentication error:', error);
       
       // If it's already a formatted error, throw it as is
-      if (error.message && !error.message.includes('fetch')) {
+      if (error.message && !error.message.includes('fetch') && !error.message.includes('NetworkError')) {
         throw error;
       }
       
-      // Check if this is an admin login attempt with demo credentials
-      if (email === 'admin@elaracapital.co.ke' && password === 'admin123') {
-        // Return a mock admin user for development
-        return mockService.auth.login(email, password);
-      }
-      
-      // For demo purposes, allow some test credentials
-      if (email === 'user@example.com' && password === 'password123') {
-        return mockService.auth.login(email, password);
-      }
-      
-      // Otherwise throw a user-friendly error
-      throw new Error('Unable to sign in. Please check your credentials or try again later.');
+      // For network or connection errors, fall back to mock
+      console.log('Falling back to mock authentication due to connection error');
+      throw new Error('Unable to connect to authentication service. Please use demo credentials: user@example.com / password123');
     }
   },
 
